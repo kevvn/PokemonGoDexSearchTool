@@ -1,0 +1,35 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.rendering-pixelated {
+  image-rendering: pixelated;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Pokemon Type Colors */
+.bg-type-normal { @apply bg-gray-400; }
+.bg-type-fire { @apply bg-red-500; }
+.bg-type-water { @apply bg-blue-500; }
+.bg-type-grass { @apply bg-green-500; }
+.bg-type-electric { @apply bg-yellow-400; }
+.bg-type-ice { @apply bg-cyan-300; }
+.bg-type-fighting { @apply bg-red-700; }
+.bg-type-poison { @apply bg-purple-500; }
+.bg-type-ground { @apply bg-yellow-600; }
+.bg-type-flying { @apply bg-indigo-300; }
+.bg-type-psychic { @apply bg-pink-500; }
+.bg-type-bug { @apply bg-lime-500; }
+.bg-type-rock { @apply bg-yellow-700; }
+.bg-type-ghost { @apply bg-purple-700; }
+.bg-type-dragon { @apply bg-indigo-600; }
+.bg-type-steel { @apply bg-gray-500; }
+.bg-type-dark { @apply bg-gray-800; }
+.bg-type-fairy { @apply bg-pink-300; }
