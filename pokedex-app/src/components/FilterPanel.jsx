@@ -21,7 +21,7 @@ const TYPES = [
   'flying', 'psychic', 'bug', 'rock', 'ghost', 'dragon', 'steel', 'dark', 'fairy'
 ];
 
-export default function FilterPanel({ filters, setFilters }) {
+function FilterPanel({ filters, setFilters }) {
   const toggleAppraisal = (star) => {
     setFilters(prev => ({
       ...prev,
@@ -180,3 +180,5 @@ export default function FilterPanel({ filters, setFilters }) {
     </div>
   );
 }
+
+export default React.memo(FilterPanel);
