@@ -43,7 +43,7 @@ const PokemonCard = React.memo(({ pokemon, selected, toggle }) => {
   );
 });
 
-export default function PokemonGrid({ pokemonList, selectedIds, togglePokemon, toggleRegionSelection }) {
+export default function PokemonGrid({ pokemonList, selectedIds, togglePokemon, handleRegionSelection }) {
   const [collapsedRegions, setCollapsedRegions] = useState({});
 
   const regions = useMemo(() => {
@@ -66,7 +66,10 @@ export default function PokemonGrid({ pokemonList, selectedIds, togglePokemon, t
     <div className="space-y-12 pb-32 px-4 md:px-6 max-w-7xl mx-auto">
       {Object.entries(regions).map(([region, pokemons]) => {
         const isCollapsed = collapsedRegions[region];
-        const allSelected = pokemons.every(p => selectedIds.has(p.id));
+        const selectedCount = pokemons.filter(p => selectedIds.has(p.id)).length;
+        const totalCount = pokemons.length;
+        const allSelected = selectedCount === totalCount;
+        const someSelected = selectedCount > 0;
 
         return (
           <div key={region} id={`region-${region}`} className="scroll-mt-48">
@@ -86,16 +89,24 @@ export default function PokemonGrid({ pokemonList, selectedIds, togglePokemon, t
                  </div>
               </div>
 
-              <button
-                onClick={() => toggleRegionSelection(pokemons.map(p => p.id))}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  allSelected
-                    ? 'bg-blue-100 text-blue-700 hover:bg-blue-200'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                {allSelected ? 'Deselect All' : 'Select All'}
-              </button>
+              <div className="flex gap-2">
+                {!allSelected && (
+                  <button
+                    onClick={() => handleRegionSelection(pokemons.map(p => p.id), true)}
+                    className="px-4 py-2 rounded-lg text-sm font-medium transition-colors bg-gray-100 text-gray-600 hover:bg-gray-200"
+                  >
+                    Select All
+                  </button>
+                )}
+                {someSelected && (
+                  <button
+                    onClick={() => handleRegionSelection(pokemons.map(p => p.id), false)}
+                    className="px-4 py-2 rounded-lg text-sm font-medium transition-colors bg-blue-100 text-blue-700 hover:bg-blue-200"
+                  >
+                    Deselect All
+                  </button>
+                )}
+              </div>
             </div>
 
             {!isCollapsed && (

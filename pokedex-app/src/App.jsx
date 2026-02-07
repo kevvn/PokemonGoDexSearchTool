@@ -37,16 +37,13 @@ function App() {
     });
   };
 
-  const toggleRegionSelection = (ids) => {
+  const handleRegionSelection = (ids, shouldSelect) => {
     setSelectedIds(prev => {
       const newSet = new Set(prev);
-      const allSelected = ids.every(id => newSet.has(id));
-
-      if (allSelected) {
-        ids.forEach(id => newSet.delete(id));
-      } else {
-        ids.forEach(id => newSet.add(id));
-      }
+      ids.forEach(id => {
+        if (shouldSelect) newSet.add(id);
+        else newSet.delete(id);
+      });
       return newSet;
     });
   };
@@ -139,7 +136,7 @@ function App() {
                pokemonList={pokemonData}
                selectedIds={selectedIds}
                togglePokemon={togglePokemon}
-               toggleRegionSelection={toggleRegionSelection}
+               handleRegionSelection={handleRegionSelection}
             />
          </div>
       </main>
