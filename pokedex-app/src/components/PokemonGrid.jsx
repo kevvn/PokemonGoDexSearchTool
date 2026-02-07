@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 
 const PokemonCard = React.memo(({ pokemon, selected, toggle }) => {
   return (
@@ -43,7 +43,9 @@ const PokemonCard = React.memo(({ pokemon, selected, toggle }) => {
   );
 });
 
-export default function PokemonGrid({ pokemonList, selectedIds, togglePokemon }) {
+export default function PokemonGrid({ pokemonList, selectedIds, togglePokemon, toggleRegionSelection }) {
+  const [collapsedRegions, setCollapsedRegions] = useState({});
+
   const regions = useMemo(() => {
     const grouped = {};
     pokemonList.forEach(p => {
@@ -53,33 +55,64 @@ export default function PokemonGrid({ pokemonList, selectedIds, togglePokemon })
     return grouped;
   }, [pokemonList]);
 
+  const toggleCollapse = (region) => {
+    setCollapsedRegions(prev => ({
+      ...prev,
+      [region]: !prev[region]
+    }));
+  };
+
   return (
     <div className="space-y-12 pb-32 px-4 md:px-6 max-w-7xl mx-auto">
-      {Object.entries(regions).map(([region, pokemons]) => (
-        <div key={region} id={`region-${region}`} className="scroll-mt-48">
-          <div className="flex items-center gap-4 mb-6 sticky top-[160px] bg-white/95 backdrop-blur-sm z-10 py-3 border-b border-gray-100 shadow-sm">
-             <div className="bg-blue-600 w-1.5 h-8 rounded-full"></div>
-             <div>
-                <h2 className="text-2xl font-bold text-gray-800 tracking-tight">
-                  {region}
-                </h2>
-                <span className="text-sm font-medium text-gray-400">
-                  {pokemons.length} Species
-                </span>
-             </div>
+      {Object.entries(regions).map(([region, pokemons]) => {
+        const isCollapsed = collapsedRegions[region];
+        const allSelected = pokemons.every(p => selectedIds.has(p.id));
+
+        return (
+          <div key={region} id={`region-${region}`} className="scroll-mt-48">
+            <div className="flex items-center justify-between mb-6 sticky top-[160px] bg-white/95 backdrop-blur-sm z-10 py-3 border-b border-gray-100 shadow-sm">
+              <div className="flex items-center gap-4 cursor-pointer" onClick={() => toggleCollapse(region)}>
+                 <div className="bg-blue-600 w-1.5 h-8 rounded-full"></div>
+                 <div>
+                    <h2 className="text-2xl font-bold text-gray-800 tracking-tight flex items-center gap-2">
+                      {region}
+                      <span className={`transition-transform duration-200 text-gray-400 text-sm ${isCollapsed ? '-rotate-90' : 'rotate-0'}`}>
+                        ▼
+                      </span>
+                    </h2>
+                    <span className="text-sm font-medium text-gray-400">
+                      {pokemons.length} Species
+                    </span>
+                 </div>
+              </div>
+
+              <button
+                onClick={() => toggleRegionSelection(pokemons.map(p => p.id))}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  allSelected
+                    ? 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                {allSelected ? 'Deselect All' : 'Select All'}
+              </button>
+            </div>
+
+            {!isCollapsed && (
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-3">
+                {pokemons.map(p => (
+                  <PokemonCard
+                    key={p.id}
+                    pokemon={p}
+                    selected={selectedIds.has(p.id)}
+                    toggle={togglePokemon}
+                  />
+                ))}
+              </div>
+            )}
           </div>
-          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-3">
-            {pokemons.map(p => (
-              <PokemonCard
-                key={p.id}
-                pokemon={p}
-                selected={selectedIds.has(p.id)}
-                toggle={togglePokemon}
-              />
-            ))}
-          </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
