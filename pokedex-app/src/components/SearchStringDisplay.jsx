@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 
-export default function SearchStringDisplay({ searchString }) {
+function SearchStringDisplay({ searchString }) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
@@ -33,3 +33,5 @@ export default function SearchStringDisplay({ searchString }) {
     </div>
   );
 }
+
+export default React.memo(SearchStringDisplay);

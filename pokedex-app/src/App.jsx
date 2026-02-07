@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import pokemonData from './data/pokedex.json';
 import PokemonGrid from './components/PokemonGrid';
 import FilterPanel from './components/FilterPanel';
@@ -28,16 +28,16 @@ function App() {
     paldea: null,
   });
 
-  const togglePokemon = (id) => {
+  const togglePokemon = useCallback((id) => {
     setSelectedIds(prev => {
       const newSet = new Set(prev);
       if (newSet.has(id)) newSet.delete(id);
       else newSet.add(id);
       return newSet;
     });
-  };
+  }, []);
 
-  const handleRegionSelection = (ids, shouldSelect) => {
+  const handleRegionSelection = useCallback((ids, shouldSelect) => {
     setSelectedIds(prev => {
       const newSet = new Set(prev);
       ids.forEach(id => {
@@ -46,7 +46,7 @@ function App() {
       });
       return newSet;
     });
-  };
+  }, []);
 
   const searchString = useMemo(() => {
     const parts = [];

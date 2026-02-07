@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function RegionSelector({ regions }) {
+function RegionSelector({ regions }) {
   const scrollToRegion = (region) => {
     const el = document.getElementById(`region-${region}`);
     if (el) {
@@ -38,3 +38,5 @@ export default function RegionSelector({ regions }) {
     </div>
   );
 }
+
+export default React.memo(RegionSelector);
