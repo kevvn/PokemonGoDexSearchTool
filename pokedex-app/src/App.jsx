@@ -37,12 +37,40 @@ function App() {
     });
   };
 
+  const handleRegionSelection = (ids, shouldSelect) => {
+    setSelectedIds(prev => {
+      const newSet = new Set(prev);
+      ids.forEach(id => {
+        if (shouldSelect) newSet.add(id);
+        else newSet.delete(id);
+      });
+      return newSet;
+    });
+  };
+
   const searchString = useMemo(() => {
     const parts = [];
 
     // Pokemon IDs
     if (selectedIds.size > 0) {
-      parts.push(Array.from(selectedIds).join(','));
+      const sorted = Array.from(selectedIds).map(Number).sort((a, b) => a - b);
+      const ranges = [];
+      if (sorted.length > 0) {
+        let start = sorted[0];
+        let prev = sorted[0];
+
+        for (let i = 1; i < sorted.length; i++) {
+          if (sorted[i] === prev + 1) {
+            prev = sorted[i];
+          } else {
+            ranges.push(start === prev ? `${start}` : `${start}-${prev}`);
+            start = sorted[i];
+            prev = sorted[i];
+          }
+        }
+        ranges.push(start === prev ? `${start}` : `${start}-${prev}`);
+        parts.push(ranges.join(','));
+      }
     }
 
     // Appraisal
@@ -108,6 +136,7 @@ function App() {
                pokemonList={pokemonData}
                selectedIds={selectedIds}
                togglePokemon={togglePokemon}
+               handleRegionSelection={handleRegionSelection}
             />
          </div>
       </main>
