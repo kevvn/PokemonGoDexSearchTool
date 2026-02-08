@@ -1,10 +1,21 @@
 import React, { useMemo, useState, useCallback } from 'react';
 
 const PokemonCard = React.memo(({ pokemon, selected, toggle }) => {
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      toggle(pokemon.id);
+    }
+  };
+
   return (
     <div
+      role="button"
+      aria-pressed={selected}
+      tabIndex={0}
       onClick={() => toggle(pokemon.id)}
-      className={`relative cursor-pointer rounded-xl p-2 flex flex-col items-center transition-all duration-200 select-none shadow-sm border ${
+      onKeyDown={handleKeyDown}
+      className={`relative cursor-pointer rounded-xl p-2 flex flex-col items-center transition-all duration-200 select-none shadow-sm border focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 ${
         selected
           ? 'bg-blue-100 border-blue-500 ring-2 ring-blue-400'
           : 'bg-white border-gray-100 hover:bg-gray-50 hover:border-gray-300'
@@ -49,10 +60,25 @@ const RegionSection = React.memo(({ region, pokemons, selectedIds, togglePokemon
   const allSelected = selectedCount === totalCount;
   const someSelected = selectedCount > 0;
 
+  const handleHeaderKeyDown = (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      toggleCollapse(region);
+    }
+  };
+
   return (
     <div id={`region-${region}`} className="scroll-mt-48">
       <div className="flex items-center justify-between mb-6 sticky top-[160px] bg-white/95 backdrop-blur-sm z-10 py-3 border-b border-gray-100 shadow-sm">
-        <div className="flex items-center gap-4 cursor-pointer" onClick={() => toggleCollapse(region)}>
+        <div
+          role="button"
+          aria-expanded={!isCollapsed}
+          aria-controls={`region-content-${region}`}
+          tabIndex={0}
+          onKeyDown={handleHeaderKeyDown}
+          className="flex items-center gap-4 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-lg p-1 -ml-1"
+          onClick={() => toggleCollapse(region)}
+        >
             <div className="bg-blue-600 w-1.5 h-8 rounded-full"></div>
             <div>
               <h2 className="text-2xl font-bold text-gray-800 tracking-tight flex items-center gap-2">
@@ -88,7 +114,7 @@ const RegionSection = React.memo(({ region, pokemons, selectedIds, togglePokemon
       </div>
 
       {!isCollapsed && (
-        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-3">
+        <div id={`region-content-${region}`} className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-3">
           {pokemons.map(p => (
             <PokemonCard
               key={p.id}
