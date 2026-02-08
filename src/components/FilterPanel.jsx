@@ -1,25 +1,5 @@
 import React from 'react';
-
-const ATTRIBUTES = [
-  'shiny',
-  'shadow',
-  'purified',
-  'lucky',
-  'legendary',
-  'mythical',
-  'ultra beasts',
-  'costume',
-  'evolve',
-  'alola',
-  'galar',
-  'hisui',
-  'paldea'
-];
-
-const TYPES = [
-  'normal', 'fire', 'water', 'electric', 'grass', 'ice', 'fighting', 'poison', 'ground',
-  'flying', 'psychic', 'bug', 'rock', 'ghost', 'dragon', 'steel', 'dark', 'fairy'
-];
+import { ATTRIBUTES, TYPES } from '../utils/searchUtils';
 
 function FilterPanel({ filters, setFilters }) {
   const toggleAppraisal = (star) => {

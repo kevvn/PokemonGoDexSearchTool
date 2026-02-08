@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import pokemonData from './data/pokedex.json';
 import PokemonGrid from './components/PokemonGrid';
 import FilterPanel from './components/FilterPanel';
@@ -7,27 +7,63 @@ import RegionSelector from './components/RegionSelector';
 import { generateSearchString } from './utils/searchUtils';
 
 function App() {
-  const [selectedIds, setSelectedIds] = useState(new Set());
-  const [filters, setFilters] = useState({
-    appraisal: [],
-    ageMin: '',
-    ageMax: '',
-    types: [],
-    // Attributes
-    shiny: null,
-    shadow: null,
-    purified: null,
-    lucky: null,
-    legendary: null,
-    mythical: null,
-    'ultra beasts': null,
-    costume: null,
-    evolve: null,
-    alola: null,
-    galar: null,
-    hisui: null,
-    paldea: null,
+  const [selectedIds, setSelectedIds] = useState(() => {
+    try {
+      const saved = localStorage.getItem('pokedex_selectedIds');
+      return saved ? new Set(JSON.parse(saved)) : new Set();
+    } catch (e) {
+      console.error('Failed to load selectedIds:', e);
+      return new Set();
+    }
   });
+
+  const [filters, setFilters] = useState(() => {
+    const defaultFilters = {
+      appraisal: [],
+      ageMin: '',
+      ageMax: '',
+      types: [],
+      // Attributes
+      shiny: null,
+      shadow: null,
+      purified: null,
+      lucky: null,
+      legendary: null,
+      mythical: null,
+      'ultra beasts': null,
+      costume: null,
+      evolve: null,
+      alola: null,
+      galar: null,
+      hisui: null,
+      paldea: null,
+    };
+
+    try {
+      const saved = localStorage.getItem('pokedex_filters');
+      return saved ? { ...defaultFilters, ...JSON.parse(saved) } : defaultFilters;
+    } catch (e) {
+      console.error('Failed to load filters:', e);
+      return defaultFilters;
+    }
+  });
+
+  // Persistence effects
+  useEffect(() => {
+    try {
+      localStorage.setItem('pokedex_selectedIds', JSON.stringify(Array.from(selectedIds)));
+    } catch (e) {
+      console.error('Failed to save selectedIds:', e);
+    }
+  }, [selectedIds]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('pokedex_filters', JSON.stringify(filters));
+    } catch (e) {
+      console.error('Failed to save filters:', e);
+    }
+  }, [filters]);
 
   const togglePokemon = useCallback((id) => {
     setSelectedIds(prev => {
@@ -61,6 +97,12 @@ function App() {
      return Array.from(uniqueRegions);
   }, []);
 
+  const handleSearchUpdate = useCallback((newString) => {
+    const { selectedIds: newIds, filters: newFilters } = parseSearchString(newString);
+    setSelectedIds(newIds);
+    setFilters(newFilters);
+  }, []);
+
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col font-sans">
       <header className="bg-white shadow-sm z-40 sticky top-0">
@@ -86,7 +128,7 @@ function App() {
          </div>
       </main>
 
-      <SearchStringDisplay searchString={searchString} />
+      <SearchStringDisplay searchString={searchString} onSearchUpdate={handleSearchUpdate} />
     </div>
   );
 }
