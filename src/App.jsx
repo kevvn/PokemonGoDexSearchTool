@@ -4,6 +4,7 @@ import PokemonGrid from './components/PokemonGrid';
 import FilterPanel from './components/FilterPanel';
 import SearchStringDisplay from './components/SearchStringDisplay';
 import RegionSelector from './components/RegionSelector';
+import { compressIdRanges } from './utils/searchUtils';
 
 function App() {
   const [selectedIds, setSelectedIds] = useState(new Set());
@@ -52,25 +53,9 @@ function App() {
     const parts = [];
 
     // Pokemon IDs
-    if (selectedIds.size > 0) {
-      const sorted = Array.from(selectedIds).map(Number).sort((a, b) => a - b);
-      const ranges = [];
-      if (sorted.length > 0) {
-        let start = sorted[0];
-        let prev = sorted[0];
-
-        for (let i = 1; i < sorted.length; i++) {
-          if (sorted[i] === prev + 1) {
-            prev = sorted[i];
-          } else {
-            ranges.push(start === prev ? `${start}` : `${start}-${prev}`);
-            start = sorted[i];
-            prev = sorted[i];
-          }
-        }
-        ranges.push(start === prev ? `${start}` : `${start}-${prev}`);
-        parts.push(ranges.join(','));
-      }
+    const idString = compressIdRanges(selectedIds);
+    if (idString) {
+      parts.push(idString);
     }
 
     // Appraisal
