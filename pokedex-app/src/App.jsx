@@ -4,29 +4,11 @@ import PokemonGrid from './components/PokemonGrid';
 import FilterPanel from './components/FilterPanel';
 import SearchStringDisplay from './components/SearchStringDisplay';
 import RegionSelector from './components/RegionSelector';
+import { INITIAL_FILTERS } from './constants/filters';
 
 function App() {
   const [selectedIds, setSelectedIds] = useState(new Set());
-  const [filters, setFilters] = useState({
-    appraisal: [],
-    ageMin: '',
-    ageMax: '',
-    types: [],
-    // Attributes
-    shiny: null,
-    shadow: null,
-    purified: null,
-    lucky: null,
-    legendary: null,
-    mythical: null,
-    'ultra beasts': null,
-    costume: null,
-    evolve: null,
-    alola: null,
-    galar: null,
-    hisui: null,
-    paldea: null,
-  });
+  const [filters, setFilters] = useState(INITIAL_FILTERS);
 
   const togglePokemon = (id) => {
     setSelectedIds(prev => {

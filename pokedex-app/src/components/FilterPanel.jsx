@@ -1,25 +1,6 @@
 import React from 'react';
 
-const ATTRIBUTES = [
-  'shiny',
-  'shadow',
-  'purified',
-  'lucky',
-  'legendary',
-  'mythical',
-  'ultra beasts',
-  'costume',
-  'evolve',
-  'alola',
-  'galar',
-  'hisui',
-  'paldea'
-];
-
-const TYPES = [
-  'normal', 'fire', 'water', 'electric', 'grass', 'ice', 'fighting', 'poison', 'ground',
-  'flying', 'psychic', 'bug', 'rock', 'ghost', 'dragon', 'steel', 'dark', 'fairy'
-];
+import { ATTRIBUTES, TYPES, INITIAL_FILTERS } from '../constants/filters';
 
 export default function FilterPanel({ filters, setFilters }) {
   const toggleAppraisal = (star) => {
@@ -45,26 +26,7 @@ export default function FilterPanel({ filters, setFilters }) {
   };
 
   const resetFilters = () => {
-    setFilters({
-      appraisal: [],
-      ageMin: '',
-      ageMax: '',
-      types: [],
-      // Attributes
-      shiny: null,
-      shadow: null,
-      purified: null,
-      lucky: null,
-      legendary: null,
-      mythical: null,
-      'ultra beasts': null,
-      costume: null,
-      evolve: null,
-      alola: null,
-      galar: null,
-      hisui: null,
-      paldea: null,
-    });
+    setFilters(INITIAL_FILTERS);
   };
 
   return (
