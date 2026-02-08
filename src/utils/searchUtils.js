@@ -1,3 +1,8 @@
+export const ATTRIBUTES = [
+  'shiny', 'shadow', 'purified', 'lucky', 'legendary', 'mythical',
+  'ultra beasts', 'costume', 'evolve', 'alola', 'galar', 'hisui', 'paldea'
+];
+
 export function compressIdRanges(selectedIds) {
   if (!selectedIds) return '';
   // Ensure unique sorted numbers
@@ -24,4 +29,48 @@ export function compressIdRanges(selectedIds) {
     return ranges.join(',');
   }
   return '';
+}
+
+export function generateSearchString(selectedIds, filters) {
+  if (!filters) filters = {};
+  const parts = [];
+
+  // Pokemon IDs
+  const idString = compressIdRanges(selectedIds);
+  if (idString) {
+    parts.push(idString);
+  }
+
+  // Appraisal
+  if (filters.appraisal && filters.appraisal.length > 0) {
+    parts.push(filters.appraisal.join(','));
+  }
+
+  // Age
+  // Check if ageMin/ageMax are present. We treat empty string as absent.
+  const hasMin = filters.ageMin !== undefined && filters.ageMin !== '';
+  const hasMax = filters.ageMax !== undefined && filters.ageMax !== '';
+
+  if (hasMin || hasMax) {
+    const min = hasMin ? filters.ageMin : '';
+    const max = hasMax ? filters.ageMax : '';
+    if (min !== '' && max !== '' && min === max) {
+       parts.push(`age${min}`);
+    } else {
+       parts.push(`age${min}-${max}`);
+    }
+  }
+
+  // Attributes
+  ATTRIBUTES.forEach(attr => {
+    if (filters[attr] === true) parts.push(attr);
+    if (filters[attr] === false) parts.push(`!${attr}`);
+  });
+
+  // Types
+  if (filters.types && filters.types.length > 0) {
+     parts.push(filters.types.join(','));
+  }
+
+  return parts.join('&');
 }

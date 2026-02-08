@@ -4,7 +4,7 @@ import PokemonGrid from './components/PokemonGrid';
 import FilterPanel from './components/FilterPanel';
 import SearchStringDisplay from './components/SearchStringDisplay';
 import RegionSelector from './components/RegionSelector';
-import { compressIdRanges } from './utils/searchUtils';
+import { generateSearchString } from './utils/searchUtils';
 
 function App() {
   const [selectedIds, setSelectedIds] = useState(new Set());
@@ -50,47 +50,7 @@ function App() {
   }, []);
 
   const searchString = useMemo(() => {
-    const parts = [];
-
-    // Pokemon IDs
-    const idString = compressIdRanges(selectedIds);
-    if (idString) {
-      parts.push(idString);
-    }
-
-    // Appraisal
-    if (filters.appraisal.length > 0) {
-      parts.push(filters.appraisal.join(','));
-    }
-
-    // Age
-    if (filters.ageMin !== '' || filters.ageMax !== '') {
-      const min = filters.ageMin !== '' ? filters.ageMin : '';
-      const max = filters.ageMax !== '' ? filters.ageMax : '';
-      if (min !== '' && max !== '' && min === max) {
-         parts.push(`age${min}`);
-      } else {
-         parts.push(`age${min}-${max}`);
-      }
-    }
-
-    // Attributes
-    const attributes = [
-      'shiny', 'shadow', 'purified', 'lucky', 'legendary', 'mythical',
-      'ultra beasts', 'costume', 'evolve', 'alola', 'galar', 'hisui', 'paldea'
-    ];
-
-    attributes.forEach(attr => {
-      if (filters[attr] === true) parts.push(attr);
-      if (filters[attr] === false) parts.push(`!${attr}`);
-    });
-
-    // Types
-    if (filters.types && filters.types.length > 0) {
-       parts.push(filters.types.join(','));
-    }
-
-    return parts.join('&');
+    return generateSearchString(selectedIds, filters);
   }, [selectedIds, filters]);
 
   // Extract regions from data
