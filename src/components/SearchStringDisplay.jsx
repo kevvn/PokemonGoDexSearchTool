@@ -1,7 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
-function SearchStringDisplay({ searchString }) {
+function SearchStringDisplay({ searchString, onSearchUpdate }) {
   const [copied, setCopied] = useState(false);
+  const [inputValue, setInputValue] = useState(searchString);
+
+  // Sync input value when searchString prop changes (e.g. from clicking grid)
+  useEffect(() => {
+    setInputValue(searchString);
+  }, [searchString]);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(searchString);
@@ -9,14 +15,34 @@ function SearchStringDisplay({ searchString }) {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      onSearchUpdate(inputValue);
+      e.currentTarget.blur();
+    }
+  };
+
+  const handleBlur = () => {
+    // Only update if value changed to avoid unnecessary re-renders/logic
+    if (inputValue !== searchString) {
+      onSearchUpdate(inputValue);
+    }
+  };
+
+  const handleChange = (e) => {
+    setInputValue(e.target.value);
+  };
+
   return (
     <div className="bg-white border-t border-gray-200 p-4 sticky bottom-0 z-50 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
       <div className="max-w-7xl mx-auto flex items-center gap-4">
         <input
           type="text"
-          readOnly
-          value={searchString}
-          placeholder="Select Pokemon or Filters..."
+          value={inputValue}
+          onChange={handleChange}
+          onKeyDown={handleKeyDown}
+          onBlur={handleBlur}
+          placeholder="Select Pokemon or type search string (e.g. 'fire&legendary' or '1-151')"
           className="flex-1 p-3 border border-gray-300 rounded-lg bg-gray-50 text-sm font-mono focus:ring-2 focus:ring-blue-500 focus:outline-none"
         />
         <button
