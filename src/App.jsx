@@ -29,6 +29,7 @@ function App() {
     paldea: null,
   });
 
+  // Memoized to prevent unnecessary re-renders of PokemonGrid
   const togglePokemon = useCallback((id) => {
     setSelectedIds(prev => {
       const newSet = new Set(prev);
@@ -38,6 +39,7 @@ function App() {
     });
   }, []);
 
+  // Memoized to prevent unnecessary re-renders of PokemonGrid
   const handleRegionSelection = useCallback((ids, shouldSelect) => {
     setSelectedIds(prev => {
       const newSet = new Set(prev);
