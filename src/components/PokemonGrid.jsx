@@ -129,17 +129,24 @@ const RegionSection = React.memo(({ region, pokemons, selectedIds, togglePokemon
   );
 });
 
-function PokemonGrid({ pokemonList, selectedIds, togglePokemon, handleRegionSelection }) {
+function PokemonGrid({ pokemonList, selectedIds, togglePokemon, handleRegionSelection, showSelectedOnly }) {
   const [collapsedRegions, setCollapsedRegions] = useState({});
+
+  const displayedPokemon = useMemo(() => {
+    if (showSelectedOnly) {
+      return pokemonList.filter(p => selectedIds.has(p.id));
+    }
+    return pokemonList;
+  }, [pokemonList, selectedIds, showSelectedOnly]);
 
   const regions = useMemo(() => {
     const grouped = {};
-    pokemonList.forEach(p => {
+    displayedPokemon.forEach(p => {
       if (!grouped[p.region]) grouped[p.region] = [];
       grouped[p.region].push(p);
     });
     return grouped;
-  }, [pokemonList]);
+  }, [displayedPokemon]);
 
   const toggleCollapse = useCallback((region) => {
     setCollapsedRegions(prev => ({
