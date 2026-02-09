@@ -138,13 +138,34 @@ function App() {
     setFilters(newFilters);
   }, []);
 
+  const [showSelectedOnly, setShowSelectedOnly] = useState(false);
+
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col font-sans">
       <header className="bg-white shadow-sm z-40 sticky top-0">
-          <h1 className="text-center py-4 text-2xl font-black text-gray-800 tracking-tighter uppercase">
-             PokéSearch
-             <span className="text-blue-500 text-xs align-top ml-1 bg-blue-100 px-1 py-0.5 rounded">v1.0</span>
-          </h1>
+          <div className="relative flex items-center justify-center py-4">
+            <h1 className="text-2xl font-black text-gray-800 tracking-tighter uppercase">
+               PokéSearch
+               <span className="text-blue-500 text-xs align-top ml-1 bg-blue-100 px-1 py-0.5 rounded">v1.0</span>
+            </h1>
+            <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                <label className="flex items-center cursor-pointer select-none gap-2" title="Show only selected Pokemon">
+                  <div className="relative">
+                    <input
+                      type="checkbox"
+                      className="sr-only"
+                      checked={showSelectedOnly}
+                      onChange={() => setShowSelectedOnly(!showSelectedOnly)}
+                    />
+                    <div className={`block w-10 h-6 rounded-full transition-colors ${showSelectedOnly ? 'bg-blue-500' : 'bg-gray-300'}`}></div>
+                    <div className={`absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${showSelectedOnly ? 'transform translate-x-4' : ''}`}></div>
+                  </div>
+                  <div className="text-xs font-bold text-gray-500 uppercase tracking-wide hidden sm:block">
+                    Selected Only
+                  </div>
+                </label>
+            </div>
+          </div>
           <RegionSelector regions={regions} />
       </header>
 
@@ -159,6 +180,7 @@ function App() {
                selectedIds={selectedIds}
                togglePokemon={togglePokemon}
                handleRegionSelection={handleRegionSelection}
+               showSelectedOnly={showSelectedOnly}
             />
          </div>
       </main>
