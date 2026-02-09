@@ -153,11 +153,11 @@ function App() {
                   <div className="relative">
                     <input
                       type="checkbox"
-                      className="sr-only"
+                      className="sr-only peer"
                       checked={showSelectedOnly}
                       onChange={() => setShowSelectedOnly(!showSelectedOnly)}
                     />
-                    <div className={`block w-10 h-6 rounded-full transition-colors ${showSelectedOnly ? 'bg-blue-500' : 'bg-gray-300'}`}></div>
+                    <div className={`block w-10 h-6 rounded-full transition-colors ${showSelectedOnly ? 'bg-blue-500' : 'bg-gray-300'} peer-focus-visible:ring-2 peer-focus-visible:ring-blue-500 peer-focus-visible:ring-offset-2`}></div>
                     <div className={`absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${showSelectedOnly ? 'transform translate-x-4' : ''}`}></div>
                   </div>
                   <div className="text-xs font-bold text-gray-500 uppercase tracking-wide hidden sm:block">

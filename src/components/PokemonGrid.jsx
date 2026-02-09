@@ -97,7 +97,7 @@ const RegionSection = React.memo(({ region, pokemons, selectedIds, togglePokemon
           {!allSelected && (
             <button
               onClick={() => handleRegionSelection(pokemons.map(p => p.id), true)}
-              className="px-4 py-2 rounded-lg text-sm font-medium transition-colors bg-gray-100 text-gray-600 hover:bg-gray-200"
+              className="px-4 py-2 rounded-lg text-sm font-medium transition-colors bg-gray-100 text-gray-600 hover:bg-gray-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
             >
               Select All
             </button>
@@ -105,7 +105,7 @@ const RegionSection = React.memo(({ region, pokemons, selectedIds, togglePokemon
           {someSelected && (
             <button
               onClick={() => handleRegionSelection(pokemons.map(p => p.id), false)}
-              className="px-4 py-2 rounded-lg text-sm font-medium transition-colors bg-blue-100 text-blue-700 hover:bg-blue-200"
+              className="px-4 py-2 rounded-lg text-sm font-medium transition-colors bg-blue-100 text-blue-700 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1"
             >
               Deselect All
             </button>
