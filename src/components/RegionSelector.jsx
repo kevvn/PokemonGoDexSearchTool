@@ -21,7 +21,7 @@ function RegionSelector({ regions }) {
           <button
             key={region}
             onClick={() => scrollToRegion(region)}
-            className="flex flex-col items-center min-w-[70px] group shrink-0"
+            className="flex flex-col items-center min-w-[70px] group shrink-0 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
           >
             <div className="w-10 h-10 rounded-full bg-gray-50 border border-gray-200 flex items-center justify-center group-hover:bg-blue-50 group-hover:border-blue-300 transition-all shadow-sm">
                {/* Simple initial based icon */}
