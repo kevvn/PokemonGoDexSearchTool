@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import SavedSearchMenu from './SavedSearchMenu';
 
 function SearchStringDisplay({ searchString, onSearchUpdate }) {
   const [copied, setCopied] = useState(false);
   const [inputValue, setInputValue] = useState(searchString);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   // Sync input value when searchString prop changes (e.g. from clicking grid)
   useEffect(() => {
@@ -33,6 +35,12 @@ function SearchStringDisplay({ searchString, onSearchUpdate }) {
     setInputValue(e.target.value);
   };
 
+  const handleSelect = (val) => {
+    onSearchUpdate(val);
+    setInputValue(val);
+    setIsMenuOpen(false);
+  };
+
   return (
     <div className="bg-white border-t border-gray-200 p-4 sticky bottom-0 z-50 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
       <div className="max-w-7xl mx-auto flex items-center gap-4">
@@ -45,6 +53,29 @@ function SearchStringDisplay({ searchString, onSearchUpdate }) {
           placeholder="Select Pokemon or type search string (e.g. 'fire&legendary' or '1-151')"
           className="flex-1 p-3 border border-gray-300 rounded-lg bg-gray-50 text-sm font-mono focus:ring-2 focus:ring-blue-500 focus:outline-none"
         />
+
+        <div className="relative">
+          <button
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className={`px-4 py-3 rounded-lg font-medium transition-all flex items-center gap-2 border ${
+              isMenuOpen
+                ? 'bg-gray-100 border-gray-300 text-gray-800 shadow-inner'
+                : 'bg-white border-gray-300 hover:bg-gray-50 text-gray-700 shadow-sm'
+            }`}
+            title="Saved Searches"
+          >
+            <span>⭐️</span>
+            <span className="hidden sm:inline">Saved</span>
+          </button>
+          {isMenuOpen && (
+            <SavedSearchMenu
+              currentSearch={inputValue}
+              onSelect={handleSelect}
+              onClose={() => setIsMenuOpen(false)}
+            />
+          )}
+        </div>
+
         <button
           onClick={handleCopy}
           className={`px-6 py-3 rounded-lg font-medium transition-all ${
