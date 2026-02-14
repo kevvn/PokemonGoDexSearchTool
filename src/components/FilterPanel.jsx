@@ -70,6 +70,8 @@ function FilterPanel({ filters, setFilters }) {
             <button
               key={star}
               onClick={() => toggleAppraisal(star)}
+              aria-pressed={filters.appraisal.includes(star)}
+              aria-label={`Appraisal ${star} stars`}
               className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors border ${
                 filters.appraisal.includes(star)
                   ? 'bg-blue-500 text-white border-blue-600'
@@ -92,6 +94,8 @@ function FilterPanel({ filters, setFilters }) {
               <div className="flex rounded-md overflow-hidden border border-gray-300">
                 <button
                   onClick={() => setAttribute(attr, filters[attr] === true ? null : true)}
+                  aria-pressed={filters[attr] === true}
+                  aria-label={`Include ${attr}`}
                   className={`flex-1 py-1 text-xs font-bold transition-colors ${
                     filters[attr] === true ? 'bg-green-500 text-white' : 'bg-gray-50 text-gray-400 hover:bg-gray-100'
                   }`}
@@ -102,6 +106,8 @@ function FilterPanel({ filters, setFilters }) {
                 <div className="w-[1px] bg-gray-300"></div>
                 <button
                   onClick={() => setAttribute(attr, filters[attr] === false ? null : false)}
+                  aria-pressed={filters[attr] === false}
+                  aria-label={`Exclude ${attr}`}
                   className={`flex-1 py-1 text-xs font-bold transition-colors ${
                     filters[attr] === false ? 'bg-red-500 text-white' : 'bg-gray-50 text-gray-400 hover:bg-gray-100'
                   }`}
@@ -121,6 +127,7 @@ function FilterPanel({ filters, setFilters }) {
         <div className="flex items-center gap-2 max-w-xs">
           <input
             type="number"
+            aria-label="Minimum age in days"
             placeholder="Min (0)"
             value={filters.ageMin}
             onChange={e => setFilters(prev => ({ ...prev, ageMin: e.target.value }))}
@@ -129,6 +136,7 @@ function FilterPanel({ filters, setFilters }) {
           <span className="text-gray-400">-</span>
           <input
             type="number"
+            aria-label="Maximum age in days"
             placeholder="Max"
             value={filters.ageMax}
             onChange={e => setFilters(prev => ({ ...prev, ageMax: e.target.value }))}
@@ -145,6 +153,8 @@ function FilterPanel({ filters, setFilters }) {
              <button
               key={type}
               onClick={() => toggleType(type)}
+              aria-pressed={filters.types.includes(type)}
+              aria-label={`Filter by type ${type}`}
               className={`px-3 py-1 rounded-full text-xs font-bold text-white capitalize transition-transform hover:scale-105 shadow-sm ${
                  filters.types.includes(type)
                  ? `bg-type-${type} ring-2 ring-offset-1 ring-gray-400 opacity-100`
