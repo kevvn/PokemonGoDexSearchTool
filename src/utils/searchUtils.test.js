@@ -38,14 +38,12 @@ describe("compressIdRanges", () => {
     expect(compressIdRanges(["1", "3"])).toBe("1,3");
   });
 
-  test("should handle duplicates gracefully", () => {
-      // Current implementation might produce weird results with duplicates if not handled.
-      // If we decide to support array with duplicates, we should expect unique ranges.
-      // For now, let's verify what happens or expect the robust behavior if I fix it.
-      // I'll assume I will fix it.
-      expect(compressIdRanges([1, 1, 2, 3])).toBe("1-3");
-      expect(compressIdRanges([1, 2, 2, 3])).toBe("1-3");
-      expect(compressIdRanges([1, 3, 3, 5])).toBe("1,3,5");
+  test("should handle duplicates and mixed types gracefully", () => {
+    expect(compressIdRanges([1, 1, 2, 3])).toBe("1-3");
+    expect(compressIdRanges([1, 2, 2, 3])).toBe("1-3");
+    expect(compressIdRanges([1, 3, 3, 5])).toBe("1,3,5");
+    expect(compressIdRanges([1, "1", 2])).toBe("1-2");
+    expect(compressIdRanges([1, 2, "2", 3])).toBe("1-3");
   });
 });
 

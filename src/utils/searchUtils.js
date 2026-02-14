@@ -21,11 +21,13 @@ export const TYPES = [
 
 export function compressIdRanges(selectedIds) {
   if (!selectedIds) return '';
-  // Ensure unique sorted numbers
-  const uniqueIds = new Set(selectedIds);
+  // Ensure unique sorted numbers by converting all to Number first
+  const uniqueIds = new Set(Array.from(selectedIds, Number));
+  uniqueIds.delete(NaN);
+
   if (uniqueIds.size === 0) return '';
 
-  const sorted = Array.from(uniqueIds).map(Number).sort((a, b) => a - b);
+  const sorted = Array.from(uniqueIds).sort((a, b) => a - b);
   const ranges = [];
 
   if (sorted.length > 0) {
