@@ -54,6 +54,32 @@ const PokemonCard = React.memo(({ pokemon, selected, toggle }) => {
   );
 });
 
+// Custom comparison function for React.memo to prevent unnecessary re-renders of RegionSection
+// when the global selectedIds state changes but the selection status of pokemon IN THIS REGION hasn't changed.
+const areRegionPropsEqual = (prev, next) => {
+  if (prev.region !== next.region) return false;
+  if (prev.isCollapsed !== next.isCollapsed) return false;
+  if (prev.pokemons !== next.pokemons) return false;
+  if (prev.handleRegionSelection !== next.handleRegionSelection) return false;
+  if (prev.togglePokemon !== next.togglePokemon) return false;
+  if (prev.toggleCollapse !== next.toggleCollapse) return false;
+
+  // Check if selection state changed for ANY pokemon in this region
+  // Since pokemons array is stable (checked above), we can iterate it.
+  const prevSel = prev.selectedIds;
+  const nextSel = next.selectedIds;
+
+  // Optimization: if reference is same (unlikely), return true
+  if (prevSel === nextSel) return true;
+
+  for (const p of prev.pokemons) {
+    if (prevSel.has(p.id) !== nextSel.has(p.id)) {
+      return false;
+    }
+  }
+  return true;
+};
+
 const RegionSection = React.memo(({ region, pokemons, selectedIds, togglePokemon, handleRegionSelection, isCollapsed, toggleCollapse }) => {
   const selectedCount = pokemons.filter(p => selectedIds.has(p.id)).length;
   const totalCount = pokemons.length;
@@ -127,7 +153,7 @@ const RegionSection = React.memo(({ region, pokemons, selectedIds, togglePokemon
       )}
     </div>
   );
-});
+}, areRegionPropsEqual);
 
 function PokemonGrid({ pokemonList, selectedIds, togglePokemon, handleRegionSelection, showSelectedOnly }) {
   const [collapsedRegions, setCollapsedRegions] = useState({});
