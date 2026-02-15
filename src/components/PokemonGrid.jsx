@@ -68,7 +68,7 @@ const RegionSection = React.memo(({ region, pokemons, selectedIds, togglePokemon
   };
 
   return (
-    <div id={`region-${region}`} className="scroll-mt-48">
+    <div id={`region-${region}`} className="scroll-mt-48 region-section-optimized">
       <div className="flex items-center justify-between mb-6 sticky top-[160px] bg-white/95 backdrop-blur-sm z-10 py-3 border-b border-gray-100 shadow-sm">
         <div
           role="button"
