@@ -22,10 +22,12 @@ export const TYPES = [
 export function compressIdRanges(selectedIds) {
   if (!selectedIds) return '';
   // Ensure unique sorted numbers
-  const uniqueIds = new Set(selectedIds);
+  // Optimization: use existing Set if available to avoid copying
+  const uniqueIds = selectedIds instanceof Set ? selectedIds : new Set(selectedIds);
   if (uniqueIds.size === 0) return '';
 
-  const sorted = Array.from(uniqueIds).map(Number).sort((a, b) => a - b);
+  // Optimization: map to Number during Array creation to avoid intermediate array allocation
+  const sorted = Array.from(uniqueIds, Number).sort((a, b) => a - b);
   const ranges = [];
 
   if (sorted.length > 0) {
