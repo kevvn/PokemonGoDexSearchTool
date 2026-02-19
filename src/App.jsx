@@ -85,6 +85,18 @@ function App() {
     });
   }, []);
 
+  const handleInvertSelection = useCallback(() => {
+    setSelectedIds(prev => {
+      const newSet = new Set();
+      pokemonData.forEach(p => {
+        if (!prev.has(p.id)) {
+          newSet.add(p.id);
+        }
+      });
+      return newSet;
+    });
+  }, []);
+
   const searchString = useMemo(() => {
     const parts = [];
 
@@ -148,7 +160,14 @@ function App() {
                PokéSearch
                <span className="text-blue-500 text-xs align-top ml-1 bg-blue-100 px-1 py-0.5 rounded">v1.0</span>
             </h1>
-            <div className="absolute right-4 top-1/2 -translate-y-1/2">
+            <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-4">
+                <button
+                  onClick={handleInvertSelection}
+                  className="px-3 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold uppercase tracking-wide rounded border border-gray-300 transition-colors"
+                  title="Invert Selection"
+                >
+                  Invert
+                </button>
                 <label className="flex items-center cursor-pointer select-none gap-2" title="Show only selected Pokemon">
                   <div className="relative">
                     <input
