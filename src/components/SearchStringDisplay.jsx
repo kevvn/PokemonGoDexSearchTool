@@ -7,13 +7,17 @@ function SearchStringDisplay({ searchString, onSearchUpdate }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const typingTimeoutRef = useRef(null);
+  const prevSearchString = useRef(searchString);
 
   // Sync input value when searchString prop changes (e.g. from clicking grid)
   useEffect(() => {
-    // If user is actively typing, don't overwrite their input with prop updates
-    // unless the prop update is significantly different (e.g. from a reset or external change)
-    if (!isTyping) {
-      setInputValue(searchString);
+    // Only update if prop actually changed to avoid overwriting user input when typing stops (isTyping -> false)
+    if (prevSearchString.current !== searchString) {
+      prevSearchString.current = searchString;
+      // If user is actively typing, don't overwrite their input with prop updates
+      if (!isTyping) {
+        setInputValue(searchString);
+      }
     }
   }, [searchString, isTyping]);
 
