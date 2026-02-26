@@ -50,19 +50,25 @@ function App() {
 
   // Persistence effects
   useEffect(() => {
-    try {
-      localStorage.setItem('pokedex_selectedIds', JSON.stringify(Array.from(selectedIds)));
-    } catch (e) {
-      console.error('Failed to save selectedIds:', e);
-    }
+    const handler = setTimeout(() => {
+      try {
+        localStorage.setItem('pokedex_selectedIds', JSON.stringify(Array.from(selectedIds)));
+      } catch (e) {
+        console.error('Failed to save selectedIds:', e);
+      }
+    }, 500);
+    return () => clearTimeout(handler);
   }, [selectedIds]);
 
   useEffect(() => {
-    try {
-      localStorage.setItem('pokedex_filters', JSON.stringify(filters));
-    } catch (e) {
-      console.error('Failed to save filters:', e);
-    }
+    const handler = setTimeout(() => {
+      try {
+        localStorage.setItem('pokedex_filters', JSON.stringify(filters));
+      } catch (e) {
+        console.error('Failed to save filters:', e);
+      }
+    }, 500);
+    return () => clearTimeout(handler);
   }, [filters]);
 
   const togglePokemon = useCallback((id) => {
