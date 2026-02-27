@@ -21,29 +21,33 @@ export const TYPES = [
 
 export function compressIdRanges(selectedIds) {
   if (!selectedIds) return '';
-  // Ensure unique sorted numbers
+
   // Optimization: Avoid redundant Set cloning if input is already a Set
   const uniqueIds = selectedIds instanceof Set ? selectedIds : new Set(selectedIds);
   if (uniqueIds.size === 0) return '';
 
-  // Optimization: Use Array.from(set, mapFn) to avoid intermediate array allocation
-  const sorted = Array.from(uniqueIds, Number).sort((a, b) => a - b);
+  // Optimization: Use Float64Array for better memory locality and sorting performance with numbers
+  // This avoids V8 hidden class checks and object allocation overhead of standard Arrays
+  // Note: The constructor automatically converts inputs to numbers. Float64Array is safe for all JS integers.
+  const sorted = new Float64Array(uniqueIds).sort();
   const ranges = [];
 
-  if (sorted.length > 0) {
+  const len = sorted.length;
+  if (len > 0) {
     let start = sorted[0];
     let prev = sorted[0];
 
-    for (let i = 1; i < sorted.length; i++) {
+    for (let i = 1; i < len; i++) {
+      const current = sorted[i];
       // Optimization: Skip duplicates in sorted array (e.g. from mixed type inputs like 1 and "1")
-      if (sorted[i] === prev) continue;
+      if (current === prev) continue;
 
-      if (sorted[i] === prev + 1) {
-        prev = sorted[i];
+      if (current === prev + 1) {
+        prev = current;
       } else {
         ranges.push(start === prev ? `${start}` : `${start}-${prev}`);
-        start = sorted[i];
-        prev = sorted[i];
+        start = current;
+        prev = current;
       }
     }
     ranges.push(start === prev ? `${start}` : `${start}-${prev}`);
