@@ -49,20 +49,27 @@ function App() {
   });
 
   // Persistence effects
+  // Optimization: Debounce localStorage writes to prevent blocking main thread on rapid updates
   useEffect(() => {
-    try {
-      localStorage.setItem('pokedex_selectedIds', JSON.stringify(Array.from(selectedIds)));
-    } catch (e) {
-      console.error('Failed to save selectedIds:', e);
-    }
+    const timer = setTimeout(() => {
+      try {
+        localStorage.setItem('pokedex_selectedIds', JSON.stringify(Array.from(selectedIds)));
+      } catch (e) {
+        console.error('Failed to save selectedIds:', e);
+      }
+    }, 500);
+    return () => clearTimeout(timer);
   }, [selectedIds]);
 
   useEffect(() => {
-    try {
-      localStorage.setItem('pokedex_filters', JSON.stringify(filters));
-    } catch (e) {
-      console.error('Failed to save filters:', e);
-    }
+    const timer = setTimeout(() => {
+      try {
+        localStorage.setItem('pokedex_filters', JSON.stringify(filters));
+      } catch (e) {
+        console.error('Failed to save filters:', e);
+      }
+    }, 500);
+    return () => clearTimeout(timer);
   }, [filters]);
 
   const togglePokemon = useCallback((id) => {
