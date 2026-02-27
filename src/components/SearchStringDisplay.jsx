@@ -13,6 +13,7 @@ function SearchStringDisplay({ searchString, onSearchUpdate }) {
     // If user is actively typing, don't overwrite their input with prop updates
     // unless the prop update is significantly different (e.g. from a reset or external change)
     if (!isTyping) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setInputValue(searchString);
     }
   }, [searchString, isTyping]);
