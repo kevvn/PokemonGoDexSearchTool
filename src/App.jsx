@@ -151,6 +151,19 @@ function App() {
   }, []);
 
   const [showSelectedOnly, setShowSelectedOnly] = useState(false);
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+
+  // Prevent scrolling on body when modal is open
+  useEffect(() => {
+    if (isFilterModalOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isFilterModalOpen]);
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col font-sans">
@@ -189,8 +202,22 @@ function App() {
       </header>
 
       <main className="flex-1 flex flex-col lg:flex-row max-w-7xl mx-auto w-full relative">
-         <aside className="lg:w-80 lg:sticky lg:top-[160px] lg:h-[calc(100vh-160px)] lg:overflow-y-auto bg-gray-50 border-r border-gray-200 z-20 shadow-inner">
-            <FilterPanel filters={filters} setFilters={setFilters} />
+         {/* Mobile Filter Modal Overlay */}
+         {isFilterModalOpen && (
+           <div
+             className="fixed inset-0 bg-black/50 z-[60] lg:hidden backdrop-blur-sm transition-opacity"
+             onClick={() => setIsFilterModalOpen(false)}
+             aria-hidden="true"
+           ></div>
+         )}
+
+         {/* Filter Panel (Sidebar on Desktop, Modal on Mobile) */}
+         <aside className={`
+           fixed inset-y-0 left-0 z-[60] w-full max-w-md bg-white shadow-2xl transform transition-transform duration-300 ease-in-out overflow-y-auto
+           ${isFilterModalOpen ? 'translate-x-0' : '-translate-x-full'}
+           lg:w-96 lg:translate-x-0 lg:sticky lg:top-[160px] lg:h-[calc(100vh-160px)] lg:bg-gray-50 lg:border-r lg:border-gray-200 lg:z-20 lg:shadow-inner
+         `}>
+            <FilterPanel filters={filters} setFilters={setFilters} onClose={() => setIsFilterModalOpen(false)} />
          </aside>
 
          <div className="flex-1">
@@ -205,6 +232,17 @@ function App() {
       </main>
 
       <SearchStringDisplay searchString={searchString} onSearchUpdate={handleSearchUpdate} />
+
+      {/* Floating Action Button for Mobile */}
+      <button
+        onClick={() => setIsFilterModalOpen(true)}
+        className="lg:hidden fixed bottom-32 right-6 z-40 bg-blue-600 text-white p-4 rounded-full shadow-xl hover:bg-blue-700 transition-transform active:scale-95 flex items-center justify-center pb-safe-area-inset-bottom"
+        aria-label="Open filters"
+      >
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+        </svg>
+      </button>
     </div>
   );
 }
