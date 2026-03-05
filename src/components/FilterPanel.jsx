@@ -151,7 +151,7 @@ function FilterPanel({ filters, setFilters, onClose }) {
       </div>
 
       {/* Types */}
-      <div>
+      <div className="pb-24 lg:pb-0">
         <h4 className="font-semibold text-gray-700 mb-3 text-sm uppercase tracking-wide">Types</h4>
         <div className="flex gap-2 flex-wrap">
           {TYPES.map(type => (

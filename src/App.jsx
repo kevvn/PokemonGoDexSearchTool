@@ -205,7 +205,7 @@ function App() {
          {/* Mobile Filter Modal Overlay */}
          {isFilterModalOpen && (
            <div
-             className="fixed inset-0 bg-black/50 z-50 lg:hidden backdrop-blur-sm transition-opacity"
+             className="fixed inset-0 bg-black/50 z-[60] lg:hidden backdrop-blur-sm transition-opacity"
              onClick={() => setIsFilterModalOpen(false)}
              aria-hidden="true"
            ></div>
@@ -213,7 +213,7 @@ function App() {
 
          {/* Filter Panel (Sidebar on Desktop, Modal on Mobile) */}
          <aside className={`
-           fixed inset-y-0 left-0 z-50 w-full max-w-md bg-white shadow-2xl transform transition-transform duration-300 ease-in-out overflow-y-auto
+           fixed inset-y-0 left-0 z-[60] w-full max-w-md bg-white shadow-2xl transform transition-transform duration-300 ease-in-out overflow-y-auto
            ${isFilterModalOpen ? 'translate-x-0' : '-translate-x-full'}
            lg:w-96 lg:translate-x-0 lg:sticky lg:top-[160px] lg:h-[calc(100vh-160px)] lg:bg-gray-50 lg:border-r lg:border-gray-200 lg:z-20 lg:shadow-inner
          `}>
