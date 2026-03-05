@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useState, useMemo, useCallback, useEffect, useDeferredValue } from 'react';
 import pokemonData from './data/pokedex.json';
 import PokemonGrid from './components/PokemonGrid';
 import FilterPanel from './components/FilterPanel';
@@ -151,6 +151,9 @@ function App() {
   }, []);
 
   const [showSelectedOnly, setShowSelectedOnly] = useState(false);
+  // Defer the value passed to the grid to keep the toggle switch UI responsive
+  // during expensive filtering and re-rendering operations.
+  const deferredShowSelectedOnly = useDeferredValue(showSelectedOnly);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
 
   // Prevent scrolling on body when modal is open
@@ -226,7 +229,7 @@ function App() {
                selectedIds={selectedIds}
                togglePokemon={togglePokemon}
                handleRegionSelection={handleRegionSelection}
-               showSelectedOnly={showSelectedOnly}
+               showSelectedOnly={deferredShowSelectedOnly}
             />
          </div>
       </main>
