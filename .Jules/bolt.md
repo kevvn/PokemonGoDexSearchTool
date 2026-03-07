@@ -7,3 +7,6 @@
 ## 2024-05-22 - compressIdRanges Optimization
 **Learning:** Contrary to previous memory, `compressIdRanges` was not using `Array.from(set, mapFn)`. Implementing this along with avoiding redundant Set cloning yielded ~22% performance improvement in micro-benchmarks.
 **Action:** Always verify existing code against performance claims in memory before assuming they are implemented.
+## 2024-05-22 - RegionSection Filtering Optimization
+**Learning:** In `RegionSection` components, using `pokemons.filter(p => selectedIds.has(p.id)).length` inside a React functional component causes O(n) array allocations and subsequent garbage collection on every render. Because the subset of data can be large, this micro-bottleneck becomes significant during rapid toggles.
+**Action:** Replaced `.filter().length` with a manual `for` loop to increment a counter, eliminating array allocation overhead and improving rendering speed for subsets.
