@@ -41,10 +41,7 @@ function App() {
   const [selectedIds, setSelectedIds] = useLocalStorage('pokedex_selectedIds', new Set(), setStorageOptions);
 
   const [filters, setFilters] = useLocalStorage('pokedex_filters', defaultFilters, filterStorageOptions);
-    appraisal: [],
-    ageMin: '',
-    ageMax: '',
-    types: [],
+
   const togglePokemon = useCallback((id) => {
     setSelectedIds(prev => {
       const newSet = new Set(prev);
