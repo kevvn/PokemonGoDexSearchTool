@@ -1,15 +1,8 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import useLocalStorage from '../hooks/useLocalStorage';
 
 function SavedSearchMenu({ currentSearch, onSelect, onClose }) {
-  const [savedSearches, setSavedSearches] = useState(() => {
-    try {
-      const saved = localStorage.getItem('pokedex_saved_searches');
-      return saved ? JSON.parse(saved) : [];
-    } catch (e) {
-      console.error('Failed to load saved searches:', e);
-      return [];
-    }
-  });
+  const [savedSearches, setSavedSearches] = useLocalStorage('pokedex_saved_searches', []);
   const [newLabel, setNewLabel] = useState('');
   const menuRef = useRef(null);
 
@@ -28,14 +21,6 @@ function SavedSearchMenu({ currentSearch, onSelect, onClose }) {
     };
   }, [onClose]);
 
-  useEffect(() => {
-    try {
-      localStorage.setItem('pokedex_saved_searches', JSON.stringify(savedSearches));
-    } catch (e) {
-      console.error('Failed to save searches:', e);
-    }
-  }, [savedSearches]);
-
   const handleSave = () => {
     if (!newLabel.trim()) return;
     const newSearch = {
@@ -47,10 +32,10 @@ function SavedSearchMenu({ currentSearch, onSelect, onClose }) {
     setNewLabel('');
   };
 
-  const handleDelete = (id, e) => {
+  const handleDelete = useCallback((id, e) => {
     e.stopPropagation();
     setSavedSearches(prev => prev.filter(s => s.id !== id));
-  };
+  }, [setSavedSearches]);
 
   const renderedList = useMemo(() => (
     <div className="max-h-60 overflow-y-auto space-y-1 pr-1 custom-scrollbar">
@@ -85,7 +70,7 @@ function SavedSearchMenu({ currentSearch, onSelect, onClose }) {
         ))
       )}
     </div>
-  ), [savedSearches, onSelect]);
+  ), [savedSearches, onSelect, handleDelete]);
 
   return (
     <>
