@@ -173,30 +173,6 @@ function App() {
                PokéSearch
                <span className="text-blue-500 text-xs align-top ml-1 bg-blue-100 px-1 py-0.5 rounded">v1.0</span>
             </h1>
-            <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-4">
-                <button
-                  onClick={handleInvertSelection}
-                  className="px-3 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold uppercase tracking-wide rounded border border-gray-300 transition-colors"
-                  title="Invert Selection"
-                >
-                  Invert
-                </button>
-                <label className="flex items-center cursor-pointer select-none gap-2" title="Show only selected Pokemon">
-                  <div className="relative">
-                    <input
-                      type="checkbox"
-                      className="sr-only"
-                      checked={showSelectedOnly}
-                      onChange={() => setShowSelectedOnly(!showSelectedOnly)}
-                    />
-                    <div className={`block w-10 h-6 rounded-full transition-colors ${showSelectedOnly ? 'bg-blue-500' : 'bg-gray-300'}`}></div>
-                    <div className={`absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${showSelectedOnly ? 'transform translate-x-4' : ''}`}></div>
-                  </div>
-                  <div className="text-xs font-bold text-gray-500 uppercase tracking-wide hidden sm:block">
-                    Selected Only
-                  </div>
-                </label>
-            </div>
           </div>
           <RegionSelector regions={regions} />
       </header>
@@ -217,7 +193,14 @@ function App() {
            ${isFilterModalOpen ? 'translate-x-0' : '-translate-x-full'}
            lg:w-96 lg:translate-x-0 lg:sticky lg:top-[160px] lg:h-[calc(100vh-160px)] lg:bg-gray-50 lg:border-r lg:border-gray-200 lg:z-20 lg:shadow-inner
          `}>
-            <FilterPanel filters={filters} setFilters={setFilters} onClose={() => setIsFilterModalOpen(false)} />
+            <FilterPanel
+              filters={filters}
+              setFilters={setFilters}
+              onClose={() => setIsFilterModalOpen(false)}
+              handleInvertSelection={handleInvertSelection}
+              showSelectedOnly={showSelectedOnly}
+              setShowSelectedOnly={setShowSelectedOnly}
+            />
          </aside>
 
          <div className="flex-1">

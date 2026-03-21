@@ -1,7 +1,7 @@
 import React from 'react';
 import { ATTRIBUTES, TYPES } from '../utils/searchUtils';
 
-function FilterPanel({ filters, setFilters, onClose }) {
+function FilterPanel({ filters, setFilters, onClose, handleInvertSelection, showSelectedOnly, setShowSelectedOnly }) {
   const toggleAppraisal = (star) => {
     setFilters(prev => ({
       ...prev,
@@ -72,6 +72,35 @@ function FilterPanel({ filters, setFilters, onClose }) {
               </svg>
             </button>
           )}
+        </div>
+      </div>
+
+      {/* Quick Actions */}
+      <div>
+        <h4 className="font-semibold text-gray-700 mb-3 text-sm uppercase tracking-wide">Quick Actions</h4>
+        <div className="flex items-center justify-between bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
+          <button
+            onClick={handleInvertSelection}
+            className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-bold uppercase tracking-wide rounded-lg border border-gray-300 transition-colors"
+            title="Invert Selection"
+          >
+            Invert Selection
+          </button>
+          <label className="flex items-center cursor-pointer select-none gap-3" title="Show only selected Pokemon">
+            <div className="text-sm font-bold text-gray-700 uppercase tracking-wide">
+              Selected Only
+            </div>
+            <div className="relative">
+              <input
+                type="checkbox"
+                className="sr-only"
+                checked={showSelectedOnly}
+                onChange={() => setShowSelectedOnly(!showSelectedOnly)}
+              />
+              <div className={`block w-12 h-7 rounded-full transition-colors ${showSelectedOnly ? 'bg-blue-500' : 'bg-gray-300'}`}></div>
+              <div className={`absolute left-1 top-1 bg-white w-5 h-5 rounded-full transition-transform ${showSelectedOnly ? 'transform translate-x-5' : ''}`}></div>
+            </div>
+          </label>
         </div>
       </div>
 
