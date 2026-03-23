@@ -129,6 +129,7 @@ function App() {
 
   const [showSelectedOnly, setShowSelectedOnly] = useState(false);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+  const [activeRegion, setActiveRegion] = useState('');
 
   // Prevent scrolling on body when modal is open
   useEffect(() => {
@@ -151,7 +152,13 @@ function App() {
                <span className="text-blue-500 text-xs align-top ml-1 bg-blue-100 px-1 py-0.5 rounded">v1.0</span>
             </h1>
           </div>
-          <RegionSelector regions={regions} />
+          <RegionSelector
+             regions={regions}
+             activeRegion={activeRegion}
+             handleRegionSelection={handleRegionSelection}
+             pokemonData={pokemonData}
+             selectedIds={selectedIds}
+          />
       </header>
 
       <main className="flex-1 flex flex-col lg:flex-row max-w-7xl mx-auto w-full relative">
@@ -187,6 +194,7 @@ function App() {
                togglePokemon={togglePokemon}
                handleRegionSelection={handleRegionSelection}
                showSelectedOnly={showSelectedOnly}
+               onRegionVisible={setActiveRegion}
             />
          </div>
       </main>

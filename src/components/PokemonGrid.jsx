@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useCallback } from 'react';
+import React, { useMemo, useState, useCallback, useEffect } from 'react';
 import { areRegionPropsEqual } from '../utils/gridUtils';
 
 const PokemonCard = React.memo(({ pokemon, selected, toggle }) => {
@@ -70,7 +70,8 @@ const RegionSection = React.memo(({ region, pokemons, selectedIds, togglePokemon
 
   return (
     <div id={`region-${region}`} className="scroll-mt-48 region-section-optimized">
-      <div className="flex items-center justify-between mb-6 sticky top-[160px] bg-white/95 backdrop-blur-sm z-10 py-3 border-b border-gray-100 shadow-sm">
+      {/* Region Header: Hidden on mobile (md:flex) because mobile uses the RegionSelector above instead */}
+      <div className="hidden md:flex items-center justify-between mb-6 sticky top-[160px] bg-white/95 backdrop-blur-sm z-10 py-3 border-b border-gray-100 shadow-sm">
         <div
           role="button"
           aria-expanded={!isCollapsed}
@@ -130,7 +131,7 @@ const RegionSection = React.memo(({ region, pokemons, selectedIds, togglePokemon
   );
 }, areRegionPropsEqual);
 
-function PokemonGrid({ pokemonList, selectedIds, togglePokemon, handleRegionSelection, showSelectedOnly }) {
+function PokemonGrid({ pokemonList, selectedIds, togglePokemon, handleRegionSelection, showSelectedOnly, onRegionVisible }) {
   const [collapsedRegions, setCollapsedRegions] = useState({});
 
   const displayedPokemon = useMemo(() => {
@@ -155,6 +156,35 @@ function PokemonGrid({ pokemonList, selectedIds, togglePokemon, handleRegionSele
       [region]: !prev[region]
     }));
   }, []);
+
+  // Use IntersectionObserver to track visible regions
+  useEffect(() => {
+    if (!onRegionVisible) return;
+
+    const observerOptions = {
+      root: null,
+      rootMargin: '-200px 0px -50% 0px', // Adjust to trigger when region header passes top offset
+      threshold: 0
+    };
+
+    const handleIntersect = (entries) => {
+      // Find the first intersecting entry
+      const intersectingEntry = entries.find(entry => entry.isIntersecting);
+      if (intersectingEntry) {
+        const regionId = intersectingEntry.target.id;
+        const regionName = regionId.replace('region-', '');
+        onRegionVisible(regionName);
+      }
+    };
+
+    const observer = new IntersectionObserver(handleIntersect, observerOptions);
+
+    // Observe all region sections
+    const regionElements = document.querySelectorAll('.region-section-optimized');
+    regionElements.forEach(el => observer.observe(el));
+
+    return () => observer.disconnect();
+  }, [regions, onRegionVisible]);
 
   return (
     <div className="space-y-12 pb-32 px-4 md:px-6 max-w-7xl mx-auto">
