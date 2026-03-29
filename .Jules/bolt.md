@@ -7,3 +7,7 @@
 ## 2024-05-22 - compressIdRanges Optimization
 **Learning:** Contrary to previous memory, `compressIdRanges` was not using `Array.from(set, mapFn)`. Implementing this along with avoiding redundant Set cloning yielded ~22% performance improvement in micro-benchmarks.
 **Action:** Always verify existing code against performance claims in memory before assuming they are implemented.
+
+## 2024-05-22 - Array Filter vs Manual Iteration
+**Learning:** Relying on `.filter().length` strictly for counting instances unnecessarily allocates intermediate arrays, causing a lot of garbage collection overhead inside a frequently invoked React render cycle (like `RegionSection`).
+**Action:** Always use manual `for` loops and incremental counters to determine sizes/counts of subsets, avoiding memory allocation.
