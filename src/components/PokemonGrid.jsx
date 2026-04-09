@@ -56,7 +56,11 @@ const PokemonCard = React.memo(({ pokemon, selected, toggle }) => {
 });
 
 const RegionSection = React.memo(({ region, pokemons, selectedIds, togglePokemon, handleRegionSelection, isCollapsed, toggleCollapse }) => {
-  const selectedCount = pokemons.filter(p => selectedIds.has(p.id)).length;
+  // Optimization: Avoid intermediate array allocation from .filter().length
+  let selectedCount = 0;
+  for (let i = 0; i < pokemons.length; i++) {
+    if (selectedIds.has(pokemons[i].id)) selectedCount++;
+  }
   const totalCount = pokemons.length;
   const allSelected = selectedCount === totalCount;
   const someSelected = selectedCount > 0;

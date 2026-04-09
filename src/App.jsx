@@ -37,6 +37,9 @@ const filterStorageOptions = {
   deserialize: (val) => ({ ...defaultFilters, ...JSON.parse(val) })
 };
 
+// Optimization: Cache flat array of IDs to avoid property access overhead in loops
+const ALL_POKEMON_IDS = pokemonData.map(p => p.id);
+
 function App() {
   const [selectedIds, setSelectedIds] = useLocalStorage('pokedex_selectedIds', new Set(), setStorageOptions);
 
@@ -65,11 +68,13 @@ function App() {
   const handleInvertSelection = useCallback(() => {
     setSelectedIds(prev => {
       const newSet = new Set();
-      pokemonData.forEach(p => {
-        if (!prev.has(p.id)) {
-          newSet.add(p.id);
+      // Optimization: Standard loop over cached IDs outperforms .forEach and object property access
+      for (let i = 0; i < ALL_POKEMON_IDS.length; i++) {
+        const id = ALL_POKEMON_IDS[i];
+        if (!prev.has(id)) {
+          newSet.add(id);
         }
-      });
+      }
       return newSet;
     });
   }, [setSelectedIds]);
