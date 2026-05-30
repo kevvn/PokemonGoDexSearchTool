@@ -21,9 +21,7 @@ const TYPES = [
   'flying', 'psychic', 'bug', 'rock', 'ghost', 'dragon', 'steel', 'dark', 'fairy'
 ];
 
-function FilterPanel({ filters, setFilters }) {
-  const [isOpen, setIsOpen] = useState(false); // Mobile drawer state
-
+function FilterPanel({ filters, setFilters, onClose, handleInvertSelection }) {
   const toggleAppraisal = (star) => {
     setFilters(prev => ({
       ...prev,
@@ -69,15 +67,14 @@ function FilterPanel({ filters, setFilters }) {
     });
   };
 
-  // High-value search shortcuts for players
   const applyPreset = (presetName) => {
     resetFilters();
     
     switch (presetName) {
-      case 'perfect': // 4*
+      case 'perfect':
         setFilters(prev => ({ ...prev, appraisal: ['4*'] }));
         break;
-      case 'trash': // 0*, 1*, 2* & not special
+      case 'trash':
         setFilters(prev => ({
           ...prev,
           appraisal: ['0*', '1*', '2*'],
@@ -88,7 +85,7 @@ function FilterPanel({ filters, setFilters }) {
           costume: false
         }));
         break;
-      case 'pvp': // Evolveable + not legendary/mythical
+      case 'pvp':
         setFilters(prev => ({
           ...prev,
           evolve: true,
@@ -96,16 +93,10 @@ function FilterPanel({ filters, setFilters }) {
           mythical: false
         }));
         break;
-      case 'legendary': // Legendary + Mythical
+      case 'legendary':
         setFilters(prev => ({
           ...prev,
           legendary: true
-        }));
-        break;
-      case 'shiny-hunter':
-        setFilters(prev => ({
-          ...prev,
-          shiny: true
         }));
         break;
       default:
@@ -113,7 +104,6 @@ function FilterPanel({ filters, setFilters }) {
     }
   };
 
-  // Age quick presets
   const applyAgePreset = (days) => {
     if (days === 'today') {
       setFilters(prev => ({ ...prev, ageMin: '0', ageMax: '0' }));
@@ -129,28 +119,29 @@ function FilterPanel({ filters, setFilters }) {
   return (
     <div className="glass-panel border-b lg:border-b-0 lg:border-r border-slate-800/80 shadow-2xl relative">
       
-      {/* Mobile Drawer Trigger Bar */}
+      {/* Mobile Drawer Trigger Header */}
       <div 
-        onClick={() => setIsOpen(prev => !prev)}
-        className="flex lg:hidden items-center justify-between p-4 cursor-pointer bg-slate-900/60 hover:bg-slate-900/90 transition-all select-none border-b border-slate-800/50"
+        className="flex lg:hidden items-center justify-between p-4 bg-slate-900 border-b border-slate-800"
       >
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2.5 select-none">
           <span className="text-blue-400">⚙️</span>
           <h3 className="font-extrabold text-sm text-slate-200 tracking-wide uppercase">
             Filter Controls & Presets
           </h3>
         </div>
-        <span className="text-slate-400 text-xs font-bold bg-slate-800 px-2 py-0.5 rounded-lg border border-slate-700/60">
-          {isOpen ? 'Close ✕' : 'Open ▼'}
-        </span>
+        <button 
+          onClick={onClose}
+          className="text-slate-400 text-xs font-bold bg-slate-950 px-2.5 py-1 rounded-lg border border-slate-800 hover:text-slate-200 cursor-pointer"
+        >
+          Close ✕
+        </button>
       </div>
 
-      {/* Main Filter Content (responsive hidden on mobile if closed) */}
-      <div className={`p-5 md:p-6 space-y-6 lg:block ${isOpen ? 'block' : 'hidden'}`}>
+      <div className="p-5 md:p-6 space-y-6">
         
-        {/* Header Block */}
+        {/* Header Block (Desktop) */}
         <div className="hidden lg:flex justify-between items-center pb-4 border-b border-slate-800/80">
-          <h3 className="text-lg font-black text-slate-100 flex items-center gap-2.5">
+          <h3 className="text-sm font-black text-slate-100 flex items-center gap-2.5">
             <span className="text-blue-400 animate-pulse-ring">⚙️</span>
             FILTERS
           </h3>
@@ -172,6 +163,21 @@ function FilterPanel({ filters, setFilters }) {
           </button>
         </div>
 
+        {/* Quick Actions (Invert selection option) */}
+        <div className="space-y-2">
+          <h4 className="font-extrabold text-slate-400 text-[10px] tracking-widest uppercase border-b border-slate-800/50 pb-1">
+            Selection Quick Actions
+          </h4>
+          <div className="pt-1 select-none">
+            <button
+              onClick={handleInvertSelection}
+              className="w-full py-2 px-3 rounded-xl text-center text-xs font-bold bg-blue-500/10 hover:bg-blue-500/25 border border-blue-500/20 text-blue-400 hover:text-blue-300 transition-all cursor-pointer"
+            >
+              🔄 Invert Current Selection
+            </button>
+          </div>
+        </div>
+
         {/* Quick Presets Section */}
         <div className="space-y-2">
           <h4 className="font-extrabold text-slate-400 text-[10px] tracking-widest uppercase border-b border-slate-800/50 pb-1">
@@ -180,25 +186,25 @@ function FilterPanel({ filters, setFilters }) {
           <div className="grid grid-cols-2 gap-1.5 pt-1.5">
             <button
               onClick={() => applyPreset('perfect')}
-              className="py-2 px-2.5 rounded-xl text-left text-[11px] font-bold bg-slate-950/40 hover:bg-emerald-500/10 border border-slate-850 hover:border-emerald-500/20 text-slate-300 hover:text-emerald-400 transition-all"
+              className="py-2 px-2.5 rounded-xl text-left text-[11px] font-bold bg-slate-950/40 hover:bg-emerald-500/10 border border-slate-850 hover:border-emerald-500/20 text-slate-300 hover:text-emerald-400 transition-all cursor-pointer"
             >
               💎 Perfect 100% IVs
             </button>
             <button
               onClick={() => applyPreset('trash')}
-              className="py-2 px-2.5 rounded-xl text-left text-[11px] font-bold bg-slate-950/40 hover:bg-rose-500/10 border border-slate-850 hover:border-rose-500/20 text-slate-300 hover:text-rose-400 transition-all"
+              className="py-2 px-2.5 rounded-xl text-left text-[11px] font-bold bg-slate-950/40 hover:bg-rose-500/10 border border-slate-850 hover:border-rose-500/20 text-slate-300 hover:text-rose-400 transition-all cursor-pointer"
             >
               🗑️ Mass Transfer Trash
             </button>
             <button
               onClick={() => applyPreset('pvp')}
-              className="py-2 px-2.5 rounded-xl text-left text-[11px] font-bold bg-slate-950/40 hover:bg-indigo-500/10 border border-slate-850 hover:border-indigo-500/20 text-slate-300 hover:text-indigo-400 transition-all"
+              className="py-2 px-2.5 rounded-xl text-left text-[11px] font-bold bg-slate-950/40 hover:bg-indigo-500/10 border border-slate-850 hover:border-indigo-500/20 text-slate-300 hover:text-indigo-400 transition-all cursor-pointer"
             >
               ⚔️ PVP Evolves
             </button>
             <button
               onClick={() => applyPreset('legendary')}
-              className="py-2 px-2.5 rounded-xl text-left text-[11px] font-bold bg-slate-950/40 hover:bg-amber-500/10 border border-slate-850 hover:border-amber-500/20 text-slate-300 hover:text-amber-400 transition-all"
+              className="py-2 px-2.5 rounded-xl text-left text-[11px] font-bold bg-slate-950/40 hover:bg-amber-500/10 border border-slate-850 hover:border-amber-500/20 text-slate-300 hover:text-amber-400 transition-all cursor-pointer"
             >
               👑 Raid Boss Flex
             </button>
@@ -210,14 +216,14 @@ function FilterPanel({ filters, setFilters }) {
           <h4 className="font-extrabold text-slate-400 text-[10px] tracking-widest uppercase border-b border-slate-800/50 pb-1">
             Storage Appraisal (IV)
           </h4>
-          <div className="flex gap-1.5 flex-wrap pt-1">
+          <div className="flex gap-1.5 flex-wrap pt-1 select-none">
             {['0*', '1*', '2*', '3*', '4*'].map(star => {
               const isActive = filters.appraisal.includes(star);
               return (
                 <button
                   key={star}
                   onClick={() => toggleAppraisal(star)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-extrabold transition-all border ${
+                  className={`px-3 py-1.5 rounded-xl text-xs font-extrabold transition-all border cursor-pointer ${
                     isActive
                       ? 'bg-blue-500 text-slate-950 border-blue-400 shadow-[0_0_10px_rgba(59,130,246,0.4)]'
                       : 'bg-slate-950/50 border-slate-850 text-slate-400 hover:bg-slate-850 hover:text-slate-200'
@@ -236,9 +242,9 @@ function FilterPanel({ filters, setFilters }) {
             Attributes & Filters
           </h4>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-2 pt-1">
+          <div className="grid grid-cols-1 gap-2 pt-1">
             {ATTRIBUTES.map(attr => {
-              const currentVal = filters[attr]; // true, false, or null
+              const currentVal = filters[attr];
               
               return (
                 <div key={attr} className="bg-slate-950/30 p-2 rounded-xl border border-slate-850/80 flex items-center justify-between gap-3">
@@ -248,10 +254,9 @@ function FilterPanel({ filters, setFilters }) {
                   
                   {/* Segmented Row */}
                   <div className="flex rounded-lg overflow-hidden border border-slate-850 bg-slate-950 text-xs shrink-0 select-none">
-                    {/* Include Stage (✓) */}
                     <button
                       onClick={() => setAttribute(attr, currentVal === true ? null : true)}
-                      className={`px-2.5 py-1 font-extrabold transition-all border-r border-slate-850 ${
+                      className={`px-2.5 py-1 font-extrabold transition-all border-r border-slate-850 cursor-pointer ${
                         currentVal === true 
                           ? 'bg-emerald-500 text-slate-950 shadow-inner' 
                           : 'text-slate-500 hover:bg-slate-900 hover:text-slate-350'
@@ -261,10 +266,9 @@ function FilterPanel({ filters, setFilters }) {
                       ✓
                     </button>
                     
-                    {/* Neutral/Ignore Stage (—) */}
                     <button
                       onClick={() => setAttribute(attr, null)}
-                      className={`px-2.5 py-1 font-bold transition-all border-r border-slate-850 ${
+                      className={`px-2.5 py-1 font-bold transition-all border-r border-slate-850 cursor-pointer ${
                         currentVal === null 
                           ? 'bg-slate-800 text-slate-300' 
                           : 'text-slate-500 hover:bg-slate-900 hover:text-slate-350'
@@ -274,10 +278,9 @@ function FilterPanel({ filters, setFilters }) {
                       —
                     </button>
 
-                    {/* Exclude Stage (✕) */}
                     <button
                       onClick={() => setAttribute(attr, currentVal === false ? null : false)}
-                      className={`px-2.5 py-1 font-extrabold transition-all ${
+                      className={`px-2.5 py-1 font-extrabold transition-all cursor-pointer ${
                         currentVal === false 
                           ? 'bg-rose-500 text-slate-950 shadow-inner' 
                           : 'text-slate-500 hover:bg-slate-900 hover:text-slate-350'
@@ -299,35 +302,33 @@ function FilterPanel({ filters, setFilters }) {
             Caught Age (Days)
           </h4>
           
-          {/* Age Presets */}
           <div className="flex gap-1.5 flex-wrap pt-1 select-none">
             <button
               onClick={() => applyAgePreset('today')}
-              className="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-slate-950/40 hover:bg-slate-850 text-slate-400 hover:text-slate-200 border border-slate-850"
+              className="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-slate-950/40 hover:bg-slate-850 text-slate-400 hover:text-slate-200 border border-slate-850 cursor-pointer"
             >
               Today
             </button>
             <button
               onClick={() => applyAgePreset('yesterday')}
-              className="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-slate-950/40 hover:bg-slate-850 text-slate-400 hover:text-slate-200 border border-slate-850"
+              className="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-slate-950/40 hover:bg-slate-850 text-slate-400 hover:text-slate-200 border border-slate-850 cursor-pointer"
             >
               Yesterday
             </button>
             <button
               onClick={() => applyAgePreset('week')}
-              className="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-slate-950/40 hover:bg-slate-850 text-slate-400 hover:text-slate-200 border border-slate-850"
+              className="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-slate-950/40 hover:bg-slate-850 text-slate-400 hover:text-slate-200 border border-slate-850 cursor-pointer"
             >
               Last 7d
             </button>
             <button
               onClick={() => applyAgePreset('month')}
-              className="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-slate-950/40 hover:bg-slate-850 text-slate-400 hover:text-slate-200 border border-slate-850"
+              className="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-slate-950/40 hover:bg-slate-850 text-slate-400 hover:text-slate-200 border border-slate-850 cursor-pointer"
             >
               Last 30d
             </button>
           </div>
 
-          {/* Age input boxes */}
           <div className="flex items-center gap-2 pt-1">
             <div className="relative flex-1">
               <span className="absolute left-2.5 top-2 text-[9px] font-extrabold text-slate-500 uppercase tracking-widest">MIN</span>
@@ -358,7 +359,7 @@ function FilterPanel({ filters, setFilters }) {
           <h4 className="font-extrabold text-slate-400 text-[10px] tracking-widest uppercase border-b border-slate-800/50 pb-1">
             Types Selection
           </h4>
-          <div className="flex gap-1.5 flex-wrap pt-1">
+          <div className="flex gap-1.5 flex-wrap pt-1 select-none">
             {TYPES.map(type => {
               const isSelected = filters.types.includes(type);
               
@@ -366,7 +367,7 @@ function FilterPanel({ filters, setFilters }) {
                  <button
                   key={type}
                   onClick={() => toggleType(type)}
-                  className={`px-2.5 py-1 rounded-xl text-[10px] font-extrabold text-white capitalize transition-all duration-200 hover:scale-105 shadow-sm border border-white/5 ${
+                  className={`px-2.5 py-1 rounded-xl text-[10px] font-extrabold text-white capitalize transition-all duration-200 hover:scale-105 shadow-sm border border-white/5 cursor-pointer ${
                      isSelected
                      ? `bg-type-${type} shadow-type-${type} opacity-100 scale-105`
                      : `bg-type-${type} opacity-25 hover:opacity-50`

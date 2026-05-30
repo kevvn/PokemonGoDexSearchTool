@@ -1,4 +1,5 @@
-import React, { useMemo, useState, useCallback, useRef } from 'react';
+import React, { useMemo, useState, useCallback, useRef, useEffect } from 'react';
+import { areRegionPropsEqual } from '../utils/gridUtils';
 
 // Smart heuristic to get evolutionary family IDs
 const getFamilyIds = (pokemon, pokemonList) => {
@@ -8,10 +9,9 @@ const getFamilyIds = (pokemon, pokemonList) => {
   const family = pokemonList.filter(p => {
     if (p.region !== pokemon.region) return false;
     
-    // Check if within National Dex sequential range of 2 (most standard families are contiguous N, N+1, N+2)
+    // Check if within National Dex sequential range of 2
     const isAdjacent = Math.abs(p.id - pokemon.id) <= 2;
     if (isAdjacent) {
-      // Ensure we don't accidentally link unrelated species at gen boundaries
       return true;
     }
     
@@ -32,10 +32,21 @@ const PokemonCard = React.memo(({ pokemon, selected, toggle, list, onSelectFamil
     onSelectFamily(familyIds);
   };
 
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      toggle(pokemon.id, e);
+    }
+  };
+
   return (
     <div
+      role="button"
+      aria-pressed={selected}
+      tabIndex={0}
       onClick={(e) => toggle(pokemon.id, e)}
-      className={`relative cursor-pointer rounded-2xl p-3 flex flex-col items-center transition-all duration-300 select-none border group/card hover:scale-[1.05] hover:active:scale-[0.98] ${
+      onKeyDown={handleKeyDown}
+      className={`relative cursor-pointer rounded-2xl p-3 flex flex-col items-center transition-all duration-300 select-none border group/card hover:scale-[1.05] hover:active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${
         selected
           ? `bg-slate-900 border-slate-700 ring-2 ring-blue-500/40 shadow-type-${primaryType}`
           : 'bg-slate-900/60 border-slate-800/80 hover:bg-slate-850 hover:border-slate-700'
@@ -45,7 +56,6 @@ const PokemonCard = React.memo(({ pokemon, selected, toggle, list, onSelectFamil
       <div className="flex justify-between w-full items-center mb-1">
         <span className="text-[10px] text-slate-500 font-mono font-bold tracking-wider">#{pokemon.id}</span>
         
-        {/* Select Family Quick Trigger */}
         <button
           onClick={handleFamilyClick}
           title="Select evolution line"
@@ -87,7 +97,7 @@ const PokemonCard = React.memo(({ pokemon, selected, toggle, list, onSelectFamil
 
       {/* Selection Checkmark Bubble */}
       {selected && (
-        <div className="absolute -top-1.5 -right-1.5 bg-blue-500 text-slate-900 rounded-full w-5 h-5 flex items-center justify-center border-2 border-slate-950 shadow-[0_0_10px_rgba(59,130,246,0.6)] animate-float">
+        <div className="absolute -top-1.5 -right-1.5 bg-blue-500 text-slate-950 rounded-full w-5 h-5 flex items-center justify-center border-2 border-slate-950 shadow-[0_0_10px_rgba(59,130,246,0.6)] animate-float">
           <svg className="w-3.5 h-3.5 fill-current text-white" viewBox="0 0 20 20">
             <path d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" fillRule="evenodd"/>
           </svg>
@@ -108,11 +118,11 @@ const RegionSection = React.memo(({ region, pokemons, selectedIds, togglePokemon
   return (
     <div 
       id={`region-${region}`} 
-      className="scroll-mt-48 bg-slate-900/30 rounded-3xl p-5 border border-slate-900/80 shadow-md mb-8"
+      className="scroll-mt-48 bg-slate-900/30 rounded-3xl p-5 border border-slate-900/80 shadow-md mb-8 region-section-optimized"
       style={{ contentVisibility: 'auto', containIntrinsicSize: '0 500px' }}
     >
-      {/* Region Section Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-800/80">
+      {/* Region Section Header (Hidden on Mobile exclusive because mobile uses the sticky RegionSelector row) */}
+      <div className="hidden md:flex items-center justify-between mb-6 pb-4 border-b border-slate-800/80">
         <div className="flex items-center gap-3 cursor-pointer select-none" onClick={() => toggleCollapse(region)}>
             <div className="bg-gradient-to-b from-blue-500 to-indigo-600 w-1.5 h-9 rounded-full shadow-[0_0_10px_rgba(59,130,246,0.5)]"></div>
             <div>
@@ -128,7 +138,7 @@ const RegionSection = React.memo(({ region, pokemons, selectedIds, togglePokemon
             </div>
         </div>
 
-        {/* Region level selection actions */}
+        {/* Region actions */}
         <div className="flex gap-2">
           {!allSelected && (
             <button
@@ -166,7 +176,7 @@ const RegionSection = React.memo(({ region, pokemons, selectedIds, togglePokemon
       )}
     </div>
   );
-});
+}, areRegionPropsEqual);
 
 function PokemonGrid({ 
   pokemonList, 
@@ -176,7 +186,8 @@ function PokemonGrid({
   searchQuery,
   setSearchQuery,
   selectedOnly,
-  setSelectedOnly
+  setSelectedOnly,
+  onRegionVisible
 }) {
   const [collapsedRegions, setCollapsedRegions] = useState({});
   const lastClickedId = useRef(null);
@@ -188,7 +199,7 @@ function PokemonGrid({
     const query = searchQuery.toLowerCase().trim();
 
     pokemonList.forEach(p => {
-      // 1. Text filter (name, id, type)
+      // 1. Text search filter
       const matchesSearch = 
         p.name.toLowerCase().includes(query) ||
         p.id.toString() === query ||
@@ -215,14 +226,12 @@ function PokemonGrid({
   }, []);
 
   const handleSelectFamily = useCallback((familyIds) => {
-    // Bulk select the family
     handleRegionSelection(familyIds, true);
   }, [handleRegionSelection]);
 
-  // Upgraded Toggle support for Shift + Click range selection
+  // Support for Shift + Click range selection
   const handleToggleCard = useCallback((id, event) => {
-    if (event.shiftKey && lastClickedId.current !== null && lastClickedId.current !== id) {
-      // Perform range selection based on index in CURRENTLY visible list
+    if (event && event.shiftKey && lastClickedId.current !== null && lastClickedId.current !== id) {
       const idx1 = visibleList.findIndex(p => p.id === lastClickedId.current);
       const idx2 = visibleList.findIndex(p => p.id === id);
 
@@ -231,26 +240,49 @@ function PokemonGrid({
         const end = Math.max(idx1, idx2);
         const rangeIds = visibleList.slice(start, end + 1).map(p => p.id);
         
-        // Determine selection target: match selection status of the last clicked item, 
-        // or default to true if last clicked is selected
         const targetSelection = selectedIds.has(lastClickedId.current);
         handleRegionSelection(rangeIds, targetSelection);
         
-        // Update anchor
         lastClickedId.current = id;
         return;
       }
     }
     
-    // Normal single select
     togglePokemon(id);
     lastClickedId.current = id;
   }, [visibleList, selectedIds, togglePokemon, handleRegionSelection]);
 
+  // Use IntersectionObserver to track visible regions and update headers
+  useEffect(() => {
+    if (!onRegionVisible) return;
+
+    const observerOptions = {
+      root: null,
+      rootMargin: '-200px 0px -50% 0px',
+      threshold: 0
+    };
+
+    const handleIntersect = (entries) => {
+      const intersectingEntry = entries.find(entry => entry.isIntersecting);
+      if (intersectingEntry) {
+        const regionId = intersectingEntry.target.id;
+        const regionName = regionId.replace('region-', '');
+        onRegionVisible(regionName);
+      }
+    };
+
+    const observer = new IntersectionObserver(handleIntersect, observerOptions);
+
+    const regionElements = document.querySelectorAll('.region-section-optimized');
+    regionElements.forEach(el => observer.observe(el));
+
+    return () => observer.disconnect();
+  }, [groupedRegions, onRegionVisible]);
+
   return (
     <div className="space-y-6 pb-36 px-4 md:px-6 max-w-7xl mx-auto mt-4">
       
-      {/* Grid Toolbar: Search and Filter Actions */}
+      {/* Grid Toolbar */}
       <div className="glass-panel rounded-3xl p-4 md:p-5 flex flex-col md:flex-row items-center gap-4 justify-between shadow-xl">
         
         {/* Live Search Input */}

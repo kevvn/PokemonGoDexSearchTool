@@ -1,19 +1,30 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import SavedSearchMenu from './SavedSearchMenu';
 
-function SearchStringDisplay({ searchString, selectedCount, onClearSelection }) {
+function SearchStringDisplay({ searchString, selectedCount, onClearSelection, onSearchUpdate }) {
   const [copied, setCopied] = useState(false);
   const [showQR, setShowQR] = useState(false);
   const [showToast, setShowToast] = useState(false);
+  const [inputValue, setInputValue] = useState(searchString);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
+  const typingTimeoutRef = useRef(null);
 
-  const handleCopy = () => {
+  // Sync input value when searchString prop changes (e.g. from clicking grid)
+  useEffect(() => {
+    if (!isTyping) {
+      setInputValue(searchString);
+    }
+  }, [searchString, isTyping]);
+
+  const handleCopy = useCallback(() => {
     if (!searchString) return;
     navigator.clipboard.writeText(searchString);
     setCopied(true);
     setShowToast(true);
     
-    // Auto reset copy visual state
     setTimeout(() => setCopied(false), 2000);
-  };
+  }, [searchString]);
 
   // Auto-hide toast
   useEffect(() => {
@@ -22,6 +33,37 @@ function SearchStringDisplay({ searchString, selectedCount, onClearSelection }) 
       return () => clearTimeout(timer);
     }
   }, [showToast]);
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      onSearchUpdate(inputValue);
+      e.currentTarget.blur();
+      setIsTyping(false);
+    }
+  };
+
+  const handleBlur = () => {
+    setIsTyping(false);
+    if (inputValue !== searchString) {
+      onSearchUpdate(inputValue);
+    }
+  };
+
+  const handleChange = (e) => {
+    setInputValue(e.target.value);
+    setIsTyping(true);
+
+    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+    typingTimeoutRef.current = setTimeout(() => {
+       setIsTyping(false);
+    }, 1000); // 1s debounce
+  };
+
+  const handleSelect = useCallback((val) => {
+    onSearchUpdate(val);
+    setInputValue(val);
+    setIsMenuOpen(false);
+  }, [onSearchUpdate]);
 
   return (
     <>
@@ -38,7 +80,6 @@ function SearchStringDisplay({ searchString, selectedCount, onClearSelection }) 
         <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[99] flex items-center justify-center p-4">
           <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 max-w-sm w-full text-center relative shadow-2xl animate-float">
             
-            {/* Close Button */}
             <button
               onClick={() => setShowQR(false)}
               className="absolute top-4 right-4 text-slate-500 hover:text-slate-200 transition-colors w-7 h-7 flex items-center justify-center bg-slate-950/60 rounded-full border border-slate-800 cursor-pointer"
@@ -46,7 +87,6 @@ function SearchStringDisplay({ searchString, selectedCount, onClearSelection }) 
               ✕
             </button>
 
-            {/* QR Icon */}
             <div className="text-3xl mb-1">📱</div>
             <h3 className="text-md font-extrabold text-slate-200 mb-1.5 uppercase tracking-wide">
               Scan to Mobile
@@ -56,7 +96,6 @@ function SearchStringDisplay({ searchString, selectedCount, onClearSelection }) 
               Scan with your phone's camera to instantly get your generated Pokémon GO search string on mobile!
             </p>
 
-            {/* QR Image Container */}
             {searchString ? (
               <div className="bg-white p-3 rounded-2xl inline-block shadow-lg border border-slate-700/10 mb-5 relative group">
                 <img
@@ -73,7 +112,6 @@ function SearchStringDisplay({ searchString, selectedCount, onClearSelection }) 
               </div>
             )}
 
-            {/* Micro details */}
             <div className="bg-slate-950/40 border border-slate-850 rounded-xl p-2.5 max-h-16 overflow-y-auto font-mono text-[10px] text-slate-400 no-scrollbar break-all text-left">
               {searchString || 'No active query filters...'}
             </div>
@@ -82,7 +120,7 @@ function SearchStringDisplay({ searchString, selectedCount, onClearSelection }) 
       )}
 
       {/* Floating Sticky Bottom Bar */}
-      <div className="bg-slate-900/85 backdrop-blur-lg border-t border-slate-800/80 p-4 sticky bottom-0 z-40 shadow-[0_-10px_30px_rgba(0,0,0,0.5)]">
+      <div className="bg-slate-900/85 backdrop-blur-lg border-t border-slate-800/80 p-4 sticky bottom-0 z-40 shadow-[0_-10px_30px_rgba(0,0,0,0.5)] pb-safe-area-inset-bottom">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center gap-3">
           
           {/* Stats Summary Panel */}
@@ -92,7 +130,6 @@ function SearchStringDisplay({ searchString, selectedCount, onClearSelection }) 
               <span>{selectedCount} Selected</span>
             </div>
             
-            {/* Clear selection button */}
             {selectedCount > 0 && (
               <button
                 onClick={onClearSelection}
@@ -104,27 +141,65 @@ function SearchStringDisplay({ searchString, selectedCount, onClearSelection }) 
             )}
           </div>
 
-          {/* Active String Output Box */}
-          <div className="relative flex-1 w-full">
+          {/* Dynamic Bidirectional Input Box */}
+          <div className="relative flex-1 w-full group">
             <input
               type="text"
-              readOnly
-              value={searchString}
-              placeholder="Select Pokemon or Filters to generate query..."
-              onClick={(e) => e.target.select()}
-              className="w-full pl-4 pr-16 py-3 rounded-2xl bg-slate-950 border border-slate-850 text-xs text-slate-300 placeholder-slate-650 font-mono focus:outline-none focus:border-blue-500/60 truncate"
+              value={inputValue}
+              onChange={handleChange}
+              onKeyDown={handleKeyDown}
+              onBlur={handleBlur}
+              placeholder="Search terms, IDs, ranges or paste expressions here..."
+              className="w-full pl-4 pr-24 py-3 rounded-2xl bg-slate-950 border border-slate-850 text-xs text-slate-300 placeholder-slate-650 font-mono focus:outline-none focus:border-blue-500/60 truncate"
             />
-            {searchString && (
-              <div className="absolute right-3.5 top-2.5 flex gap-1">
-                <span className="text-[10px] bg-slate-900 border border-slate-800 text-slate-500 font-extrabold px-2 py-0.5 rounded-lg select-none">
-                  {searchString.length} chars
+            {inputValue && (
+              <div className="absolute right-3.5 top-2 flex items-center gap-1.5 select-none">
+                <span className="text-[9px] bg-slate-900 border border-slate-800 text-slate-500 font-extrabold px-1.5 py-0.5 rounded">
+                  {inputValue.length} chars
                 </span>
+                
+                {/* Clear button inside input */}
+                <button
+                  onClick={() => {
+                     setInputValue('');
+                     onSearchUpdate('');
+                  }}
+                  className="text-slate-500 hover:text-slate-350 bg-slate-900 border border-slate-800 w-5 h-5 flex items-center justify-center rounded cursor-pointer"
+                  title="Clear input"
+                >
+                  ✕
+                </button>
               </div>
             )}
           </div>
 
           {/* Main Action buttons */}
-          <div className="flex gap-2 w-full sm:w-auto shrink-0">
+          <div className="flex gap-2 w-full sm:w-auto shrink-0 relative">
+            
+            {/* Saved Searches Drawer Trigger */}
+            <div className="relative flex-1 sm:flex-initial">
+              <button
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                className={`w-full flex items-center justify-center gap-2 px-5 py-3 rounded-2xl font-extrabold text-xs transition-all duration-200 border cursor-pointer select-none active:scale-95 ${
+                  isMenuOpen
+                    ? 'bg-blue-500/10 border-blue-500 text-blue-400 shadow-inner'
+                    : 'bg-slate-950 hover:bg-slate-850 border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white'
+                }`}
+                title="Saved Searches Menu"
+              >
+                <span>⭐</span>
+                <span>Saved</span>
+              </button>
+              
+              {isMenuOpen && (
+                <SavedSearchMenu
+                  currentSearch={inputValue}
+                  onSelect={handleSelect}
+                  onClose={() => setIsMenuOpen(false)}
+                />
+              )}
+            </div>
+
             {/* Scan to Phone Button */}
             <button
               onClick={() => setShowQR(true)}
@@ -150,12 +225,12 @@ function SearchStringDisplay({ searchString, selectedCount, onClearSelection }) 
               {copied ? (
                 <>
                   <span>✓</span>
-                  <span>Copied!</span>
+                  <span>Copied</span>
                 </>
               ) : (
                 <>
                   <span>📋</span>
-                  <span>Copy String</span>
+                  <span>Copy</span>
                 </>
               )}
             </button>

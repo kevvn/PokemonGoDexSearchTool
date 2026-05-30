@@ -1,34 +1,39 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import pokemonData from './data/pokedex.json';
 import PokemonGrid from './components/PokemonGrid';
 import FilterPanel from './components/FilterPanel';
 import SearchStringDisplay from './components/SearchStringDisplay';
 import RegionSelector from './components/RegionSelector';
+import useLocalStorage from './hooks/useLocalStorage';
+import { compressIdRanges, parseSearchString, ATTRIBUTES } from './utils/searchUtils';
+
+const defaultFilters = {
+  appraisal: [],
+  ageMin: '',
+  ageMax: '',
+  types: [],
+  ...ATTRIBUTES.reduce((acc, attr) => ({ ...acc, [attr]: null }), {})
+};
+
+const setStorageOptions = {
+  serialize: (val) => JSON.stringify(Array.from(val)),
+  deserialize: (val) => new Set(JSON.parse(val))
+};
+
+const filterStorageOptions = {
+  deserialize: (val) => ({ ...defaultFilters, ...JSON.parse(val) })
+};
 
 function App() {
-  const [selectedIds, setSelectedIds] = useState(new Set());
+  // Persisted state hooks
+  const [selectedIds, setSelectedIds] = useLocalStorage('pokedex_selectedIds', new Set(), setStorageOptions);
+  const [filters, setFilters] = useLocalStorage('pokedex_filters', defaultFilters, filterStorageOptions);
+  
+  // Local volatile states
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedOnly, setSelectedOnly] = useState(false);
-  const [filters, setFilters] = useState({
-    appraisal: [],
-    ageMin: '',
-    ageMax: '',
-    types: [],
-    // Attributes
-    shiny: null,
-    shadow: null,
-    purified: null,
-    lucky: null,
-    legendary: null,
-    mythical: null,
-    'ultra beasts': null,
-    costume: null,
-    evolve: null,
-    alola: null,
-    galar: null,
-    hisui: null,
-    paldea: null,
-  });
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+  const [activeRegion, setActiveRegion] = useState('');
 
   const togglePokemon = useCallback((id) => {
     setSelectedIds(prev => {
@@ -37,7 +42,7 @@ function App() {
       else newSet.add(id);
       return newSet;
     });
-  }, []);
+  }, [setSelectedIds]);
 
   const handleRegionSelection = useCallback((ids, shouldSelect) => {
     setSelectedIds(prev => {
@@ -48,35 +53,32 @@ function App() {
       });
       return newSet;
     });
-  }, []);
+  }, [setSelectedIds]);
 
   const handleClearSelection = useCallback(() => {
     setSelectedIds(new Set());
-  }, []);
+  }, [setSelectedIds]);
 
+  const handleInvertSelection = useCallback(() => {
+    setSelectedIds(prev => {
+      const newSet = new Set();
+      pokemonData.forEach(p => {
+        if (!prev.has(p.id)) {
+          newSet.add(p.id);
+        }
+      });
+      return newSet;
+    });
+  }, [setSelectedIds]);
+
+  // Generate Pokego search string
   const searchString = useMemo(() => {
     const parts = [];
 
     // Pokemon IDs
-    if (selectedIds.size > 0) {
-      const sorted = Array.from(selectedIds).map(Number).sort((a, b) => a - b);
-      const ranges = [];
-      if (sorted.length > 0) {
-        let start = sorted[0];
-        let prev = sorted[0];
-
-        for (let i = 1; i < sorted.length; i++) {
-          if (sorted[i] === prev + 1) {
-            prev = sorted[i];
-          } else {
-            ranges.push(start === prev ? `${start}` : `${start}-${prev}`);
-            start = sorted[i];
-            prev = sorted[i];
-          }
-        }
-        ranges.push(start === prev ? `${start}` : `${start}-${prev}`);
-        parts.push(ranges.join(','));
-      }
+    const idString = compressIdRanges(selectedIds);
+    if (idString) {
+      parts.push(idString);
     }
 
     // Appraisal
@@ -96,12 +98,7 @@ function App() {
     }
 
     // Attributes
-    const attributes = [
-      'shiny', 'shadow', 'purified', 'lucky', 'legendary', 'mythical',
-      'ultra beasts', 'costume', 'evolve', 'alola', 'galar', 'hisui', 'paldea'
-    ];
-
-    attributes.forEach(attr => {
+    ATTRIBUTES.forEach(attr => {
       if (filters[attr] === true) parts.push(attr);
       if (filters[attr] === false) parts.push(`!${attr}`);
     });
@@ -114,13 +111,31 @@ function App() {
     return parts.join('&');
   }, [selectedIds, filters]);
 
-  // Extract regions from data
+  // Extract unique regions
   const regions = useMemo(() => {
-     // Use Set to get unique regions, preserving order of appearance in JSON (which is Gen 1 -> Gen 9)
      const uniqueRegions = new Set();
      pokemonData.forEach(p => uniqueRegions.add(p.region));
      return Array.from(uniqueRegions);
   }, []);
+
+  // Update selection/filters when user pastes/types search string directly in display input
+  const handleSearchUpdate = useCallback((newString) => {
+    const { selectedIds: newIds, filters: newFilters } = parseSearchString(newString);
+    setSelectedIds(newIds);
+    setFilters(newFilters);
+  }, [setSelectedIds, setFilters]);
+
+  // Lock document body scroll on mobile when modal is active
+  useEffect(() => {
+    if (isFilterModalOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isFilterModalOpen]);
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-blue-500/30">
@@ -147,16 +162,36 @@ function App() {
           <RegionSelector 
             regions={regions} 
             selectedIds={selectedIds} 
-            pokemonList={pokemonData} 
+            pokemonList={pokemonData}
+            activeRegion={activeRegion}
+            handleRegionSelection={handleRegionSelection}
           />
       </header>
 
       {/* Main Container Layout */}
       <main className="flex-1 flex flex-col lg:flex-row max-w-7xl mx-auto w-full relative">
          
-         {/* Collapsible/Sticky Filter Panel */}
-         <aside className="lg:w-80 lg:sticky lg:top-[160px] lg:h-[calc(100vh-160px)] lg:overflow-y-auto z-20">
-            <FilterPanel filters={filters} setFilters={setFilters} />
+         {/* Mobile Filter Modal Backdrop overlay */}
+         {isFilterModalOpen && (
+           <div
+             className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[50] lg:hidden transition-opacity"
+             onClick={() => setIsFilterModalOpen(false)}
+             aria-hidden="true"
+           ></div>
+         )}
+
+         {/* Collapsible/Sticky Filter Panel Drawer */}
+         <aside className={`
+           fixed inset-y-0 left-0 z-[60] w-full max-w-sm bg-slate-900 border-r border-slate-800/80 transform transition-transform duration-300 ease-in-out overflow-y-auto
+           ${isFilterModalOpen ? 'translate-x-0' : '-translate-x-full'}
+           lg:translate-x-0 lg:static lg:w-80 lg:h-[calc(100vh-160px)] lg:overflow-y-auto lg:z-20
+         `}>
+            <FilterPanel 
+              filters={filters} 
+              setFilters={setFilters} 
+              onClose={() => setIsFilterModalOpen(false)}
+              handleInvertSelection={handleInvertSelection}
+            />
          </aside>
 
          {/* Pokémon Grid Panel */}
@@ -170,6 +205,7 @@ function App() {
                setSearchQuery={setSearchQuery}
                selectedOnly={selectedOnly}
                setSelectedOnly={setSelectedOnly}
+               onRegionVisible={setActiveRegion}
             />
          </div>
       </main>
@@ -179,7 +215,19 @@ function App() {
         searchString={searchString} 
         selectedCount={selectedIds.size}
         onClearSelection={handleClearSelection}
+        onSearchUpdate={handleSearchUpdate}
       />
+
+      {/* Floating Action Button (FAB) for Mobile filters trigger */}
+      <button
+        onClick={() => setIsFilterModalOpen(true)}
+        className="lg:hidden fixed bottom-28 right-6 z-30 bg-blue-600 hover:bg-blue-500 text-slate-950 p-4 rounded-full shadow-[0_0_20px_rgba(37,99,235,0.4)] transition-all duration-200 active:scale-90 flex items-center justify-center cursor-pointer border border-blue-400/30"
+        aria-label="Open filter settings"
+      >
+        <svg className="w-5 h-5 stroke-current text-slate-950" fill="none" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+        </svg>
+      </button>
     </div>
   );
 }
