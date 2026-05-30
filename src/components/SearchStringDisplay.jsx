@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import SavedSearchMenu from './SavedSearchMenu';
 
-function SearchStringDisplay({ searchString, onSearchUpdate }) {
+function SearchStringDisplay({ searchString, selectedCount, onClearSelection, onSearchUpdate }) {
   const [copied, setCopied] = useState(false);
+  const [showQR, setShowQR] = useState(false);
+  const [showToast, setShowToast] = useState(false);
   const [inputValue, setInputValue] = useState(searchString);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
@@ -10,19 +12,27 @@ function SearchStringDisplay({ searchString, onSearchUpdate }) {
 
   // Sync input value when searchString prop changes (e.g. from clicking grid)
   useEffect(() => {
-    // If user is actively typing, don't overwrite their input with prop updates
-    // unless the prop update is significantly different (e.g. from a reset or external change)
     if (!isTyping) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setInputValue(searchString);
     }
   }, [searchString, isTyping]);
 
   const handleCopy = useCallback(() => {
+    if (!searchString) return;
     navigator.clipboard.writeText(searchString);
     setCopied(true);
+    setShowToast(true);
+    
     setTimeout(() => setCopied(false), 2000);
   }, [searchString]);
+
+  // Auto-hide toast
+  useEffect(() => {
+    if (showToast) {
+      const timer = setTimeout(() => setShowToast(false), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [showToast]);
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
@@ -43,11 +53,10 @@ function SearchStringDisplay({ searchString, onSearchUpdate }) {
     setInputValue(e.target.value);
     setIsTyping(true);
 
-    // Debounce the "isTyping" state release
     if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
     typingTimeoutRef.current = setTimeout(() => {
        setIsTyping(false);
-    }, 1000); // 1s after last keystroke, we consider typing stopped
+    }, 1000); // 1s debounce
   };
 
   const handleSelect = useCallback((val) => {
@@ -57,84 +66,179 @@ function SearchStringDisplay({ searchString, onSearchUpdate }) {
   }, [onSearchUpdate]);
 
   return (
-    <div className="bg-white/95 backdrop-blur-md border-t border-gray-200 p-2 sm:p-4 sticky bottom-0 z-50 shadow-[0_-8px_30px_rgba(0,0,0,0.12)] pb-safe-area-inset-bottom">
-      <div className="max-w-7xl mx-auto flex items-stretch gap-2 sm:gap-4 relative">
-        <div className="flex-1 relative group">
-          <input
-            type="text"
-            value={inputValue}
-            onChange={handleChange}
-            onKeyDown={handleKeyDown}
-            onBlur={handleBlur}
-            placeholder="Search Pokemon"
-            className="w-full h-full pl-3 sm:pl-4 pr-8 sm:pr-12 py-3 border border-gray-300 rounded-xl bg-gray-50/50 text-sm font-mono focus:ring-2 sm:focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all shadow-sm group-hover:bg-white"
-          />
-          {/* Clear button if input has text */}
-          {inputValue && (
-            <button
-              onClick={() => {
-                 setInputValue('');
-                 onSearchUpdate('');
-              }}
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-200 transition-colors"
-              title="Clear search"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-              </svg>
-            </button>
-          )}
-        </div>
-
-        <div className="relative flex-shrink-0">
-          <button
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className={`h-full px-3 sm:px-5 rounded-xl font-medium transition-all flex items-center justify-center gap-2 border select-none active:scale-95 ${
-              isMenuOpen
-                ? 'bg-blue-50 border-blue-200 text-blue-700 shadow-inner'
-                : 'bg-white border-gray-200 hover:bg-gray-50 text-gray-700 shadow-sm hover:border-gray-300'
-            }`}
-            title="Saved Searches"
-          >
-            <span className="text-lg">⭐️</span>
-            <span className="hidden sm:inline text-sm font-semibold">Saved</span>
-          </button>
-          {isMenuOpen && (
-            <SavedSearchMenu
-              currentSearch={inputValue}
-              onSelect={handleSelect}
-              onClose={() => setIsMenuOpen(false)}
-            />
-          )}
-        </div>
-
-        <button
-          onClick={handleCopy}
-          className={`h-full px-4 sm:px-8 rounded-xl font-semibold transition-all shadow-md active:scale-95 flex items-center justify-center min-w-[3rem] sm:min-w-[100px] ${
-            copied
-              ? 'bg-green-500 hover:bg-green-600 text-white shadow-green-200'
-              : 'bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white shadow-blue-200'
-          }`}
-          title="Copy to Clipboard"
-        >
-          {copied ? (
-             <span className="flex items-center gap-1">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                   <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                </svg>
-                <span className="hidden sm:inline">Copied</span>
-             </span>
-          ) : (
-            <>
-              <span className="hidden sm:inline">Copy</span>
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 sm:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                 <path strokeLinecap="round" strokeLinejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
-              </svg>
-            </>
-          )}
-        </button>
+    <>
+      {/* Toast Notification */}
+      <div className={`fixed bottom-24 left-1/2 -translate-x-1/2 z-[100] transition-all duration-300 transform flex items-center gap-2 bg-emerald-500 text-slate-950 font-bold px-4 py-2.5 rounded-2xl shadow-[0_10px_25px_-5px_rgba(16,185,129,0.5)] border border-emerald-400/30 ${
+        showToast ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0 pointer-events-none'
+      }`}>
+        <span>✨</span>
+        <span>Search string copied to clipboard!</span>
       </div>
-    </div>
+
+      {/* QR Code Popover Modal */}
+      {showQR && (
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[99] flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 max-w-sm w-full text-center relative shadow-2xl animate-float">
+            
+            <button
+              onClick={() => setShowQR(false)}
+              className="absolute top-4 right-4 text-slate-500 hover:text-slate-200 transition-colors w-7 h-7 flex items-center justify-center bg-slate-950/60 rounded-full border border-slate-800 cursor-pointer"
+            >
+              ✕
+            </button>
+
+            <div className="text-3xl mb-1">📱</div>
+            <h3 className="text-md font-extrabold text-slate-200 mb-1.5 uppercase tracking-wide">
+              Scan to Mobile
+            </h3>
+            
+            <p className="text-[11px] text-slate-400 mb-5 max-w-[280px] mx-auto leading-relaxed">
+              Scan with your phone's camera to instantly get your generated Pokémon GO search string on mobile!
+            </p>
+
+            {searchString ? (
+              <div className="bg-white p-3 rounded-2xl inline-block shadow-lg border border-slate-700/10 mb-5 relative group">
+                <img
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(searchString)}`}
+                  alt="Search query QR Code"
+                  className="w-48 h-48 block rounded-lg select-none"
+                  width="192"
+                  height="192"
+                />
+              </div>
+            ) : (
+              <div className="bg-slate-950/50 p-6 rounded-2xl mb-5 border border-slate-850 text-slate-500 text-xs">
+                Select some filters to generate a QR code!
+              </div>
+            )}
+
+            <div className="bg-slate-950/40 border border-slate-850 rounded-xl p-2.5 max-h-16 overflow-y-auto font-mono text-[10px] text-slate-400 no-scrollbar break-all text-left">
+              {searchString || 'No active query filters...'}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Floating Sticky Bottom Bar */}
+      <div className="bg-slate-900/85 backdrop-blur-lg border-t border-slate-800/80 p-4 sticky bottom-0 z-40 shadow-[0_-10px_30px_rgba(0,0,0,0.5)] pb-safe-area-inset-bottom">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center gap-3">
+          
+          {/* Stats Summary Panel */}
+          <div className="flex items-center gap-2 shrink-0 select-none">
+            <div className="bg-blue-500/10 border border-blue-500/20 text-blue-400 font-extrabold text-xs px-3.5 py-2.5 rounded-2xl flex items-center gap-2">
+              <span>🎯</span>
+              <span>{selectedCount} Selected</span>
+            </div>
+            
+            {selectedCount > 0 && (
+              <button
+                onClick={onClearSelection}
+                className="text-xs font-bold text-slate-500 hover:text-rose-400 bg-slate-950/30 hover:bg-rose-500/5 px-3 py-2.5 rounded-2xl border border-slate-850 hover:border-rose-500/10 transition-all cursor-pointer"
+                title="Clear current selection"
+              >
+                Clear
+              </button>
+            )}
+          </div>
+
+          {/* Dynamic Bidirectional Input Box */}
+          <div className="relative flex-1 w-full group">
+            <input
+              type="text"
+              value={inputValue}
+              onChange={handleChange}
+              onKeyDown={handleKeyDown}
+              onBlur={handleBlur}
+              placeholder="Search terms, IDs, ranges or paste expressions here..."
+              className="w-full pl-4 pr-24 py-3 rounded-2xl bg-slate-950 border border-slate-850 text-xs text-slate-300 placeholder-slate-650 font-mono focus:outline-none focus:border-blue-500/60 truncate"
+            />
+            {inputValue && (
+              <div className="absolute right-3.5 top-2 flex items-center gap-1.5 select-none">
+                <span className="text-[9px] bg-slate-900 border border-slate-800 text-slate-500 font-extrabold px-1.5 py-0.5 rounded">
+                  {inputValue.length} chars
+                </span>
+                
+                {/* Clear button inside input */}
+                <button
+                  onClick={() => {
+                     setInputValue('');
+                     onSearchUpdate('');
+                  }}
+                  className="text-slate-500 hover:text-slate-350 bg-slate-900 border border-slate-800 w-5 h-5 flex items-center justify-center rounded cursor-pointer"
+                  title="Clear input"
+                >
+                  ✕
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Main Action buttons */}
+          <div className="flex gap-2 w-full sm:w-auto shrink-0 relative">
+            
+            {/* Saved Searches Drawer Trigger */}
+            <div className="relative flex-1 sm:flex-initial">
+              <button
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                className={`w-full flex items-center justify-center gap-2 px-5 py-3 rounded-2xl font-extrabold text-xs transition-all duration-200 border cursor-pointer select-none active:scale-95 ${
+                  isMenuOpen
+                    ? 'bg-blue-500/10 border-blue-500 text-blue-400 shadow-inner'
+                    : 'bg-slate-950 hover:bg-slate-850 border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white'
+                }`}
+                title="Saved Searches Menu"
+              >
+                <span>⭐</span>
+                <span>Saved</span>
+              </button>
+              
+              {isMenuOpen && (
+                <SavedSearchMenu
+                  currentSearch={inputValue}
+                  onSelect={handleSelect}
+                  onClose={() => setIsMenuOpen(false)}
+                />
+              )}
+            </div>
+
+            {/* Scan to Phone Button */}
+            <button
+              onClick={() => setShowQR(true)}
+              className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-5 py-3 rounded-2xl font-extrabold text-xs transition-all duration-200 border bg-slate-950 hover:bg-slate-850 border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white cursor-pointer"
+              title="Generate QR code to scan with your phone"
+            >
+              <span>📱</span>
+              <span>Mobile QR</span>
+            </button>
+
+            {/* Copy Clipboard Button */}
+            <button
+              onClick={handleCopy}
+              disabled={!searchString}
+              className={`flex-1 sm:flex-initial flex items-center justify-center gap-2 px-6 py-3 rounded-2xl font-extrabold text-xs transition-all duration-300 ${
+                !searchString
+                  ? 'bg-slate-800 border border-slate-850 text-slate-600 cursor-not-allowed'
+                  : copied
+                    ? 'bg-emerald-500 text-slate-950 shadow-[0_0_15px_rgba(16,185,129,0.4)] cursor-pointer'
+                    : 'bg-blue-600 hover:bg-blue-500 text-slate-950 hover:scale-[1.03] active:scale-[0.98] shadow-[0_0_15px_rgba(37,99,235,0.4)] cursor-pointer'
+              }`}
+            >
+              {copied ? (
+                <>
+                  <span>✓</span>
+                  <span>Copied</span>
+                </>
+              ) : (
+                <>
+                  <span>📋</span>
+                  <span>Copy</span>
+                </>
+              )}
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </>
   );
 }
 

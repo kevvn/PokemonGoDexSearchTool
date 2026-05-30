@@ -15,6 +15,8 @@ export const areRegionPropsEqual = (prev, next) => {
   if (prev.handleRegionSelection !== next.handleRegionSelection) return false;
   if (prev.togglePokemon !== next.togglePokemon) return false;
   if (prev.toggleCollapse !== next.toggleCollapse) return false;
+  if (prev.fullList !== next.fullList) return false;
+  if (prev.onSelectFamily !== next.onSelectFamily) return false;
 
   // Check if selection state changed for ANY pokemon in this region
   // Since pokemons array is stable (or content-equal), we can iterate it.

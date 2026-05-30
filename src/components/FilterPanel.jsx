@@ -1,7 +1,27 @@
-import React from 'react';
-import { ATTRIBUTES, TYPES } from '../utils/searchUtils';
+import React, { useState } from 'react';
 
-function FilterPanel({ filters, setFilters, onClose, handleInvertSelection, showSelectedOnly, setShowSelectedOnly }) {
+const ATTRIBUTES = [
+  'shiny',
+  'shadow',
+  'purified',
+  'lucky',
+  'legendary',
+  'mythical',
+  'ultra beasts',
+  'costume',
+  'evolve',
+  'alola',
+  'galar',
+  'hisui',
+  'paldea'
+];
+
+const TYPES = [
+  'normal', 'fire', 'water', 'electric', 'grass', 'ice', 'fighting', 'poison', 'ground',
+  'flying', 'psychic', 'bug', 'rock', 'ghost', 'dragon', 'steel', 'dark', 'fairy'
+];
+
+function FilterPanel({ filters, setFilters, onClose, handleInvertSelection }) {
   const toggleAppraisal = (star) => {
     setFilters(prev => ({
       ...prev,
@@ -47,158 +67,320 @@ function FilterPanel({ filters, setFilters, onClose, handleInvertSelection, show
     });
   };
 
+  const applyPreset = (presetName) => {
+    resetFilters();
+    
+    switch (presetName) {
+      case 'perfect':
+        setFilters(prev => ({ ...prev, appraisal: ['4*'] }));
+        break;
+      case 'trash':
+        setFilters(prev => ({
+          ...prev,
+          appraisal: ['0*', '1*', '2*'],
+          shiny: false,
+          legendary: false,
+          mythical: false,
+          lucky: false,
+          costume: false
+        }));
+        break;
+      case 'pvp':
+        setFilters(prev => ({
+          ...prev,
+          evolve: true,
+          legendary: false,
+          mythical: false
+        }));
+        break;
+      case 'legendary':
+        setFilters(prev => ({
+          ...prev,
+          legendary: true
+        }));
+        break;
+      default:
+        break;
+    }
+  };
+
+  const applyAgePreset = (days) => {
+    if (days === 'today') {
+      setFilters(prev => ({ ...prev, ageMin: '0', ageMax: '0' }));
+    } else if (days === 'yesterday') {
+      setFilters(prev => ({ ...prev, ageMin: '1', ageMax: '1' }));
+    } else if (days === 'week') {
+      setFilters(prev => ({ ...prev, ageMin: '0', ageMax: '7' }));
+    } else if (days === 'month') {
+      setFilters(prev => ({ ...prev, ageMin: '0', ageMax: '30' }));
+    }
+  };
+
   return (
-    <div className="bg-gray-50 border-b border-gray-200 p-4 md:p-6 shadow-sm space-y-6">
-      <div className="flex justify-between items-center sticky top-0 z-10 bg-gray-50 pb-2">
-        <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-          <span>⚙️</span>
-          Filters
-        </h3>
-        <div className="flex items-center gap-4">
-          <button
-              onClick={resetFilters}
-              className="text-sm text-red-500 hover:underline font-medium"
-          >
-              Reset All
-          </button>
-          {onClose && (
-            <button
-              onClick={onClose}
-              className="lg:hidden p-2 -mr-2 text-gray-500 hover:text-gray-700 hover:bg-gray-200 rounded-full transition-colors"
-              aria-label="Close filters"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          )}
+    <div className="glass-panel border-b lg:border-b-0 lg:border-r border-slate-800/80 shadow-2xl relative">
+      
+      {/* Mobile Drawer Trigger Header */}
+      <div 
+        className="flex lg:hidden items-center justify-between p-4 bg-slate-900 border-b border-slate-800"
+      >
+        <div className="flex items-center gap-2.5 select-none">
+          <span className="text-blue-400">⚙️</span>
+          <h3 className="font-extrabold text-sm text-slate-200 tracking-wide uppercase">
+            Filter Controls & Presets
+          </h3>
         </div>
+        <button 
+          onClick={onClose}
+          className="text-slate-400 text-xs font-bold bg-slate-950 px-2.5 py-1 rounded-lg border border-slate-800 hover:text-slate-200 cursor-pointer"
+        >
+          Close ✕
+        </button>
       </div>
 
-      {/* Quick Actions */}
-      <div>
-        <h4 className="font-semibold text-gray-700 mb-3 text-sm uppercase tracking-wide">Quick Actions</h4>
-        <div className="flex items-center justify-between bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
+      <div className="p-5 md:p-6 space-y-6">
+        
+        {/* Header Block (Desktop) */}
+        <div className="hidden lg:flex justify-between items-center pb-4 border-b border-slate-800/80">
+          <h3 className="text-sm font-black text-slate-100 flex items-center gap-2.5">
+            <span className="text-blue-400 animate-pulse-ring">⚙️</span>
+            FILTERS
+          </h3>
           <button
-            onClick={handleInvertSelection}
-            className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-bold uppercase tracking-wide rounded-lg border border-gray-300 transition-colors"
-            title="Invert Selection"
+            onClick={resetFilters}
+            className="text-xs font-bold text-rose-400 hover:text-rose-350 hover:underline transition-colors bg-rose-500/5 hover:bg-rose-500/10 px-2.5 py-1 rounded-lg border border-rose-500/10"
           >
-            Invert Selection
+            Reset All
           </button>
-          <label className="flex items-center cursor-pointer select-none gap-3" title="Show only selected Pokemon">
-            <div className="text-sm font-bold text-gray-700 uppercase tracking-wide">
-              Selected Only
-            </div>
-            <div className="relative">
+        </div>
+
+        {/* Mobile-only Reset */}
+        <div className="flex lg:hidden justify-end">
+          <button
+            onClick={resetFilters}
+            className="text-xs font-bold text-rose-400 bg-rose-500/5 hover:bg-rose-500/10 px-2.5 py-1 rounded-lg border border-rose-500/10"
+          >
+            Reset All
+          </button>
+        </div>
+
+        {/* Quick Actions (Invert selection option) */}
+        <div className="space-y-2">
+          <h4 className="font-extrabold text-slate-400 text-[10px] tracking-widest uppercase border-b border-slate-800/50 pb-1">
+            Selection Quick Actions
+          </h4>
+          <div className="pt-1 select-none">
+            <button
+              onClick={handleInvertSelection}
+              className="w-full py-2 px-3 rounded-xl text-center text-xs font-bold bg-blue-500/10 hover:bg-blue-500/25 border border-blue-500/20 text-blue-400 hover:text-blue-300 transition-all cursor-pointer"
+            >
+              🔄 Invert Current Selection
+            </button>
+          </div>
+        </div>
+
+        {/* Quick Presets Section */}
+        <div className="space-y-2">
+          <h4 className="font-extrabold text-slate-400 text-[10px] tracking-widest uppercase border-b border-slate-800/50 pb-1">
+            Player Quick Presets
+          </h4>
+          <div className="grid grid-cols-2 gap-1.5 pt-1.5">
+            <button
+              onClick={() => applyPreset('perfect')}
+              className="py-2 px-2.5 rounded-xl text-left text-[11px] font-bold bg-slate-950/40 hover:bg-emerald-500/10 border border-slate-850 hover:border-emerald-500/20 text-slate-300 hover:text-emerald-400 transition-all cursor-pointer"
+            >
+              💎 Perfect 100% IVs
+            </button>
+            <button
+              onClick={() => applyPreset('trash')}
+              className="py-2 px-2.5 rounded-xl text-left text-[11px] font-bold bg-slate-950/40 hover:bg-rose-500/10 border border-slate-850 hover:border-rose-500/20 text-slate-300 hover:text-rose-400 transition-all cursor-pointer"
+            >
+              🗑️ Mass Transfer Trash
+            </button>
+            <button
+              onClick={() => applyPreset('pvp')}
+              className="py-2 px-2.5 rounded-xl text-left text-[11px] font-bold bg-slate-950/40 hover:bg-indigo-500/10 border border-slate-850 hover:border-indigo-500/20 text-slate-300 hover:text-indigo-400 transition-all cursor-pointer"
+            >
+              ⚔️ PVP Evolves
+            </button>
+            <button
+              onClick={() => applyPreset('legendary')}
+              className="py-2 px-2.5 rounded-xl text-left text-[11px] font-bold bg-slate-950/40 hover:bg-amber-500/10 border border-slate-850 hover:border-amber-500/20 text-slate-300 hover:text-amber-400 transition-all cursor-pointer"
+            >
+              👑 Raid Boss Flex
+            </button>
+          </div>
+        </div>
+
+        {/* Appraisal Section */}
+        <div className="space-y-2.5">
+          <h4 className="font-extrabold text-slate-400 text-[10px] tracking-widest uppercase border-b border-slate-800/50 pb-1">
+            Storage Appraisal (IV)
+          </h4>
+          <div className="flex gap-1.5 flex-wrap pt-1 select-none">
+            {['0*', '1*', '2*', '3*', '4*'].map(star => {
+              const isActive = filters.appraisal.includes(star);
+              return (
+                <button
+                  key={star}
+                  onClick={() => toggleAppraisal(star)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-extrabold transition-all border cursor-pointer ${
+                    isActive
+                      ? 'bg-blue-500 text-slate-950 border-blue-400 shadow-[0_0_10px_rgba(59,130,246,0.4)]'
+                      : 'bg-slate-950/50 border-slate-850 text-slate-400 hover:bg-slate-850 hover:text-slate-200'
+                  }`}
+                >
+                  {star}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Attributes Segmented Control */}
+        <div className="space-y-2.5">
+          <h4 className="font-extrabold text-slate-400 text-[10px] tracking-widest uppercase border-b border-slate-800/50 pb-1">
+            Attributes & Filters
+          </h4>
+          
+          <div className="grid grid-cols-1 gap-2 pt-1">
+            {ATTRIBUTES.map(attr => {
+              const currentVal = filters[attr];
+              
+              return (
+                <div key={attr} className="bg-slate-950/30 p-2 rounded-xl border border-slate-850/80 flex items-center justify-between gap-3">
+                  <span className="capitalize text-xs font-bold text-slate-300 truncate" title={attr}>
+                    {attr}
+                  </span>
+                  
+                  {/* Segmented Row */}
+                  <div className="flex rounded-lg overflow-hidden border border-slate-850 bg-slate-950 text-xs shrink-0 select-none">
+                    <button
+                      onClick={() => setAttribute(attr, currentVal === true ? null : true)}
+                      className={`px-2.5 py-1 font-extrabold transition-all border-r border-slate-850 cursor-pointer ${
+                        currentVal === true 
+                          ? 'bg-emerald-500 text-slate-950 shadow-inner' 
+                          : 'text-slate-500 hover:bg-slate-900 hover:text-slate-350'
+                      }`}
+                      title={`Require ${attr}`}
+                    >
+                      ✓
+                    </button>
+                    
+                    <button
+                      onClick={() => setAttribute(attr, null)}
+                      className={`px-2.5 py-1 font-bold transition-all border-r border-slate-850 cursor-pointer ${
+                        currentVal === null 
+                          ? 'bg-slate-800 text-slate-300' 
+                          : 'text-slate-500 hover:bg-slate-900 hover:text-slate-350'
+                      }`}
+                      title="Ignore filter"
+                    >
+                      —
+                    </button>
+
+                    <button
+                      onClick={() => setAttribute(attr, currentVal === false ? null : false)}
+                      className={`px-2.5 py-1 font-extrabold transition-all cursor-pointer ${
+                        currentVal === false 
+                          ? 'bg-rose-500 text-slate-950 shadow-inner' 
+                          : 'text-slate-500 hover:bg-slate-900 hover:text-slate-350'
+                      }`}
+                      title={`Exclude ${attr}`}
+                    >
+                      ✕
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Age Filter Block */}
+        <div className="space-y-2.5">
+          <h4 className="font-extrabold text-slate-400 text-[10px] tracking-widest uppercase border-b border-slate-800/50 pb-1">
+            Caught Age (Days)
+          </h4>
+          
+          <div className="flex gap-1.5 flex-wrap pt-1 select-none">
+            <button
+              onClick={() => applyAgePreset('today')}
+              className="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-slate-950/40 hover:bg-slate-850 text-slate-400 hover:text-slate-200 border border-slate-850 cursor-pointer"
+            >
+              Today
+            </button>
+            <button
+              onClick={() => applyAgePreset('yesterday')}
+              className="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-slate-950/40 hover:bg-slate-850 text-slate-400 hover:text-slate-200 border border-slate-850 cursor-pointer"
+            >
+              Yesterday
+            </button>
+            <button
+              onClick={() => applyAgePreset('week')}
+              className="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-slate-950/40 hover:bg-slate-850 text-slate-400 hover:text-slate-200 border border-slate-850 cursor-pointer"
+            >
+              Last 7d
+            </button>
+            <button
+              onClick={() => applyAgePreset('month')}
+              className="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-slate-950/40 hover:bg-slate-850 text-slate-400 hover:text-slate-200 border border-slate-850 cursor-pointer"
+            >
+              Last 30d
+            </button>
+          </div>
+
+          <div className="flex items-center gap-2 pt-1">
+            <div className="relative flex-1">
+              <span className="absolute left-2.5 top-2 text-[9px] font-extrabold text-slate-500 uppercase tracking-widest">MIN</span>
               <input
-                type="checkbox"
-                className="sr-only"
-                checked={showSelectedOnly}
-                onChange={() => setShowSelectedOnly(!showSelectedOnly)}
+                type="number"
+                placeholder="0"
+                value={filters.ageMin}
+                onChange={e => setFilters(prev => ({ ...prev, ageMin: e.target.value }))}
+                className="w-full pl-9 pr-2 py-2 rounded-xl bg-slate-950 border border-slate-850 text-xs text-slate-200 placeholder-slate-650 focus:outline-none focus:border-blue-500 font-bold"
               />
-              <div className={`block w-12 h-7 rounded-full transition-colors ${showSelectedOnly ? 'bg-blue-500' : 'bg-gray-300'}`}></div>
-              <div className={`absolute left-1 top-1 bg-white w-5 h-5 rounded-full transition-transform ${showSelectedOnly ? 'transform translate-x-5' : ''}`}></div>
             </div>
-          </label>
-        </div>
-      </div>
-
-      {/* Appraisal */}
-      <div>
-        <h4 className="font-semibold text-gray-700 mb-3 text-sm uppercase tracking-wide">Appraisal</h4>
-        <div className="flex gap-2 flex-wrap">
-          {['0*', '1*', '2*', '3*', '4*'].map(star => (
-            <button
-              key={star}
-              onClick={() => toggleAppraisal(star)}
-              className={`px-4 py-2 rounded-full text-base font-medium transition-colors border ${
-                filters.appraisal.includes(star)
-                  ? 'bg-blue-500 text-white border-blue-600'
-                  : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-100'
-              }`}
-            >
-              {star}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Attributes */}
-      <div>
-        <h4 className="font-semibold text-gray-700 mb-3 text-sm uppercase tracking-wide">Attributes</h4>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-          {ATTRIBUTES.map(attr => (
-            <div key={attr} className="bg-white p-2 rounded-lg border border-gray-200 flex flex-col gap-2 shadow-sm">
-              <span className="capitalize text-sm font-medium text-gray-600 text-center truncate" title={attr}>{attr}</span>
-              <div className="flex rounded-md overflow-hidden border border-gray-300">
-                <button
-                  onClick={() => setAttribute(attr, filters[attr] === true ? null : true)}
-                  className={`flex-1 py-2 text-sm font-bold transition-colors ${
-                    filters[attr] === true ? 'bg-green-500 text-white' : 'bg-gray-50 text-gray-400 hover:bg-gray-100'
-                  }`}
-                  title={`Include ${attr}`}
-                >
-                  ✓
-                </button>
-                <div className="w-[1px] bg-gray-300"></div>
-                <button
-                  onClick={() => setAttribute(attr, filters[attr] === false ? null : false)}
-                  className={`flex-1 py-2 text-sm font-bold transition-colors ${
-                    filters[attr] === false ? 'bg-red-500 text-white' : 'bg-gray-50 text-gray-400 hover:bg-gray-100'
-                  }`}
-                  title={`Exclude ${attr}`}
-                >
-                  ✕
-                </button>
-              </div>
+            <span className="text-slate-600 font-bold">-</span>
+            <div className="relative flex-1">
+              <span className="absolute left-2.5 top-2 text-[9px] font-extrabold text-slate-500 uppercase tracking-widest">MAX</span>
+              <input
+                type="number"
+                placeholder="Any"
+                value={filters.ageMax}
+                onChange={e => setFilters(prev => ({ ...prev, ageMax: e.target.value }))}
+                className="w-full pl-9 pr-2 py-2 rounded-xl bg-slate-950 border border-slate-850 text-xs text-slate-200 placeholder-slate-650 focus:outline-none focus:border-blue-500 font-bold"
+              />
             </div>
-          ))}
+          </div>
         </div>
-      </div>
 
-      {/* Age */}
-      <div>
-        <h4 className="font-semibold text-gray-700 mb-3 text-sm uppercase tracking-wide">Age (Days)</h4>
-        <div className="flex items-center gap-3 max-w-xs">
-          <input
-            type="number"
-            placeholder="Min (0)"
-            value={filters.ageMin}
-            onChange={e => setFilters(prev => ({ ...prev, ageMin: e.target.value }))}
-            className="w-full p-3 border border-gray-300 rounded-lg text-base focus:ring-2 focus:ring-blue-500 outline-none"
-          />
-          <span className="text-gray-400 font-bold">-</span>
-          <input
-            type="number"
-            placeholder="Max"
-            value={filters.ageMax}
-            onChange={e => setFilters(prev => ({ ...prev, ageMax: e.target.value }))}
-            className="w-full p-3 border border-gray-300 rounded-lg text-base focus:ring-2 focus:ring-blue-500 outline-none"
-          />
+        {/* Types Filter Block */}
+        <div className="space-y-2.5 pb-4">
+          <h4 className="font-extrabold text-slate-400 text-[10px] tracking-widest uppercase border-b border-slate-800/50 pb-1">
+            Types Selection
+          </h4>
+          <div className="flex gap-1.5 flex-wrap pt-1 select-none">
+            {TYPES.map(type => {
+              const isSelected = filters.types.includes(type);
+              
+              return (
+                 <button
+                  key={type}
+                  onClick={() => toggleType(type)}
+                  className={`px-2.5 py-1 rounded-xl text-[10px] font-extrabold text-white capitalize transition-all duration-200 hover:scale-105 shadow-sm border border-white/5 cursor-pointer ${
+                     isSelected
+                     ? `bg-type-${type} shadow-type-${type} opacity-100 scale-105`
+                     : `bg-type-${type} opacity-25 hover:opacity-50`
+                  }`}
+                 >
+                   {type}
+                 </button>
+              );
+            })}
+          </div>
         </div>
-      </div>
 
-      {/* Types */}
-      <div className="pb-24 lg:pb-0">
-        <h4 className="font-semibold text-gray-700 mb-3 text-sm uppercase tracking-wide">Types</h4>
-        <div className="flex gap-2 flex-wrap">
-          {TYPES.map(type => (
-             <button
-              key={type}
-              onClick={() => toggleType(type)}
-              className={`px-4 py-2 rounded-full text-sm font-bold text-white capitalize transition-transform hover:scale-105 shadow-sm ${
-                 filters.types.includes(type)
-                 ? `bg-type-${type} ring-2 ring-offset-1 ring-gray-400 opacity-100`
-                 : `bg-type-${type} opacity-40 hover:opacity-70`
-              }`}
-             >
-               {type}
-             </button>
-          ))}
-        </div>
       </div>
-
     </div>
   );
 }

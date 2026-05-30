@@ -4,28 +4,15 @@ import PokemonGrid from './components/PokemonGrid';
 import FilterPanel from './components/FilterPanel';
 import SearchStringDisplay from './components/SearchStringDisplay';
 import RegionSelector from './components/RegionSelector';
-import { compressIdRanges, parseSearchString, ATTRIBUTES } from './utils/searchUtils';
 import useLocalStorage from './hooks/useLocalStorage';
+import { compressIdRanges, parseSearchString, ATTRIBUTES } from './utils/searchUtils';
 
 const defaultFilters = {
   appraisal: [],
   ageMin: '',
   ageMax: '',
   types: [],
-  // Attributes
-  shiny: null,
-  shadow: null,
-  purified: null,
-  lucky: null,
-  legendary: null,
-  mythical: null,
-  'ultra beasts': null,
-  costume: null,
-  evolve: null,
-  alola: null,
-  galar: null,
-  hisui: null,
-  paldea: null,
+  ...ATTRIBUTES.reduce((acc, attr) => ({ ...acc, [attr]: null }), {})
 };
 
 const setStorageOptions = {
@@ -38,9 +25,15 @@ const filterStorageOptions = {
 };
 
 function App() {
+  // Persisted state hooks
   const [selectedIds, setSelectedIds] = useLocalStorage('pokedex_selectedIds', new Set(), setStorageOptions);
-
   const [filters, setFilters] = useLocalStorage('pokedex_filters', defaultFilters, filterStorageOptions);
+  
+  // Local volatile states
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedOnly, setSelectedOnly] = useState(false);
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+  const [activeRegion, setActiveRegion] = useState('');
 
   const togglePokemon = useCallback((id) => {
     setSelectedIds(prev => {
@@ -62,6 +55,10 @@ function App() {
     });
   }, [setSelectedIds]);
 
+  const handleClearSelection = useCallback(() => {
+    setSelectedIds(new Set());
+  }, [setSelectedIds]);
+
   const handleInvertSelection = useCallback(() => {
     setSelectedIds(prev => {
       const newSet = new Set();
@@ -74,6 +71,7 @@ function App() {
     });
   }, [setSelectedIds]);
 
+  // Generate Pokego search string
   const searchString = useMemo(() => {
     const parts = [];
 
@@ -113,25 +111,21 @@ function App() {
     return parts.join('&');
   }, [selectedIds, filters]);
 
-  // Extract regions from data
+  // Extract unique regions
   const regions = useMemo(() => {
-     // Use Set to get unique regions, preserving order of appearance in JSON (which is Gen 1 -> Gen 9)
      const uniqueRegions = new Set();
      pokemonData.forEach(p => uniqueRegions.add(p.region));
      return Array.from(uniqueRegions);
   }, []);
 
+  // Update selection/filters when user pastes/types search string directly in display input
   const handleSearchUpdate = useCallback((newString) => {
     const { selectedIds: newIds, filters: newFilters } = parseSearchString(newString);
     setSelectedIds(newIds);
     setFilters(newFilters);
   }, [setSelectedIds, setFilters]);
 
-  const [showSelectedOnly, setShowSelectedOnly] = useState(false);
-  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
-  const [activeRegion, setActiveRegion] = useState('');
-
-  // Prevent scrolling on body when modal is open
+  // Lock document body scroll on mobile when modal is active
   useEffect(() => {
     if (isFilterModalOpen) {
       document.body.style.overflow = 'hidden';
@@ -144,71 +138,94 @@ function App() {
   }, [isFilterModalOpen]);
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col font-sans">
-      <header className="bg-white shadow-sm z-40 sticky top-0">
-          <div className="relative flex items-center justify-center py-4">
-            <h1 className="text-2xl font-black text-gray-800 tracking-tighter uppercase">
-               PokéSearch
-               <span className="text-blue-500 text-xs align-top ml-1 bg-blue-100 px-1 py-0.5 rounded">v1.0</span>
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-blue-500/30">
+      
+      {/* Premium Glassmorphic Header */}
+      <header className="bg-slate-900/90 border-b border-slate-800/80 z-40 sticky top-0 backdrop-blur-md">
+          <div className="max-w-7xl mx-auto flex items-center justify-between px-4 md:px-6 py-3.5 select-none">
+            <h1 className="text-xl font-extrabold tracking-tight uppercase flex items-center gap-2 cursor-default">
+              <span className="text-2xl animate-float">🔍</span>
+              <span className="bg-gradient-to-r from-blue-400 via-indigo-400 to-indigo-500 bg-clip-text text-transparent font-black tracking-tighter">
+                PokéSearch
+              </span>
+              <span className="text-[10px] font-extrabold bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded-lg border border-blue-500/30">
+                PRO UX v2.0
+              </span>
             </h1>
+            
+            <div className="text-[11px] font-bold text-slate-500 hidden sm:block tracking-wide">
+              Pokémon GO Search Query Maker
+            </div>
           </div>
-          <RegionSelector
-             regions={regions}
-             activeRegion={activeRegion}
-             handleRegionSelection={handleRegionSelection}
-             pokemonData={pokemonData}
-             selectedIds={selectedIds}
+          
+          {/* Enhanced Region Navigation Selector */}
+          <RegionSelector 
+            regions={regions} 
+            selectedIds={selectedIds} 
+            pokemonList={pokemonData}
+            activeRegion={activeRegion}
+            handleRegionSelection={handleRegionSelection}
           />
       </header>
 
+      {/* Main Container Layout */}
       <main className="flex-1 flex flex-col lg:flex-row max-w-7xl mx-auto w-full relative">
-         {/* Mobile Filter Modal Overlay */}
+         
+         {/* Mobile Filter Modal Backdrop overlay */}
          {isFilterModalOpen && (
            <div
-             className="fixed inset-0 bg-black/50 z-[60] lg:hidden backdrop-blur-sm transition-opacity"
+             className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[50] lg:hidden transition-opacity"
              onClick={() => setIsFilterModalOpen(false)}
              aria-hidden="true"
            ></div>
          )}
 
-         {/* Filter Panel (Sidebar on Desktop, Modal on Mobile) */}
+         {/* Collapsible/Sticky Filter Panel Drawer */}
          <aside className={`
-           fixed inset-y-0 left-0 z-[60] w-full max-w-md bg-white shadow-2xl transform transition-transform duration-300 ease-in-out overflow-y-auto
+           fixed inset-y-0 left-0 z-[60] w-full max-w-sm bg-slate-900 border-r border-slate-800/80 transform transition-transform duration-300 ease-in-out overflow-y-auto
            ${isFilterModalOpen ? 'translate-x-0' : '-translate-x-full'}
-           lg:w-96 lg:translate-x-0 lg:sticky lg:top-[160px] lg:h-[calc(100vh-160px)] lg:bg-gray-50 lg:border-r lg:border-gray-200 lg:z-20 lg:shadow-inner
+           lg:translate-x-0 lg:static lg:w-80 lg:h-[calc(100vh-160px)] lg:overflow-y-auto lg:z-20
          `}>
-            <FilterPanel
-              filters={filters}
-              setFilters={setFilters}
+            <FilterPanel 
+              filters={filters} 
+              setFilters={setFilters} 
               onClose={() => setIsFilterModalOpen(false)}
               handleInvertSelection={handleInvertSelection}
-              showSelectedOnly={showSelectedOnly}
-              setShowSelectedOnly={setShowSelectedOnly}
             />
          </aside>
 
-         <div className="flex-1">
+         {/* Pokémon Grid Panel */}
+         <div className="flex-1 overflow-x-hidden">
             <PokemonGrid
                pokemonList={pokemonData}
                selectedIds={selectedIds}
                togglePokemon={togglePokemon}
                handleRegionSelection={handleRegionSelection}
-               showSelectedOnly={showSelectedOnly}
+               searchQuery={searchQuery}
+               setSearchQuery={setSearchQuery}
+               selectedOnly={selectedOnly}
+               setSelectedOnly={setSelectedOnly}
                onRegionVisible={setActiveRegion}
             />
          </div>
       </main>
 
-      <SearchStringDisplay searchString={searchString} onSearchUpdate={handleSearchUpdate} />
+      {/* Dynamic bottom string display dashboard */}
+      <SearchStringDisplay 
+        searchString={searchString} 
+        selectedCount={selectedIds.size}
+        onClearSelection={handleClearSelection}
+        onSearchUpdate={handleSearchUpdate}
+      />
 
-      {/* Floating Action Button for Mobile */}
+      {/* Floating Action Button (FAB) for Mobile filters trigger */}
       <button
         onClick={() => setIsFilterModalOpen(true)}
-        className="lg:hidden fixed bottom-32 right-6 z-40 bg-blue-600 text-white p-4 rounded-full shadow-xl hover:bg-blue-700 transition-transform active:scale-95 flex items-center justify-center pb-safe-area-inset-bottom"
-        aria-label="Open filters"
+        className="lg:hidden fixed bottom-28 right-6 z-30 bg-blue-600 hover:bg-blue-500 text-slate-950 p-4 rounded-full shadow-[0_0_20px_rgba(37,99,235,0.4)] transition-all duration-200 active:scale-90 flex items-center justify-center cursor-pointer border border-blue-400/30"
+        aria-label="Open filter settings"
       >
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+        <svg className="w-5 h-5 stroke-current text-slate-950" fill="none" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
         </svg>
       </button>
     </div>
