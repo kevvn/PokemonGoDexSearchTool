@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import SavedSearchMenu from './SavedSearchMenu';
 
-function SearchStringDisplay({ searchString, selectedCount, onClearSelection, onSearchUpdate }) {
+function SearchStringDisplay({ searchString, selectedCount, onClearSelection, onSearchUpdate, onOpenFilters }) {
   const [copied, setCopied] = useState(false);
   const [showQR, setShowQR] = useState(false);
   const [showToast, setShowToast] = useState(false);
@@ -174,8 +174,18 @@ function SearchStringDisplay({ searchString, selectedCount, onClearSelection, on
           </div>
 
           {/* Main Action buttons */}
-          <div className="flex gap-2 w-full sm:w-auto shrink-0 relative">
+          <div className="grid grid-cols-2 gap-2 w-full sm:flex sm:w-auto shrink-0 relative">
             
+            {/* Mobile Filters Trigger */}
+            <button
+              onClick={onOpenFilters}
+              className="lg:hidden flex items-center justify-center gap-2 px-5 py-3 rounded-2xl font-extrabold text-xs transition-all duration-200 border bg-slate-950 hover:bg-slate-850 border-slate-800 hover:border-slate-700 text-slate-350 hover:text-white cursor-pointer select-none active:scale-95"
+              title="Open filter panel settings"
+            >
+              <span>⚙️</span>
+              <span>Filters</span>
+            </button>
+
             {/* Saved Searches Drawer Trigger */}
             <div className="relative flex-1 sm:flex-initial">
               <button

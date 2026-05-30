@@ -216,18 +216,8 @@ function App() {
         selectedCount={selectedIds.size}
         onClearSelection={handleClearSelection}
         onSearchUpdate={handleSearchUpdate}
+        onOpenFilters={() => setIsFilterModalOpen(true)}
       />
-
-      {/* Floating Action Button (FAB) for Mobile filters trigger */}
-      <button
-        onClick={() => setIsFilterModalOpen(true)}
-        className="lg:hidden fixed bottom-28 right-6 z-30 bg-blue-600 hover:bg-blue-500 text-slate-950 p-4 rounded-full shadow-[0_0_20px_rgba(37,99,235,0.4)] transition-all duration-200 active:scale-90 flex items-center justify-center cursor-pointer border border-blue-400/30"
-        aria-label="Open filter settings"
-      >
-        <svg className="w-5 h-5 stroke-current text-slate-950" fill="none" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-        </svg>
-      </button>
     </div>
   );
 }
