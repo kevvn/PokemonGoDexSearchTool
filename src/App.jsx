@@ -7,6 +7,8 @@ import RegionSelector from './components/RegionSelector';
 
 function App() {
   const [selectedIds, setSelectedIds] = useState(new Set());
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedOnly, setSelectedOnly] = useState(false);
   const [filters, setFilters] = useState({
     appraisal: [],
     ageMin: '',
@@ -46,6 +48,10 @@ function App() {
       });
       return newSet;
     });
+  }, []);
+
+  const handleClearSelection = useCallback(() => {
+    setSelectedIds(new Set());
   }, []);
 
   const searchString = useMemo(() => {
@@ -117,31 +123,63 @@ function App() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col font-sans">
-      <header className="bg-white shadow-sm z-40 sticky top-0">
-          <h1 className="text-center py-4 text-2xl font-black text-gray-800 tracking-tighter uppercase">
-             PokéSearch
-             <span className="text-blue-500 text-xs align-top ml-1 bg-blue-100 px-1 py-0.5 rounded">v1.0</span>
-          </h1>
-          <RegionSelector regions={regions} />
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-blue-500/30">
+      
+      {/* Premium Glassmorphic Header */}
+      <header className="bg-slate-900/90 border-b border-slate-800/80 z-40 sticky top-0 backdrop-blur-md">
+          <div className="max-w-7xl mx-auto flex items-center justify-between px-4 md:px-6 py-3.5 select-none">
+            <h1 className="text-xl font-extrabold tracking-tight uppercase flex items-center gap-2 cursor-default">
+              <span className="text-2xl animate-float">🔍</span>
+              <span className="bg-gradient-to-r from-blue-400 via-indigo-400 to-indigo-500 bg-clip-text text-transparent font-black tracking-tighter">
+                PokéSearch
+              </span>
+              <span className="text-[10px] font-extrabold bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded-lg border border-blue-500/30">
+                PRO UX v2.0
+              </span>
+            </h1>
+            
+            <div className="text-[11px] font-bold text-slate-500 hidden sm:block tracking-wide">
+              Pokémon GO Search Query Maker
+            </div>
+          </div>
+          
+          {/* Enhanced Region Navigation Selector */}
+          <RegionSelector 
+            regions={regions} 
+            selectedIds={selectedIds} 
+            pokemonList={pokemonData} 
+          />
       </header>
 
+      {/* Main Container Layout */}
       <main className="flex-1 flex flex-col lg:flex-row max-w-7xl mx-auto w-full relative">
-         <aside className="lg:w-80 lg:sticky lg:top-[160px] lg:h-[calc(100vh-160px)] lg:overflow-y-auto bg-gray-50 border-r border-gray-200 z-20 shadow-inner">
+         
+         {/* Collapsible/Sticky Filter Panel */}
+         <aside className="lg:w-80 lg:sticky lg:top-[160px] lg:h-[calc(100vh-160px)] lg:overflow-y-auto z-20">
             <FilterPanel filters={filters} setFilters={setFilters} />
          </aside>
 
-         <div className="flex-1">
+         {/* Pokémon Grid Panel */}
+         <div className="flex-1 overflow-x-hidden">
             <PokemonGrid
                pokemonList={pokemonData}
                selectedIds={selectedIds}
                togglePokemon={togglePokemon}
                handleRegionSelection={handleRegionSelection}
+               searchQuery={searchQuery}
+               setSearchQuery={setSearchQuery}
+               selectedOnly={selectedOnly}
+               setSelectedOnly={setSelectedOnly}
             />
          </div>
       </main>
 
-      <SearchStringDisplay searchString={searchString} />
+      {/* Dynamic bottom string display dashboard */}
+      <SearchStringDisplay 
+        searchString={searchString} 
+        selectedCount={selectedIds.size}
+        onClearSelection={handleClearSelection}
+      />
     </div>
   );
 }
