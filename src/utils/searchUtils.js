@@ -110,7 +110,7 @@ export function parseSearchString(searchString) {
 
     // 3. Attributes
     if (ATTRIBUTES.includes(value)) {
-      filters[value] = isNegated ? false : true;
+      filters[value] = !isNegated;
       return;
     }
 
