@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect, useRef } from 'react';
+import React, { useMemo, useEffect, useRef, useCallback } from 'react';
 
 function RegionSelector({ regions, selectedIds, pokemonList, activeRegion, handleRegionSelection }) {
   const scrollContainerRef = useRef(null);
@@ -46,6 +46,18 @@ function RegionSelector({ regions, selectedIds, pokemonList, activeRegion, handl
     }
   };
 
+  const handleScrollLeft = useCallback(() => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({ left: -240, behavior: 'smooth' });
+    }
+  }, []);
+
+  const handleScrollRight = useCallback(() => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({ left: 240, behavior: 'smooth' });
+    }
+  }, []);
+
   const onSelectAllToggle = (region, shouldSelect) => {
     if (pokemonList && handleRegionSelection) {
       const regionPokemonIds = pokemonList.filter(p => p.region === region).map(p => p.id);
@@ -54,10 +66,28 @@ function RegionSelector({ regions, selectedIds, pokemonList, activeRegion, handl
   };
 
   return (
-    <div className="bg-slate-900/90 backdrop-blur-md z-30 border-b border-slate-800/80 sticky top-[72px]">
+    <nav aria-label="Region quick navigation" className="bg-slate-900/90 backdrop-blur-md z-30 border-b border-slate-800/80 sticky top-[72px] relative group">
+      {/* Desktop Scroll Left Button */}
+      <button
+        onClick={handleScrollLeft}
+        aria-label="Scroll regions left"
+        className="hidden md:flex absolute left-1 top-1/2 -translate-y-1/2 z-40 w-7 h-7 items-center justify-center rounded-full bg-slate-950/80 border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-850 opacity-0 group-hover:opacity-100 transition-opacity shadow-lg cursor-pointer"
+      >
+        ‹
+      </button>
+
+      {/* Desktop Scroll Right Button */}
+      <button
+        onClick={handleScrollRight}
+        aria-label="Scroll regions right"
+        className="hidden md:flex absolute right-1 top-1/2 -translate-y-1/2 z-40 w-7 h-7 items-center justify-center rounded-full bg-slate-950/80 border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-850 opacity-0 group-hover:opacity-100 transition-opacity shadow-lg cursor-pointer"
+      >
+        ›
+      </button>
+
       <div 
         ref={scrollContainerRef} 
-        className="flex overflow-x-auto p-3.5 gap-3.5 no-scrollbar max-w-7xl mx-auto px-4 md:px-6 scroll-smooth"
+        className="flex overflow-x-auto p-3.5 gap-3.5 no-scrollbar max-w-7xl mx-auto px-4 md:px-8 scroll-smooth"
       >
         {regions.map(region => {
           const stats = regionStats[region] || { total: 0, selected: 0 };
@@ -73,7 +103,9 @@ function RegionSelector({ regions, selectedIds, pokemonList, activeRegion, handl
             >
               <button
                 onClick={() => scrollToRegion(region)}
-                className={`flex items-center gap-2.5 px-4 py-2 rounded-xl group transition-all duration-200 border hover:scale-[1.03] active:scale-[0.98] ${
+                aria-current={isActive ? 'true' : undefined}
+                aria-label={`${region} region: ${stats.selected} of ${stats.total} species selected`}
+                className={`flex items-center gap-2.5 px-4 py-2 rounded-xl group/btn transition-all duration-200 border hover:scale-[1.03] active:scale-[0.98] cursor-pointer ${
                   isActive
                     ? 'bg-blue-500/10 border-blue-500 shadow-[0_0_12px_rgba(59,130,246,0.25)]'
                     : isAllSelected
@@ -91,7 +123,7 @@ function RegionSelector({ regions, selectedIds, pokemonList, activeRegion, handl
                       ? 'bg-emerald-500/20 border border-emerald-500 text-emerald-400'
                       : hasSelected
                         ? 'bg-blue-500/20 border border-blue-500 text-blue-400'
-                        : 'bg-slate-800 border border-slate-700/60 text-slate-400 group-hover:text-slate-200'
+                        : 'bg-slate-800 border border-slate-700/60 text-slate-400 group-hover/btn:text-slate-200'
                 }`}>
                   {region.substring(0, 2).toUpperCase()}
                 </div>
@@ -99,14 +131,14 @@ function RegionSelector({ regions, selectedIds, pokemonList, activeRegion, handl
                 {/* Region details */}
                 <div className="flex flex-col items-start select-none">
                   <span className={`text-xs font-bold uppercase tracking-wider transition-colors ${
-                    isActive ? 'text-blue-400' : 'text-slate-300 group-hover:text-white'
+                    isActive ? 'text-blue-400' : 'text-slate-300 group-hover/btn:text-white'
                   }`}>
                     {region}
                   </span>
                   
                   {/* Selected count */}
                   <div className="flex items-center gap-1 mt-0.5">
-                    <span className="text-[10px] font-semibold text-slate-500 group-hover:text-slate-400">
+                    <span className="text-[10px] font-semibold text-slate-500 group-hover/btn:text-slate-400">
                       {stats.total} entries
                     </span>
                     {hasSelected && (
@@ -128,14 +160,16 @@ function RegionSelector({ regions, selectedIds, pokemonList, activeRegion, handl
                   {!isAllSelected ? (
                     <button
                       onClick={() => onSelectAllToggle(region, true)}
-                      className="text-[9px] bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 text-blue-400 py-1 px-3 rounded-full font-bold shadow-sm transition-colors whitespace-nowrap"
+                      aria-label={`Select all ${region} Pokémon`}
+                      className="text-[9px] bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 text-blue-400 py-1 px-3 rounded-full font-bold shadow-sm transition-colors whitespace-nowrap cursor-pointer"
                     >
                       Select All
                     </button>
                   ) : hasSelected ? (
                     <button
                       onClick={() => onSelectAllToggle(region, false)}
-                      className="text-[9px] bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 text-rose-400 py-1 px-3 rounded-full font-bold shadow-sm transition-colors whitespace-nowrap"
+                      aria-label={`Deselect all ${region} Pokémon`}
+                      className="text-[9px] bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 text-rose-400 py-1 px-3 rounded-full font-bold shadow-sm transition-colors whitespace-nowrap cursor-pointer"
                     >
                       Deselect
                     </button>
@@ -146,7 +180,7 @@ function RegionSelector({ regions, selectedIds, pokemonList, activeRegion, handl
           );
         })}
       </div>
-    </div>
+    </nav>
   );
 }
 

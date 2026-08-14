@@ -1,10 +1,44 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import SavedSearchMenu from './SavedSearchMenu';
 
+// Robust cross-browser clipboard copy with fallback
+const copyToClipboard = async (text) => {
+  if (navigator.clipboard && window.isSecureContext) {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch (err) {
+      console.warn('navigator.clipboard failed, attempting fallback...', err);
+    }
+  }
+
+  // Textarea fallback
+  const textArea = document.createElement('textarea');
+  textArea.value = text;
+  textArea.style.position = 'fixed';
+  textArea.style.left = '-999999px';
+  textArea.style.top = '-999999px';
+  textArea.setAttribute('readonly', '');
+  document.body.appendChild(textArea);
+  textArea.focus();
+  textArea.select();
+
+  try {
+    const successful = document.execCommand('copy');
+    textArea.remove();
+    return successful;
+  } catch (err) {
+    textArea.remove();
+    console.error('execCommand copy fallback failed:', err);
+    return false;
+  }
+};
+
 function SearchStringDisplay({ searchString, selectedCount, onClearSelection, onSearchUpdate, onOpenFilters }) {
   const [copied, setCopied] = useState(false);
   const [showQR, setShowQR] = useState(false);
   const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState('Search string copied to clipboard!');
   const [inputValue, setInputValue] = useState(searchString);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
@@ -17,13 +51,18 @@ function SearchStringDisplay({ searchString, selectedCount, onClearSelection, on
     }
   }, [searchString, isTyping]);
 
-  const handleCopy = useCallback(() => {
+  const handleCopy = useCallback(async () => {
     if (!searchString) return;
-    navigator.clipboard.writeText(searchString);
-    setCopied(true);
-    setShowToast(true);
-    
-    setTimeout(() => setCopied(false), 2000);
+    const success = await copyToClipboard(searchString);
+    if (success) {
+      setToastMessage('Search string copied to clipboard!');
+      setCopied(true);
+      setShowToast(true);
+      setTimeout(() => setCopied(false), 2000);
+    } else {
+      setToastMessage('Unable to copy automatically. Please copy manually.');
+      setShowToast(true);
+    }
   }, [searchString]);
 
   // Auto-hide toast
@@ -33,6 +72,18 @@ function SearchStringDisplay({ searchString, selectedCount, onClearSelection, on
       return () => clearTimeout(timer);
     }
   }, [showToast]);
+
+  // Close modals on Escape key
+  useEffect(() => {
+    const handleGlobalKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        if (showQR) setShowQR(false);
+        if (isMenuOpen) setIsMenuOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleGlobalKeyDown);
+    return () => window.removeEventListener('keydown', handleGlobalKeyDown);
+  }, [showQR, isMenuOpen]);
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
@@ -55,7 +106,7 @@ function SearchStringDisplay({ searchString, selectedCount, onClearSelection, on
 
     if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
     typingTimeoutRef.current = setTimeout(() => {
-       setIsTyping(false);
+      setIsTyping(false);
     }, 1000); // 1s debounce
   };
 
@@ -65,23 +116,40 @@ function SearchStringDisplay({ searchString, selectedCount, onClearSelection, on
     setIsMenuOpen(false);
   }, [onSearchUpdate]);
 
+  // Character length evaluation for Pokémon GO limits
+  const charLength = inputValue.length;
+  const isHighLength = charLength > 600;
+  const isVeryHighLength = charLength > 1000;
+
   return (
     <>
       {/* Toast Notification */}
-      <div className={`fixed bottom-24 left-1/2 -translate-x-1/2 z-[100] transition-all duration-300 transform flex items-center gap-2 bg-emerald-500 text-slate-950 font-bold px-4 py-2.5 rounded-2xl shadow-[0_10px_25px_-5px_rgba(16,185,129,0.5)] border border-emerald-400/30 ${
-        showToast ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0 pointer-events-none'
-      }`}>
+      <div 
+        role="status"
+        aria-live="polite"
+        className={`fixed bottom-24 left-1/2 -translate-x-1/2 z-[100] transition-all duration-300 transform flex items-center gap-2 bg-emerald-500 text-slate-950 font-bold px-4 py-2.5 rounded-2xl shadow-[0_10px_25px_-5px_rgba(16,185,129,0.5)] border border-emerald-400/30 ${
+          showToast ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0 pointer-events-none'
+        }`}
+      >
         <span>✨</span>
-        <span>Search string copied to clipboard!</span>
+        <span>{toastMessage}</span>
       </div>
 
       {/* QR Code Popover Modal */}
       {showQR && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[99] flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 max-w-sm w-full text-center relative shadow-2xl animate-float">
-            
+        <div 
+          className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[99] flex items-center justify-center p-4"
+          onClick={() => setShowQR(false)}
+          aria-modal="true"
+          role="dialog"
+        >
+          <div 
+            className="bg-slate-900 border border-slate-800 rounded-3xl p-6 max-w-sm w-full text-center relative shadow-2xl animate-float"
+            onClick={(e) => e.stopPropagation()}
+          >
             <button
               onClick={() => setShowQR(false)}
+              aria-label="Close QR Code dialog"
               className="absolute top-4 right-4 text-slate-500 hover:text-slate-200 transition-colors w-7 h-7 flex items-center justify-center bg-slate-950/60 rounded-full border border-slate-800 cursor-pointer"
             >
               ✕
@@ -100,7 +168,7 @@ function SearchStringDisplay({ searchString, selectedCount, onClearSelection, on
               <div className="bg-white p-3 rounded-2xl inline-block shadow-lg border border-slate-700/10 mb-5 relative group">
                 <img
                   src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(searchString)}`}
-                  alt="Search query QR Code"
+                  alt="Pokémon GO search query QR Code"
                   className="w-48 h-48 block rounded-lg select-none"
                   width="192"
                   height="192"
@@ -133,6 +201,7 @@ function SearchStringDisplay({ searchString, selectedCount, onClearSelection, on
             {selectedCount > 0 && (
               <button
                 onClick={onClearSelection}
+                aria-label="Clear all selected Pokémon"
                 className="text-xs font-bold text-slate-500 hover:text-rose-400 bg-slate-950/30 hover:bg-rose-500/5 px-3 py-2.5 rounded-2xl border border-slate-850 hover:border-rose-500/10 transition-all cursor-pointer"
                 title="Clear current selection"
               >
@@ -149,21 +218,32 @@ function SearchStringDisplay({ searchString, selectedCount, onClearSelection, on
               onChange={handleChange}
               onKeyDown={handleKeyDown}
               onBlur={handleBlur}
+              aria-label="Search string generator and editor"
               placeholder="Search terms, IDs, ranges or paste expressions here..."
-              className="w-full pl-4 pr-24 py-3 rounded-2xl bg-slate-950 border border-slate-850 text-xs text-slate-300 placeholder-slate-650 font-mono focus:outline-none focus:border-blue-500/60 truncate"
+              className="w-full pl-4 pr-28 py-3 rounded-2xl bg-slate-950 border border-slate-850 text-xs text-slate-300 placeholder-slate-650 font-mono focus:outline-none focus:border-blue-500/60 truncate"
             />
             {inputValue && (
-              <div className="absolute right-3.5 top-2 flex items-center gap-1.5 select-none">
-                <span className="text-[9px] bg-slate-900 border border-slate-800 text-slate-500 font-extrabold px-1.5 py-0.5 rounded">
-                  {inputValue.length} chars
+              <div className="absolute right-3.5 top-2.5 flex items-center gap-1.5 select-none">
+                <span 
+                  className={`text-[9px] border font-extrabold px-1.5 py-0.5 rounded transition-colors ${
+                    isVeryHighLength
+                      ? 'bg-rose-500/20 text-rose-400 border-rose-500/40'
+                      : isHighLength
+                        ? 'bg-amber-500/20 text-amber-400 border-amber-500/40'
+                        : 'bg-slate-900 border-slate-800 text-slate-500'
+                  }`}
+                  title={isVeryHighLength ? 'Long query (>1000 chars) — Some game versions may truncate' : `${charLength} characters`}
+                >
+                  {charLength} chars
                 </span>
                 
                 {/* Clear button inside input */}
                 <button
                   onClick={() => {
-                     setInputValue('');
-                     onSearchUpdate('');
+                    setInputValue('');
+                    onSearchUpdate('');
                   }}
+                  aria-label="Clear input query"
                   className="text-slate-500 hover:text-slate-350 bg-slate-900 border border-slate-800 w-5 h-5 flex items-center justify-center rounded cursor-pointer"
                   title="Clear input"
                 >
@@ -179,6 +259,7 @@ function SearchStringDisplay({ searchString, selectedCount, onClearSelection, on
             {/* Mobile Filters Trigger */}
             <button
               onClick={onOpenFilters}
+              aria-label="Open filter settings modal"
               className="lg:hidden flex items-center justify-center gap-2 px-5 py-3 rounded-2xl font-extrabold text-xs transition-all duration-200 border bg-slate-950 hover:bg-slate-850 border-slate-800 hover:border-slate-700 text-slate-350 hover:text-white cursor-pointer select-none active:scale-95"
               title="Open filter panel settings"
             >
@@ -190,6 +271,8 @@ function SearchStringDisplay({ searchString, selectedCount, onClearSelection, on
             <div className="relative flex-1 sm:flex-initial">
               <button
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
+                aria-label="Toggle Saved Searches menu"
+                aria-expanded={isMenuOpen}
                 className={`w-full flex items-center justify-center gap-2 px-5 py-3 rounded-2xl font-extrabold text-xs transition-all duration-200 border cursor-pointer select-none active:scale-95 ${
                   isMenuOpen
                     ? 'bg-blue-500/10 border-blue-500 text-blue-400 shadow-inner'
@@ -213,6 +296,7 @@ function SearchStringDisplay({ searchString, selectedCount, onClearSelection, on
             {/* Scan to Phone Button */}
             <button
               onClick={() => setShowQR(true)}
+              aria-label="Generate QR Code to scan on mobile"
               className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-5 py-3 rounded-2xl font-extrabold text-xs transition-all duration-200 border bg-slate-950 hover:bg-slate-850 border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white cursor-pointer"
               title="Generate QR code to scan with your phone"
             >
@@ -224,6 +308,7 @@ function SearchStringDisplay({ searchString, selectedCount, onClearSelection, on
             <button
               onClick={handleCopy}
               disabled={!searchString}
+              aria-label="Copy search query to clipboard"
               className={`flex-1 sm:flex-initial flex items-center justify-center gap-2 px-6 py-3 rounded-2xl font-extrabold text-xs transition-all duration-300 ${
                 !searchString
                   ? 'bg-slate-800 border border-slate-850 text-slate-600 cursor-not-allowed'
