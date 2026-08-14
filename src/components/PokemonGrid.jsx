@@ -1,34 +1,16 @@
 import React, { useMemo, useState, useCallback, useRef, useEffect } from 'react';
 import { areRegionPropsEqual } from '../utils/gridUtils';
+import { getFamilyIds } from '../utils/familyUtils';
 
-// Smart heuristic to get evolutionary family IDs
-const getFamilyIds = (pokemon, pokemonList) => {
-  const getPrefix = (name) => name.split('-')[0].substring(0, 4);
-  const prefix = getPrefix(pokemon.name);
-  
-  const family = pokemonList.filter(p => {
-    if (p.region !== pokemon.region) return false;
-    
-    // Check if within National Dex sequential range of 2
-    const isAdjacent = Math.abs(p.id - pokemon.id) <= 2;
-    if (isAdjacent) {
-      return true;
-    }
-    
-    // Fallback to prefix matching for name similarity within same gen
-    const pPrefix = getPrefix(p.name);
-    return pPrefix === prefix && Math.abs(p.id - pokemon.id) <= 5;
-  });
-  
-  return family.map(p => p.id);
-};
+// Fallback Pokéball SVG data URL for broken sprite image handling
+const FALLBACK_SPRITE = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%23ef4444'/%3E%3Cpath d='M5 50h90A45 45 0 0 1 5 50' fill='%23f8fafc'/%3E%3Cpath d='M5 50h90' stroke='%230f172a' stroke-width='8'/%3E%3Ccircle cx='50' cy='50' r='16' fill='%230f172a'/%3E%3Ccircle cx='50' cy='50' r='10' fill='%23f8fafc'/%3E%3C/svg%3E";
 
-const PokemonCard = React.memo(({ pokemon, selected, toggle, list, onSelectFamily }) => {
+const PokemonCard = React.memo(({ pokemon, selected, toggle, onSelectFamily }) => {
   const primaryType = pokemon.types[0] || 'normal';
   
   const handleFamilyClick = (e) => {
     e.stopPropagation();
-    const familyIds = getFamilyIds(pokemon, list);
+    const familyIds = getFamilyIds(pokemon.id);
     onSelectFamily(familyIds);
   };
 
@@ -39,14 +21,20 @@ const PokemonCard = React.memo(({ pokemon, selected, toggle, list, onSelectFamil
     }
   };
 
+  const handleImageError = (e) => {
+    e.currentTarget.onerror = null;
+    e.currentTarget.src = FALLBACK_SPRITE;
+  };
+
   return (
     <div
       role="button"
       aria-pressed={selected}
+      aria-label={`#${pokemon.id} ${pokemon.name}, ${pokemon.types.join(', ')}`}
       tabIndex={0}
       onClick={(e) => toggle(pokemon.id, e)}
       onKeyDown={handleKeyDown}
-      className={`relative cursor-pointer rounded-2xl p-3 flex flex-col items-center transition-all duration-300 select-none border group/card hover:scale-[1.05] hover:active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${
+      className={`relative cursor-pointer rounded-2xl p-3 flex flex-col items-center transition-all duration-200 select-none border group/card hover:scale-[1.04] hover:active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${
         selected
           ? `bg-slate-900 border-slate-700 ring-2 ring-blue-500/40 shadow-type-${primaryType}`
           : 'bg-slate-900/60 border-slate-800/80 hover:bg-slate-850 hover:border-slate-700'
@@ -58,8 +46,9 @@ const PokemonCard = React.memo(({ pokemon, selected, toggle, list, onSelectFamil
         
         <button
           onClick={handleFamilyClick}
-          title="Select evolution line"
-          className="opacity-0 group-hover/card:opacity-100 text-[9px] bg-slate-800 hover:bg-slate-750 text-blue-400 hover:text-blue-300 font-bold px-1.5 py-0.5 rounded border border-slate-700 transition-all cursor-pointer"
+          title={`Select entire evolution line for ${pokemon.name}`}
+          aria-label={`Select evolution family for ${pokemon.name}`}
+          className="opacity-0 group-hover/card:opacity-100 focus:opacity-100 text-[9px] bg-slate-800 hover:bg-slate-750 text-blue-400 hover:text-blue-300 font-bold px-1.5 py-0.5 rounded border border-slate-700 transition-all cursor-pointer"
         >
           + Family
         </button>
@@ -71,6 +60,7 @@ const PokemonCard = React.memo(({ pokemon, selected, toggle, list, onSelectFamil
         <img
           src={pokemon.sprite}
           alt={pokemon.name}
+          onError={handleImageError}
           className="w-20 h-20 object-contain rendering-pixelated relative z-10 drop-shadow-[0_4px_6px_rgba(0,0,0,0.3)] transition-transform duration-300 group-hover/card:scale-110"
           loading="lazy"
           width="80"
@@ -80,7 +70,7 @@ const PokemonCard = React.memo(({ pokemon, selected, toggle, list, onSelectFamil
 
       {/* Name */}
       <div className="text-xs font-bold capitalize text-slate-200 text-center truncate w-full px-1 mb-2 group-hover/card:text-white">
-        {pokemon.name.replace('-', ' ')}
+        {pokemon.name.replace(/-/g, ' ')}
       </div>
 
       {/* Modern Type Badges */}
@@ -107,7 +97,7 @@ const PokemonCard = React.memo(({ pokemon, selected, toggle, list, onSelectFamil
   );
 });
 
-const RegionSection = React.memo(({ region, pokemons, selectedIds, togglePokemon, handleRegionSelection, isCollapsed, toggleCollapse, fullList, onSelectFamily }) => {
+const RegionSection = React.memo(({ region, pokemons, selectedIds, togglePokemon, handleRegionSelection, isCollapsed, toggleCollapse, onSelectFamily }) => {
   const selectedCount = pokemons.filter(p => selectedIds.has(p.id)).length;
   const totalCount = pokemons.length;
   const allSelected = selectedCount === totalCount && totalCount > 0;
@@ -121,21 +111,28 @@ const RegionSection = React.memo(({ region, pokemons, selectedIds, togglePokemon
       className="scroll-mt-48 bg-slate-900/30 rounded-3xl p-5 border border-slate-900/80 shadow-md mb-8 region-section-optimized"
       style={{ contentVisibility: 'auto', containIntrinsicSize: '0 500px' }}
     >
-      {/* Region Section Header (Hidden on Mobile exclusive because mobile uses the sticky RegionSelector row) */}
+      {/* Region Section Header (Desktop) */}
       <div className="hidden md:flex items-center justify-between mb-6 pb-4 border-b border-slate-800/80">
-        <div className="flex items-center gap-3 cursor-pointer select-none" onClick={() => toggleCollapse(region)}>
-            <div className="bg-gradient-to-b from-blue-500 to-indigo-600 w-1.5 h-9 rounded-full shadow-[0_0_10px_rgba(59,130,246,0.5)]"></div>
-            <div>
-              <h2 className="text-xl font-extrabold text-slate-100 tracking-wide flex items-center gap-2 hover:text-white transition-colors">
-                {region}
-                <span className={`transition-transform duration-300 text-slate-500 text-xs ${isCollapsed ? '-rotate-90' : 'rotate-0'}`}>
-                  ▼
-                </span>
-              </h2>
-              <span className="text-xs font-semibold text-slate-500 mt-0.5 block">
-                {selectedCount} selected / {totalCount} Species
+        <div 
+          className="flex items-center gap-3 cursor-pointer select-none" 
+          onClick={() => toggleCollapse(region)}
+          role="button"
+          tabIndex={0}
+          aria-expanded={!isCollapsed}
+          aria-controls={`region-grid-${region}`}
+        >
+          <div className="bg-gradient-to-b from-blue-500 to-indigo-600 w-1.5 h-9 rounded-full shadow-[0_0_10px_rgba(59,130,246,0.5)]"></div>
+          <div>
+            <h2 className="text-xl font-extrabold text-slate-100 tracking-wide flex items-center gap-2 hover:text-white transition-colors">
+              {region}
+              <span className={`transition-transform duration-300 text-slate-500 text-xs ${isCollapsed ? '-rotate-90' : 'rotate-0'}`}>
+                ▼
               </span>
-            </div>
+            </h2>
+            <span className="text-xs font-semibold text-slate-500 mt-0.5 block">
+              {selectedCount} selected / {totalCount} Species
+            </span>
+          </div>
         </div>
 
         {/* Region actions */}
@@ -143,7 +140,7 @@ const RegionSection = React.memo(({ region, pokemons, selectedIds, togglePokemon
           {!allSelected && (
             <button
               onClick={() => handleRegionSelection(pokemons.map(p => p.id), true)}
-              className="px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all duration-200 bg-slate-850 hover:bg-slate-800 border border-slate-850 text-slate-300 hover:text-white"
+              className="px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all duration-200 bg-slate-850 hover:bg-slate-800 border border-slate-850 text-slate-300 hover:text-white cursor-pointer"
             >
               Select All
             </button>
@@ -151,7 +148,7 @@ const RegionSection = React.memo(({ region, pokemons, selectedIds, togglePokemon
           {someSelected && (
             <button
               onClick={() => handleRegionSelection(pokemons.map(p => p.id), false)}
-              className="px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all duration-200 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 text-blue-400 hover:text-blue-300"
+              className="px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all duration-200 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 text-blue-400 hover:text-blue-300 cursor-pointer"
             >
               Deselect All
             </button>
@@ -161,14 +158,13 @@ const RegionSection = React.memo(({ region, pokemons, selectedIds, togglePokemon
 
       {/* Grid Container */}
       {!isCollapsed && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-3.5">
+        <div id={`region-grid-${region}`} className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-3.5">
           {pokemons.map(p => (
             <PokemonCard
               key={p.id}
               pokemon={p}
               selected={selectedIds.has(p.id)}
               toggle={togglePokemon}
-              list={fullList}
               onSelectFamily={onSelectFamily}
             />
           ))}
@@ -192,6 +188,14 @@ function PokemonGrid({
   const [collapsedRegions, setCollapsedRegions] = useState({});
   const lastClickedId = useRef(null);
 
+  // Keep refs to avoid recreating handlers when dependencies update
+  const visibleListRef = useRef([]);
+  const selectedIdsRef = useRef(selectedIds);
+
+  useEffect(() => {
+    selectedIdsRef.current = selectedIds;
+  }, [selectedIds]);
+
   // Group and Filter Pokémon
   const { groupedRegions, visibleList } = useMemo(() => {
     const grouped = {};
@@ -201,6 +205,7 @@ function PokemonGrid({
     pokemonList.forEach(p => {
       // 1. Text search filter
       const matchesSearch = 
+        !query ||
         p.name.toLowerCase().includes(query) ||
         p.id.toString() === query ||
         p.types.some(t => t.toLowerCase().includes(query));
@@ -215,6 +220,7 @@ function PokemonGrid({
       }
     });
 
+    visibleListRef.current = visible;
     return { groupedRegions: grouped, visibleList: visible };
   }, [pokemonList, searchQuery, selectedOnly, selectedIds]);
 
@@ -229,18 +235,19 @@ function PokemonGrid({
     handleRegionSelection(familyIds, true);
   }, [handleRegionSelection]);
 
-  // Support for Shift + Click range selection
+  // Stable card toggle handler with Shift + Click range support
   const handleToggleCard = useCallback((id, event) => {
     if (event && event.shiftKey && lastClickedId.current !== null && lastClickedId.current !== id) {
-      const idx1 = visibleList.findIndex(p => p.id === lastClickedId.current);
-      const idx2 = visibleList.findIndex(p => p.id === id);
+      const currentVisible = visibleListRef.current;
+      const idx1 = currentVisible.findIndex(p => p.id === lastClickedId.current);
+      const idx2 = currentVisible.findIndex(p => p.id === id);
 
       if (idx1 !== -1 && idx2 !== -1) {
         const start = Math.min(idx1, idx2);
         const end = Math.max(idx1, idx2);
-        const rangeIds = visibleList.slice(start, end + 1).map(p => p.id);
+        const rangeIds = currentVisible.slice(start, end + 1).map(p => p.id);
         
-        const targetSelection = selectedIds.has(lastClickedId.current);
+        const targetSelection = selectedIdsRef.current.has(lastClickedId.current);
         handleRegionSelection(rangeIds, targetSelection);
         
         lastClickedId.current = id;
@@ -250,7 +257,7 @@ function PokemonGrid({
     
     togglePokemon(id);
     lastClickedId.current = id;
-  }, [visibleList, selectedIds, togglePokemon, handleRegionSelection]);
+  }, [togglePokemon, handleRegionSelection]);
 
   // Use IntersectionObserver to track visible regions and update headers
   useEffect(() => {
@@ -295,12 +302,14 @@ function PokemonGrid({
             placeholder="Search by Name, Dex #, or Type..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            aria-label="Search Pokémon by Name, Dex Number, or Type"
             className="w-full pl-10 pr-10 py-2.5 rounded-2xl bg-slate-950/80 border border-slate-800 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/50 transition-all font-medium"
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery('')}
-              className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-500 hover:text-slate-300 font-bold"
+              aria-label="Clear search input"
+              className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-500 hover:text-slate-300 font-bold cursor-pointer"
             >
               ✕
             </button>
@@ -313,7 +322,8 @@ function PokemonGrid({
           {/* Selected Only Toggle */}
           <button
             onClick={() => setSelectedOnly(prev => !prev)}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all border ${
+            aria-pressed={selectedOnly}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all border cursor-pointer ${
               selectedOnly
                 ? 'bg-blue-500 text-slate-950 border-blue-400 shadow-[0_0_12px_rgba(59,130,246,0.3)] hover:bg-blue-400'
                 : 'bg-slate-950/80 border-slate-800 text-slate-400 hover:text-slate-350 hover:border-slate-700'
@@ -331,7 +341,7 @@ function PokemonGrid({
                 const hasAnySelected = visibleIds.some(id => selectedIds.has(id));
                 handleRegionSelection(visibleIds, !hasAnySelected);
               }}
-              className="px-4 py-2.5 rounded-2xl text-xs font-bold transition-all bg-slate-850 hover:bg-slate-800 border border-slate-800 text-slate-300"
+              className="px-4 py-2.5 rounded-2xl text-xs font-bold transition-all bg-slate-850 hover:bg-slate-800 border border-slate-800 text-slate-300 cursor-pointer"
             >
               {visibleList.some(p => selectedIds.has(p.id)) ? 'Deselect Visible' : 'Select Visible'}
             </button>
@@ -354,16 +364,15 @@ function PokemonGrid({
       <div className="space-y-6">
         {Object.entries(groupedRegions).map(([region, pokemons]) => (
           <RegionSection
-              key={region}
-              region={region}
-              pokemons={pokemons}
-              selectedIds={selectedIds}
-              togglePokemon={handleToggleCard}
-              handleRegionSelection={handleRegionSelection}
-              isCollapsed={collapsedRegions[region]}
-              toggleCollapse={toggleCollapse}
-              fullList={pokemonList}
-              onSelectFamily={handleSelectFamily}
+            key={region}
+            region={region}
+            pokemons={pokemons}
+            selectedIds={selectedIds}
+            togglePokemon={handleToggleCard}
+            handleRegionSelection={handleRegionSelection}
+            isCollapsed={collapsedRegions[region]}
+            toggleCollapse={toggleCollapse}
+            onSelectFamily={handleSelectFamily}
           />
         ))}
       </div>
