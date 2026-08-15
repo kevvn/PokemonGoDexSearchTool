@@ -4,7 +4,9 @@
 
 @layer base {
   body {
-    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-family: 'Outfit', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: #e4f4ee;
+    color: #1e293b;
   }
   
   code, pre {
@@ -18,21 +20,21 @@
 
 /* Custom scrollbars */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(15, 23, 42, 0.6);
+  background: rgba(220, 240, 235, 0.6);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.2);
+  background: rgba(0, 180, 155, 0.4);
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(148, 163, 184, 0.4);
+  background: rgba(0, 180, 155, 0.7);
 }
 
 .no-scrollbar::-webkit-scrollbar {
@@ -43,58 +45,221 @@
   scrollbar-width: none;
 }
 
-/* Glassmorphism Styles */
-.glass-panel {
-  background: rgba(30, 41, 59, 0.7);
-  backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+/* Authentic Pokémon GO Storage & Pokédex Background */
+.pogo-storage-bg {
+  background: linear-gradient(180deg, #3db8a2 0%, #60ceba 120px, #caeee4 380px, #e8f7f2 700px, #f4fbf8 100%);
+  min-height: 100vh;
 }
 
-.glass-panel-light {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+.pogo-header-gradient {
+  background: linear-gradient(180deg, #1b7a69 0%, #299b87 60%, #35b09b 100%);
+  border-bottom: 2.5px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 4px 15px rgba(10, 60, 50, 0.15);
 }
 
-/* Premium Pokemon Type Colors & Glowing Shadows */
-.bg-type-normal { background: linear-gradient(135deg, #a8a77a, #7d7c58); }
-.bg-type-fire { background: linear-gradient(135deg, #ee8130, #b8540b); }
-.bg-type-water { background: linear-gradient(135deg, #6390f0, #1754db); }
-.bg-type-grass { background: linear-gradient(135deg, #78c850, #418220); }
-.bg-type-electric { background: linear-gradient(135deg, #f7d02c, #cca305); }
-.bg-type-ice { background: linear-gradient(135deg, #96d9d6, #41ada9); }
-.bg-type-fighting { background: linear-gradient(135deg, #c22e28, #7a120e); }
-.bg-type-poison { background: linear-gradient(135deg, #a33ea1, #621461); }
-.bg-type-ground { background: linear-gradient(135deg, #e2bf65, #a38128); }
-.bg-type-flying { background: linear-gradient(135deg, #a98ff3, #6742d8); }
-.bg-type-psychic { background: linear-gradient(135deg, #f95587, #c11046); }
-.bg-type-bug { background: linear-gradient(135deg, #a6b91a, #657304); }
-.bg-type-rock { background: linear-gradient(135deg, #b6a136, #736417); }
-.bg-type-ghost { background: linear-gradient(135deg, #705746, #403026); }
-.bg-type-dragon { background: linear-gradient(135deg, #6f35fc, #3b05bd); }
-.bg-type-steel { background: linear-gradient(135deg, #b7b7ce, #777793); }
-.bg-type-dark { background: linear-gradient(135deg, #3c2d23, #150f0b); }
-.bg-type-fairy { background: linear-gradient(135deg, #d685ad, #a84877); }
+.pogo-storage-counter {
+  background: rgba(255, 255, 255, 0.95);
+  border: 1.5px solid #299b87;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
 
-/* Selection Glows */
-.shadow-type-normal { box-shadow: 0 0 15px rgba(168, 167, 122, 0.4); }
-.shadow-type-fire { box-shadow: 0 0 15px rgba(238, 129, 48, 0.5); }
-.shadow-type-water { box-shadow: 0 0 15px rgba(99, 144, 240, 0.5); }
-.shadow-type-grass { box-shadow: 0 0 15px rgba(120, 200, 80, 0.5); }
-.shadow-type-electric { box-shadow: 0 0 15px rgba(247, 208, 44, 0.5); }
-.shadow-type-ice { box-shadow: 0 0 15px rgba(150, 217, 214, 0.5); }
-.shadow-type-fighting { box-shadow: 0 0 15px rgba(194, 46, 40, 0.5); }
-.shadow-type-poison { box-shadow: 0 0 15px rgba(163, 62, 161, 0.5); }
-.shadow-type-ground { box-shadow: 0 0 15px rgba(226, 191, 101, 0.5); }
-.shadow-type-flying { box-shadow: 0 0 15px rgba(169, 143, 243, 0.5); }
-.shadow-type-psychic { box-shadow: 0 0 15px rgba(249, 85, 135, 0.5); }
-.shadow-type-bug { box-shadow: 0 0 15px rgba(166, 185, 26, 0.5); }
-.shadow-type-rock { box-shadow: 0 0 15px rgba(182, 161, 54, 0.5); }
-.shadow-type-ghost { box-shadow: 0 0 15px rgba(112, 87, 70, 0.5); }
-.shadow-type-dragon { box-shadow: 0 0 15px rgba(111, 53, 252, 0.5); }
-.shadow-type-steel { box-shadow: 0 0 15px rgba(183, 183, 206, 0.5); }
-.shadow-type-dark { box-shadow: 0 0 15px rgba(60, 45, 35, 0.5); }
-.shadow-type-fairy { box-shadow: 0 0 15px rgba(214, 133, 173, 0.5); }
+/* Pokémon GO Storage Slot Cards */
+.pogo-card {
+  background: #ffffff;
+  border-radius: 1.5rem;
+  border: 1.5px solid #d1ede4;
+  box-shadow: 0 4px 14px rgba(25, 80, 70, 0.08);
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.pogo-card:hover {
+  transform: translateY(-3px) scale(1.02);
+  border-color: #00d2b4;
+  box-shadow: 0 8px 24px rgba(0, 210, 180, 0.22), 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.pogo-card-selected {
+  background: linear-gradient(145deg, #ffffff 0%, #e6faf5 100%);
+  border: 2.5px solid #00c7ab;
+  box-shadow: 0 0 20px rgba(0, 210, 180, 0.35), 0 6px 18px rgba(0, 0, 0, 0.08);
+  transform: scale(1.02);
+}
+
+/* Authentic Pokémon Circular Pedestal Stage Platform */
+.pogo-pedestal {
+  position: absolute;
+  bottom: 2px;
+  width: 78px;
+  height: 24px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at 50% 50%, rgba(200, 245, 235, 0.9) 0%, rgba(160, 230, 215, 0.6) 65%, rgba(90, 200, 180, 0.8) 100%);
+  border: 1.5px solid rgba(0, 180, 155, 0.4);
+  box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.8), 0 3px 6px rgba(0, 60, 50, 0.1);
+}
+
+/* Signature Pokémon GO Close Button (Circular Rose/Pink with X) */
+.pogo-close-btn {
+  background: linear-gradient(135deg, #ff4d79 0%, #e6194b 100%);
+  box-shadow: 0 4px 12px rgba(230, 25, 75, 0.4), inset 0 1px 2px rgba(255, 255, 255, 0.6);
+  border: 2.5px solid #ffffff;
+  color: #ffffff;
+  transition: all 0.2s ease;
+}
+
+.pogo-close-btn:hover {
+  background: linear-gradient(135deg, #ff668c 0%, #ff2d5d 100%);
+  transform: scale(1.08) rotate(90deg);
+  box-shadow: 0 6px 16px rgba(230, 25, 75, 0.5);
+}
+
+/* Signature 3D Floating Pokéball Button */
+.pokeball-btn {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  border: 3.5px solid #112d35;
+  box-shadow: 0 0 24px rgba(0, 210, 180, 0.6), 0 8px 20px rgba(10, 50, 45, 0.35);
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  background: #ffffff;
+}
+
+.pokeball-btn:hover {
+  transform: scale(1.1) rotate(15deg);
+  box-shadow: 0 0 32px rgba(0, 210, 180, 0.85), 0 10px 25px rgba(0, 0, 0, 0.4);
+}
+
+.pokeball-btn:active {
+  transform: scale(0.95);
+}
+
+.pokeball-top-half {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 50%;
+  background: linear-gradient(180deg, #ff385c 0%, #d8182f 100%);
+}
+
+.pokeball-bottom-half {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 50%;
+  background: linear-gradient(180deg, #ffffff 0%, #e2e8f0 100%);
+}
+
+.pokeball-band {
+  position: absolute;
+  top: calc(50% - 3px);
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: #112d35;
+  z-index: 2;
+}
+
+.pokeball-center-circle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 20px;
+  height: 20px;
+  background: #ffffff;
+  border: 4px solid #112d35;
+  border-radius: 50%;
+  z-index: 3;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.pokeball-center-circle::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 6px;
+  height: 6px;
+  background: #112d35;
+  border-radius: 50%;
+}
+
+/* Small Selection Pokéball Badge */
+.pokeball-badge {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid #112d35;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 0 8px rgba(0, 210, 180, 0.6);
+}
+
+.pokeball-badge-top {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 50%;
+  background: #ff385c;
+}
+
+.pokeball-badge-bottom {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 50%;
+  background: #ffffff;
+}
+
+.pokeball-badge-band {
+  position: absolute;
+  top: calc(50% - 1px);
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #112d35;
+  z-index: 2;
+}
+
+.pokeball-badge-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 7px;
+  height: 7px;
+  background: #ffffff;
+  border: 1.5px solid #112d35;
+  border-radius: 50%;
+  z-index: 3;
+}
+
+/* Authentic Pokémon GO Type Colors & Gradients */
+.bg-type-normal { background: linear-gradient(135deg, #a8a878, #8a8a59); }
+.bg-type-fire { background: linear-gradient(135deg, #f08030, #dd6610); }
+.bg-type-water { background: linear-gradient(135deg, #6890f0, #386ceb); }
+.bg-type-grass { background: linear-gradient(135deg, #78c850, #5ca935); }
+.bg-type-electric { background: linear-gradient(135deg, #f8d030, #e0b808); }
+.bg-type-ice { background: linear-gradient(135deg, #98d8d8, #69c6c6); }
+.bg-type-fighting { background: linear-gradient(135deg, #c03028, #9b2019); }
+.bg-type-poison { background: linear-gradient(135deg, #a040a0, #802680); }
+.bg-type-ground { background: linear-gradient(135deg, #e0c068, #c8a43c); }
+.bg-type-flying { background: linear-gradient(135deg, #a890f0, #8664eb); }
+.bg-type-psychic { background: linear-gradient(135deg, #f85888, #e82e66); }
+.bg-type-bug { background: linear-gradient(135deg, #a8b820, #8d9a1b); }
+.bg-type-rock { background: linear-gradient(135deg, #b8a038, #938024); }
+.bg-type-ghost { background: linear-gradient(135deg, #705898, #553e7d); }
+.bg-type-dragon { background: linear-gradient(135deg, #7038f8, #4c0ee3); }
+.bg-type-steel { background: linear-gradient(135deg, #b8b8d0, #9797ba); }
+.bg-type-dark { background: linear-gradient(135deg, #705848, #513e32); }
+.bg-type-fairy { background: linear-gradient(135deg, #ee99ac, #e36a84); }
 
 /* Animation Classes */
 @keyframes float {

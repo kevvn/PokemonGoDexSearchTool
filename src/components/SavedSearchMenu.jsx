@@ -15,8 +15,8 @@ function SavedSearchMenu({ currentSearch, onSelect, onClose }) {
     document.addEventListener('mousedown', handleClickOutside);
     document.addEventListener('touchstart', handleClickOutside);
     return () => {
-        document.removeEventListener('mousedown', handleClickOutside);
-        document.removeEventListener('touchstart', handleClickOutside);
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
     };
   }, [onClose]);
 
@@ -40,30 +40,30 @@ function SavedSearchMenu({ currentSearch, onSelect, onClose }) {
     <div className="max-h-60 overflow-y-auto space-y-2 pr-1 no-scrollbar">
       {savedSearches.length === 0 ? (
         <div className="text-center py-8 text-slate-500">
-           <div className="text-3xl mb-2 select-none">📭</div>
-           <p className="text-xs font-bold">No saved searches yet</p>
-           <p className="text-[10px] text-slate-600 mt-1 max-w-[200px] mx-auto leading-relaxed">
-             Save your active filters and selections to find them here later.
-           </p>
+          <div className="text-4xl mb-2 select-none animate-float">📭</div>
+          <p className="text-xs font-black uppercase tracking-wider text-slate-700">No saved searches yet</p>
+          <p className="text-[10px] text-slate-500 mt-1 max-w-[200px] mx-auto leading-relaxed font-medium">
+            Save your active filters and selections to find them here later.
+          </p>
         </div>
       ) : (
         savedSearches.map(search => (
           <div
             key={search.id}
             onClick={() => onSelect(search.value)}
-            className="group flex items-center justify-between p-3 bg-slate-950/40 hover:bg-blue-500/5 rounded-xl cursor-pointer transition-all duration-200 border border-slate-850 hover:border-blue-500/20 active:scale-[0.98]"
+            className="group flex items-center justify-between p-3 bg-slate-50 hover:bg-teal-50 rounded-2xl cursor-pointer transition-all duration-150 border border-slate-200 hover:border-teal-300 active:scale-[0.98] shadow-xs"
           >
             <div className="flex-1 min-w-0 mr-3">
-              <div className="font-extrabold text-xs text-slate-200 truncate group-hover:text-blue-400 transition-colors" title={search.label}>
+              <div className="font-black text-xs text-slate-800 truncate group-hover:text-teal-700 transition-colors uppercase tracking-tight" title={search.label}>
                 {search.label}
               </div>
-              <div className="text-[10px] text-slate-500 truncate font-mono mt-0.5" title={search.value}>
+              <div className="text-[10px] text-teal-700 truncate font-mono mt-0.5 font-bold" title={search.value}>
                 {search.value}
               </div>
             </div>
             <button
               onClick={(e) => handleDelete(search.id, e)}
-              className="text-slate-500 hover:text-rose-400 p-1.5 rounded-lg hover:bg-rose-500/10 transition-colors cursor-pointer"
+              className="text-slate-400 hover:text-rose-600 p-1.5 rounded-full hover:bg-rose-50 transition-colors cursor-pointer"
               title="Delete Saved Search"
               aria-label="Delete saved search"
             >
@@ -79,50 +79,50 @@ function SavedSearchMenu({ currentSearch, onSelect, onClose }) {
 
   return (
     <>
-        {/* Mobile Backdrop */}
-        <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-sm sm:hidden z-40" onClick={onClose} aria-hidden="true" />
+      {/* Mobile Backdrop */}
+      <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm sm:hidden z-40" onClick={onClose} aria-hidden="true" />
 
-        {/* Modal container */}
-        <div
-           ref={menuRef}
-           className="fixed bottom-[88px] left-0 right-0 mx-4 sm:mx-0 sm:absolute sm:bottom-full sm:right-0 sm:left-auto sm:mb-4 sm:w-96 bg-slate-900 border border-slate-800 rounded-2xl p-5 z-50 shadow-2xl animate-float"
-        >
-          {/* Header */}
-          <div className="flex justify-between items-center mb-4 pb-3 border-b border-slate-800/80">
-            <h3 className="font-extrabold text-slate-100 text-sm flex items-center gap-2 uppercase tracking-wide">
-               <span className="text-md">⭐️</span> Saved Searches
-            </h3>
-            <button
-               onClick={onClose}
-               className="text-slate-500 hover:text-slate-200 w-7 h-7 flex items-center justify-center bg-slate-950/60 rounded-full border border-slate-800 transition-colors cursor-pointer"
-               aria-label="Close menu"
-            >
-               ✕
-            </button>
-          </div>
-
-          {/* New Saved Input Form */}
-          <div className="flex gap-2 mb-4">
-            <input
-              type="text"
-              value={newLabel}
-              onChange={(e) => setNewLabel(e.target.value)}
-              placeholder="Label (e.g. 'My CDay Team')"
-              className="flex-1 px-3 py-2 bg-slate-950 border border-slate-850 rounded-xl text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:border-blue-500 font-bold"
-              onKeyDown={(e) => e.key === 'Enter' && handleSave()}
-            />
-            <button
-              onClick={handleSave}
-              disabled={!newLabel.trim()}
-              className="px-4 py-2 bg-blue-600 text-slate-950 rounded-xl text-xs font-extrabold hover:bg-blue-500 disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer select-none"
-            >
-              Save
-            </button>
-          </div>
-
-          {/* List */}
-          {renderedList}
+      {/* Modal container */}
+      <div
+        ref={menuRef}
+        className="fixed bottom-[88px] left-0 right-0 mx-4 sm:mx-0 sm:absolute sm:bottom-full sm:right-0 sm:left-auto sm:mb-4 sm:w-96 bg-white border-2 border-teal-200 rounded-3xl p-5 z-50 shadow-2xl animate-float backdrop-blur-xl text-slate-800"
+      >
+        {/* Header */}
+        <div className="flex justify-between items-center mb-4 pb-3 border-b border-teal-100">
+          <h3 className="font-black text-slate-900 text-sm flex items-center gap-2 uppercase tracking-wider">
+            <span className="text-amber-500">⭐️</span> Saved Searches
+          </h3>
+          <button
+            onClick={onClose}
+            aria-label="Close menu"
+            className="pogo-close-btn w-7 h-7 rounded-full flex items-center justify-center text-white font-black text-xs cursor-pointer shadow-md"
+          >
+            ✕
+          </button>
         </div>
+
+        {/* New Saved Input Form */}
+        <div className="flex gap-2 mb-4">
+          <input
+            type="text"
+            value={newLabel}
+            onChange={(e) => setNewLabel(e.target.value)}
+            placeholder="Label (e.g. 'PVP Great League')"
+            className="flex-1 px-4 py-2 bg-slate-50 border border-teal-200 rounded-full text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-teal-500 font-bold"
+            onKeyDown={(e) => e.key === 'Enter' && handleSave()}
+          />
+          <button
+            onClick={handleSave}
+            disabled={!newLabel.trim()}
+            className="px-4 py-2 bg-gradient-to-r from-teal-500 to-emerald-500 text-white rounded-full text-xs font-black uppercase tracking-wider hover:from-teal-400 hover:to-emerald-400 disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer select-none shadow-sm"
+          >
+            Save
+          </button>
+        </div>
+
+        {/* List */}
+        {renderedList}
+      </div>
     </>
   );
 }

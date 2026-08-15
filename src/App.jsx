@@ -71,7 +71,7 @@ function App() {
     });
   }, [setSelectedIds]);
 
-  // Generate Pokego search string
+  // Generate Pokémon GO search query string
   const searchString = useMemo(() => {
     const parts = [];
 
@@ -138,27 +138,41 @@ function App() {
   }, [isFilterModalOpen]);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-blue-500/30">
+    <div className="min-h-screen pogo-storage-bg text-slate-800 flex flex-col font-sans selection:bg-teal-500/20 selection:text-teal-900">
       
-      {/* Premium Glassmorphic Header */}
-      <header className="bg-slate-900/90 border-b border-slate-800/80 z-40 sticky top-0 backdrop-blur-md">
-          <div className="max-w-7xl mx-auto flex items-center justify-between px-4 md:px-6 py-3.5 select-none">
-            <h1 className="text-xl font-extrabold tracking-tight uppercase flex items-center gap-2 cursor-default">
-              <span className="text-2xl animate-float">🔍</span>
-              <span className="bg-gradient-to-r from-blue-400 via-indigo-400 to-indigo-500 bg-clip-text text-transparent font-black tracking-tighter">
-                PokéSearch
-              </span>
-              <span className="text-[10px] font-extrabold bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded-lg border border-blue-500/30">
-                PRO UX v2.0
-              </span>
-            </h1>
+      {/* Authentic Pokémon GO Header Bar */}
+      <header className="pogo-header-gradient text-white z-40 sticky top-0 shadow-lg">
+          <div className="max-w-7xl mx-auto flex items-center justify-between px-4 md:px-6 py-3 select-none">
             
-            <div className="text-[11px] font-bold text-slate-500 hidden sm:block tracking-wide">
-              Pokémon GO Search Query Maker
+            {/* App Branding */}
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-full bg-white/20 p-1 flex items-center justify-center shadow-md border border-white/40">
+                <div className="pokeball-badge scale-125" />
+              </div>
+              <div>
+                <h1 className="text-xl font-black tracking-wider uppercase drop-shadow-sm text-white">
+                  POKÉMON
+                </h1>
+                <div className="text-[9px] font-extrabold text-teal-100 uppercase tracking-widest leading-none">
+                  Pokédex & Search Tool
+                </div>
+              </div>
+            </div>
+            
+            {/* Pokémon GO Storage Counter Pill */}
+            <div className="flex items-center gap-2">
+              <div className="pogo-storage-counter px-4 py-1.5 rounded-full flex items-center gap-2 text-slate-800 shadow-md">
+                <span className="text-xs font-black text-[#1b7a69] tracking-wider uppercase">
+                  STORAGE:
+                </span>
+                <span className="text-xs font-mono font-black text-slate-900">
+                  <span className="text-[#00aa90] font-black">{selectedIds.size}</span> / {pokemonData.length}
+                </span>
+              </div>
             </div>
           </div>
           
-          {/* Enhanced Region Navigation Selector */}
+          {/* Pokémon GO Top Category Tabs */}
           <RegionSelector 
             regions={regions} 
             selectedIds={selectedIds} 
@@ -174,17 +188,17 @@ function App() {
          {/* Mobile Filter Modal Backdrop overlay */}
          {isFilterModalOpen && (
            <div
-             className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[50] lg:hidden transition-opacity"
+             className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[50] lg:hidden transition-opacity"
              onClick={() => setIsFilterModalOpen(false)}
              aria-hidden="true"
            ></div>
          )}
 
-         {/* Collapsible/Sticky Filter Panel Drawer */}
+         {/* Collapsible/Sticky Filter Panel Drawer (PoGo Search Sheet) */}
          <aside className={`
-           fixed inset-y-0 left-0 z-[60] w-full max-w-sm bg-slate-900 border-r border-slate-800/80 transform transition-transform duration-300 ease-in-out overflow-y-auto
+           fixed inset-y-0 left-0 z-[60] w-full max-w-sm bg-white border-r border-teal-100 transform transition-transform duration-300 ease-in-out overflow-y-auto shadow-2xl
            ${isFilterModalOpen ? 'translate-x-0' : '-translate-x-full'}
-           lg:translate-x-0 lg:static lg:w-80 lg:h-[calc(100vh-160px)] lg:overflow-y-auto lg:z-20
+           lg:translate-x-0 lg:static lg:w-80 lg:h-[calc(100vh-140px)] lg:overflow-y-auto lg:z-20 lg:shadow-none lg:bg-white/90 lg:backdrop-blur-md
          `}>
             <FilterPanel 
               filters={filters} 
@@ -206,11 +220,12 @@ function App() {
                selectedOnly={selectedOnly}
                setSelectedOnly={setSelectedOnly}
                onRegionVisible={setActiveRegion}
+               onOpenFilters={() => setIsFilterModalOpen(true)}
             />
          </div>
       </main>
 
-      {/* Dynamic bottom string display dashboard */}
+      {/* Dynamic bottom string display dashboard with 3D Pokéball */}
       <SearchStringDisplay 
         searchString={searchString} 
         selectedCount={selectedIds.size}
