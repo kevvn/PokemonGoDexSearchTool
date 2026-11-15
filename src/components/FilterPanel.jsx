@@ -15,7 +15,7 @@ const ATTRIBUTE_CATEGORIES = [
   {
     name: 'Origin & Encounters',
     icon: '📍',
-    items: ['traded', 'hatched', 'raid', 'remoteraid', 'research', 'defender', 'background', 'locationcard']
+    items: ['traded', 'hatched', 'raid', 'remoteraid', 'research', 'defender', 'background', 'locationbackground', 'specialbackground', 'profilebackground', 'locationcard']
   },
   {
     name: 'Size & Buddy Levels',

@@ -20,6 +20,9 @@ export const ATTRIBUTES = [
   'defender',
   'favorite',
   'background',
+  'locationbackground',
+  'specialbackground',
+  'profilebackground',
   'locationcard',
   'xxs',
   'xxl',
@@ -53,7 +56,13 @@ const ATTRIBUTE_ALIASES = {
   'best-buddy': 'buddy5',
   'best_buddy': 'buddy5',
   'location-card': 'locationcard',
-  'location_card': 'locationcard'
+  'location_card': 'locationcard',
+  'location-background': 'locationbackground',
+  'location_background': 'locationbackground',
+  'special-background': 'specialbackground',
+  'special_background': 'specialbackground',
+  'profile-background': 'profilebackground',
+  'profile_background': 'profilebackground'
 };
 
 export function compressIdRanges(selectedIds) {

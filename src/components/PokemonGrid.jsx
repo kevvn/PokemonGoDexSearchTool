@@ -230,9 +230,12 @@ function PokemonGrid({
       }
     });
 
-    visibleListRef.current = visible;
     return { groupedRegions: grouped, visibleList: visible };
   }, [pokemonList, searchQuery, selectedOnly, selectedIds]);
+
+  useEffect(() => {
+    visibleListRef.current = visibleList;
+  }, [visibleList]);
 
   const toggleCollapse = useCallback((region) => {
     setCollapsedRegions(prev => ({

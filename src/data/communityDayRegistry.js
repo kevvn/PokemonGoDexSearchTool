@@ -1,0 +1,190 @@
+import { getFamilyIds } from '../utils/familyUtils';
+
+/**
+ * Complete Chronological Registry of Pokémon GO Community Day & Community Day Classic Events (2018–2026)
+ * Organized by Year and Month so users can expand/collapse by year/month, inspect featured species,
+ * and generate search strings for Community Day Shiny trade stockpiles (1-3) vs surplus transfers (count4-).
+ */
+const RAW_COMMUNITY_DAYS = [
+  // ================= 2026 =================
+  { id: '2026-11-pawniard', year: 2026, month: 'November', monthNum: 11, date: '2026-11-21', species: 'Pawniard', dexId: 624, finalEvolution: 'Kingambit', exclusiveMove: 'Kowtow Cleave', isClassic: false, utility: 'PvE Dark/Steel & ML' },
+  { id: '2026-10-zorua', year: 2026, month: 'October', monthNum: 10, date: '2026-10-10', species: 'Zorua', dexId: 570, finalEvolution: 'Zoroark', exclusiveMove: 'Sucker Punch', isClassic: false, utility: 'Collectible Shiny' },
+  { id: '2026-09-gible-cdc', year: 2026, month: 'September', monthNum: 9, date: '2026-09-12', species: 'Gible', dexId: 443, finalEvolution: 'Garchomp', exclusiveMove: 'Earth Power', isClassic: true, utility: 'S-Tier Ground/Dragon PvE & ML' },
+  { id: '2026-08-nickit', year: 2026, month: 'August', monthNum: 8, date: '2026-08-16', species: 'Nickit', dexId: 827, finalEvolution: 'Thievul', exclusiveMove: 'Icy Wind', isClassic: false, utility: 'GL/UL Spice' },
+  { id: '2026-07-sobble', year: 2026, month: 'July', monthNum: 7, date: '2026-07-04', species: 'Sobble', dexId: 816, finalEvolution: 'Inteleon', exclusiveMove: 'Hydro Cannon', isClassic: false, utility: 'Top Water PvE & G-Max' },
+  { id: '2026-06-frigibax', year: 2026, month: 'June', monthNum: 6, date: '2026-06-20', species: 'Frigibax', dexId: 996, finalEvolution: 'Baxcalibur', exclusiveMove: 'Glaive Rush', isClassic: false, utility: 'S-Tier Ice/Dragon PvE & ML' },
+  { id: '2026-05-deino-cdc', year: 2026, month: 'May', monthNum: 5, date: '2026-05-16', species: 'Deino', dexId: 633, finalEvolution: 'Hydreigon', exclusiveMove: 'Brutal Swing', isClassic: true, utility: 'S-Tier Dark PvE Attacker' },
+  { id: '2026-05-lechonk', year: 2026, month: 'May', monthNum: 5, date: '2026-05-09', species: 'Lechonk', dexId: 915, finalEvolution: 'Oinkologne', exclusiveMove: 'Mud-Slap', isClassic: false, utility: 'GL Bulk Spice' },
+  { id: '2026-04-tinkatink', year: 2026, month: 'April', monthNum: 4, date: '2026-04-11', species: 'Tinkatink', dexId: 957, finalEvolution: 'Tinkaton', exclusiveMove: 'Gigaton Hammer', isClassic: false, utility: 'Top GL/UL Fairy/Steel' },
+  { id: '2026-03-scorbunny', year: 2026, month: 'March', monthNum: 3, date: '2026-03-14', species: 'Scorbunny', dexId: 813, finalEvolution: 'Cinderace', exclusiveMove: 'Blast Burn', isClassic: false, utility: 'Top Fire PvE & D-Max' },
+  { id: '2026-02-vulpix', year: 2026, month: 'February', monthNum: 2, date: '2026-02-01', species: 'Vulpix & Alolan Vulpix', dexId: 37, finalEvolution: 'Ninetales', exclusiveMove: 'Energy Ball / Chilling Water', isClassic: false, utility: 'Top GL/UL PvP Staple' },
+  { id: '2026-01-grookey', year: 2026, month: 'January', monthNum: 1, date: '2026-01-18', species: 'Grookey', dexId: 810, finalEvolution: 'Rillaboom', exclusiveMove: 'Frenzy Plant', isClassic: false, utility: 'Top Grass PvE & D-Max' },
+  { id: '2026-01-piplup-cdc', year: 2026, month: 'January', monthNum: 1, date: '2026-01-04', species: 'Piplup', dexId: 393, finalEvolution: 'Empoleon', exclusiveMove: 'Hydro Cannon', isClassic: true, utility: 'Top GL/UL Steel/Water' },
+
+  // ================= 2025 =================
+  { id: '2025-11-pawmi', year: 2025, month: 'November', monthNum: 11, date: '2025-11-09', species: 'Pawmi', dexId: 921, finalEvolution: 'Pawmot', exclusiveMove: 'Thunder Shock', isClassic: false, utility: 'Collectible Shiny' },
+  { id: '2025-10-quaxly', year: 2025, month: 'October', monthNum: 10, date: '2025-10-12', species: 'Quaxly', dexId: 912, finalEvolution: 'Quaquaval', exclusiveMove: 'Hydro Cannon', isClassic: false, utility: 'Water PvE & PvP' },
+  { id: '2025-09-flabebe', year: 2025, month: 'September', monthNum: 9, date: '2025-09-14', species: 'Flabébé', dexId: 669, finalEvolution: 'Florges', exclusiveMove: 'Chilling Water', isClassic: false, utility: 'Top ML & UL Fairy' },
+  { id: '2025-08-pikipek', year: 2025, month: 'August', monthNum: 8, date: '2025-08-17', species: 'Pikipek', dexId: 731, finalEvolution: 'Toucannon', exclusiveMove: 'Beak Blast', isClassic: false, utility: 'Collectible Shiny' },
+  { id: '2025-07-rookidee', year: 2025, month: 'July', monthNum: 7, date: '2025-07-20', species: 'Rookidee', dexId: 821, finalEvolution: 'Corviknight', exclusiveMove: 'Air Cutter', isClassic: false, utility: 'Top GL/UL Steel/Flying' },
+  { id: '2025-06-jangmoo', year: 2025, month: 'June', monthNum: 6, date: '2025-06-21', species: 'Jangmo-o', dexId: 782, finalEvolution: 'Kommo-o', exclusiveMove: 'Clanging Scales', isClassic: false, utility: 'Top GL/UL/ML Dragon/Fighting' },
+  { id: '2025-05-solosis', year: 2025, month: 'May', monthNum: 5, date: '2025-05-17', species: 'Solosis', dexId: 577, finalEvolution: 'Reuniclus', exclusiveMove: 'Charm', isClassic: false, utility: 'Collectible Shiny' },
+  { id: '2025-04-vanillite', year: 2025, month: 'April', monthNum: 4, date: '2025-04-19', species: 'Vanillite', dexId: 582, finalEvolution: 'Vanilluxe', exclusiveMove: 'Avalanche', isClassic: false, utility: 'Budget Ice Attacker' },
+  { id: '2025-03-totodile-cdc', year: 2025, month: 'March', monthNum: 3, date: '2025-03-22', species: 'Totodile', dexId: 158, finalEvolution: 'Feraligatr', exclusiveMove: 'Hydro Cannon', isClassic: true, utility: '#1 GL & UL Meta Staple' },
+  { id: '2025-03-fuecoco', year: 2025, month: 'March', monthNum: 3, date: '2025-03-08', species: 'Fuecoco', dexId: 909, finalEvolution: 'Skeledirge', exclusiveMove: 'Blast Burn', isClassic: false, utility: 'Top UL/GL Fire/Ghost' },
+  { id: '2025-02-karrablast-shelmet', year: 2025, month: 'February', monthNum: 2, date: '2025-02-09', species: 'Karrablast & Shelmet', dexId: 588, extraDexIds: [616, 617], finalEvolution: 'Escavalier / Accelgor', exclusiveMove: 'Razor Shell / Energy Ball', isClassic: false, utility: 'UL Escavalier' },
+  { id: '2025-01-ralts-cdc', year: 2025, month: 'January', monthNum: 1, date: '2025-01-25', species: 'Ralts', dexId: 280, finalEvolution: 'Gardevoir / Gallade', exclusiveMove: 'Synchronoise', isClassic: true, utility: '#1 Fairy Mega & Shadow' },
+  { id: '2025-01-sprigatito', year: 2025, month: 'January', monthNum: 1, date: '2025-01-05', species: 'Sprigatito', dexId: 906, finalEvolution: 'Meowscarada', exclusiveMove: 'Frenzy Plant', isClassic: false, utility: 'High Grass DPS' },
+
+  // ================= 2024 =================
+  { id: '2024-11-mankey', year: 2024, month: 'November', monthNum: 11, date: '2024-11-10', species: 'Mankey', dexId: 56, finalEvolution: 'Annihilape / Primeape', exclusiveMove: 'Rage Fist', isClassic: false, utility: 'Top GL/UL/ML Rage Fist' },
+  { id: '2024-10-sewaddle', year: 2024, month: 'October', monthNum: 10, date: '2024-10-05', species: 'Sewaddle', dexId: 540, finalEvolution: 'Leavanny', exclusiveMove: 'Shadow Claw', isClassic: false, utility: 'Collectible Shiny' },
+  { id: '2024-09-ponyta', year: 2024, month: 'September', monthNum: 9, date: '2024-09-14', species: 'Ponyta & Galarian Ponyta', dexId: 77, finalEvolution: 'Rapidash', exclusiveMove: 'Wild Charge', isClassic: false, utility: 'Limited Cup PvP' },
+  { id: '2024-08-popplio', year: 2024, month: 'August', monthNum: 8, date: '2024-08-31', species: 'Popplio', dexId: 728, finalEvolution: 'Primarina', exclusiveMove: 'Hydro Cannon', isClassic: false, utility: 'Top ML & Raid Water/Fairy' },
+  { id: '2024-08-beldum-cdc', year: 2024, month: 'August', monthNum: 8, date: '2024-08-18', species: 'Beldum', dexId: 374, finalEvolution: 'Metagross', exclusiveMove: 'Meteor Mash', isClassic: true, utility: 'S-Tier Steel PvE & ML' },
+  { id: '2024-07-tynamo', year: 2024, month: 'July', monthNum: 7, date: '2024-07-21', species: 'Tynamo', dexId: 602, finalEvolution: 'Eelektross', exclusiveMove: 'Volt Switch', isClassic: false, utility: 'GL/UL Spice' },
+  { id: '2024-06-cyndaquil-cdc', year: 2024, month: 'June', monthNum: 6, date: '2024-06-22', species: 'Cyndaquil', dexId: 155, finalEvolution: 'Typhlosion', exclusiveMove: 'Blast Burn', isClassic: true, utility: 'Top GL/UL Thunder Punch + BB' },
+  { id: '2024-06-goomy', year: 2024, month: 'June', monthNum: 6, date: '2024-06-09', species: 'Goomy', dexId: 704, finalEvolution: 'Goodra', exclusiveMove: 'Thunder Punch', isClassic: false, utility: 'GL/UL Dragon Tank' },
+  { id: '2024-05-bounsweet', year: 2024, month: 'May', monthNum: 5, date: '2024-05-19', species: 'Bounsweet', dexId: 761, finalEvolution: 'Tsareena', exclusiveMove: 'High Jump Kick', isClassic: false, utility: 'Collectible Shiny' },
+  { id: '2024-04-bellsprout', year: 2024, month: 'April', monthNum: 4, date: '2024-04-20', species: 'Bellsprout', dexId: 69, finalEvolution: 'Victreebel', exclusiveMove: 'Magical Leaf', isClassic: false, utility: 'Shadow GL/UL Grass' },
+  { id: '2024-04-bagon-cdc', year: 2024, month: 'April', monthNum: 4, date: '2024-04-07', species: 'Bagon', dexId: 371, finalEvolution: 'Salamence', exclusiveMove: 'Outrage', isClassic: true, utility: 'S-Tier Dragon Raid & Mega' },
+  { id: '2024-03-litten', year: 2024, month: 'March', monthNum: 3, date: '2024-03-16', species: 'Litten', dexId: 725, finalEvolution: 'Incineroar', exclusiveMove: 'Blast Burn', isClassic: false, utility: 'UL & Fire Raid Attacker' },
+  { id: '2024-02-chansey', year: 2024, month: 'February', monthNum: 2, date: '2024-02-04', species: 'Chansey', dexId: 113, finalEvolution: 'Blissey', exclusiveMove: 'Wild Charge', isClassic: false, utility: '#1 Gym Defender & D-Max Tank' },
+  { id: '2024-01-porygon-cdc', year: 2024, month: 'January', monthNum: 1, date: '2024-01-20', species: 'Porygon', dexId: 137, finalEvolution: 'Porygon-Z', exclusiveMove: 'Tri Attack', isClassic: true, utility: 'Collectible Shiny' },
+  { id: '2024-01-rowlet', year: 2024, month: 'January', monthNum: 1, date: '2024-01-06', species: 'Rowlet', dexId: 722, finalEvolution: 'Decidueye', exclusiveMove: 'Frenzy Plant', isClassic: false, utility: 'Grass PvE & GL' },
+
+  // ================= 2023 =================
+  { id: '2023-11-mareep-cdc', year: 2023, month: 'November', monthNum: 11, date: '2023-11-25', species: 'Mareep', dexId: 179, finalEvolution: 'Ampharos', exclusiveMove: 'Dragon Pulse', isClassic: true, utility: 'UL Brutal Swing & Mega' },
+  { id: '2023-11-wooper', year: 2023, month: 'November', monthNum: 11, date: '2023-11-05', species: 'Wooper & Paldean Wooper', dexId: 194, finalEvolution: 'Quagsire / Clodsire', exclusiveMove: 'Aqua Tail / Megahorn', isClassic: false, utility: '#1 GL Clodsire & Quagsire' },
+  { id: '2023-10-timburr', year: 2023, month: 'October', monthNum: 10, date: '2023-10-15', species: 'Timburr', dexId: 532, finalEvolution: 'Conkeldurr', exclusiveMove: 'Brutal Swing', isClassic: false, utility: 'S-Tier Fighting Raid & ML' },
+  { id: '2023-09-grubbin', year: 2023, month: 'September', monthNum: 9, date: '2023-09-23', species: 'Grubbin', dexId: 736, finalEvolution: 'Vikavolt / Charjabug', exclusiveMove: 'Volt Switch', isClassic: false, utility: 'Top GL Charjabug' },
+  { id: '2023-09-charmander-cdc', year: 2023, month: 'September', monthNum: 9, date: '2023-09-02', species: 'Charmander', dexId: 4, finalEvolution: 'Charizard', exclusiveMove: 'Dragon Breath & Blast Burn', isClassic: true, utility: 'Top Fire Mega, G-Max & PvP' },
+  { id: '2023-08-froakie', year: 2023, month: 'August', monthNum: 8, date: '2023-08-13', species: 'Froakie', dexId: 656, finalEvolution: 'Greninja', exclusiveMove: 'Hydro Cannon', isClassic: false, utility: 'Fastest Water Spam GL/UL/PvE' },
+  { id: '2023-07-poliwag', year: 2023, month: 'July', monthNum: 7, date: '2023-07-30', species: 'Poliwag', dexId: 60, finalEvolution: 'Poliwrath / Politoed', exclusiveMove: 'Counter / Ice Beam', isClassic: false, utility: 'Top GL/UL Poliwrath' },
+  { id: '2023-07-squirtle-cdc', year: 2023, month: 'July', monthNum: 7, date: '2023-07-09', species: 'Squirtle', dexId: 7, finalEvolution: 'Blastoise', exclusiveMove: 'Hydro Cannon', isClassic: true, utility: 'Water Mega, G-Max & UL' },
+  { id: '2023-06-axew', year: 2023, month: 'June', monthNum: 6, date: '2023-06-10', species: 'Axew', dexId: 610, finalEvolution: 'Haxorus', exclusiveMove: 'Breaking Swipe', isClassic: false, utility: 'Dragon Raid & ML Premier' },
+  { id: '2023-05-fennekin', year: 2023, month: 'May', monthNum: 5, date: '2023-05-21', species: 'Fennekin', dexId: 653, finalEvolution: 'Delphox', exclusiveMove: 'Blast Burn', isClassic: false, utility: 'Budget Fire Raider' },
+  { id: '2023-04-swinub-cdc', year: 2023, month: 'April', monthNum: 4, date: '2023-04-29', species: 'Swinub', dexId: 220, finalEvolution: 'Mamoswine', exclusiveMove: 'Ancient Power', isClassic: true, utility: '#1 Non-Mega/Shadow Ice Raider' },
+  { id: '2023-04-togetic', year: 2023, month: 'April', monthNum: 4, date: '2023-04-15', species: 'Togetic', dexId: 176, finalEvolution: 'Togekiss', exclusiveMove: 'Aura Sphere', isClassic: false, utility: 'ML & Fairy Raid Anchor' },
+  { id: '2023-03-slowpoke', year: 2023, month: 'March', monthNum: 3, date: '2023-03-18', species: 'Slowpoke & Galarian Slowpoke', dexId: 79, finalEvolution: 'Slowbro / Slowking', exclusiveMove: 'Surf', isClassic: false, utility: 'Mega Slowbro & Psychic Cup' },
+  { id: '2023-02-noibat', year: 2023, month: 'February', monthNum: 2, date: '2023-02-05', species: 'Noibat', dexId: 714, finalEvolution: 'Noivern', exclusiveMove: 'Boomburst', isClassic: false, utility: 'Collectible 400-Candy Shiny' },
+  { id: '2023-01-larvitar-cdc', year: 2023, month: 'January', monthNum: 1, date: '2023-01-21', species: 'Larvitar', dexId: 246, finalEvolution: 'Tyranitar', exclusiveMove: 'Smack Down', isClassic: true, utility: 'S-Tier Dark/Rock Mega & Shadow' },
+  { id: '2023-01-chespin', year: 2023, month: 'January', monthNum: 1, date: '2023-01-07', species: 'Chespin', dexId: 650, finalEvolution: 'Chesnaught', exclusiveMove: 'Frenzy Plant', isClassic: false, utility: 'GL/UL Fighting/Grass' },
+
+  // ================= 2022 =================
+  { id: '2022-11-teddiursa', year: 2022, month: 'November', monthNum: 11, date: '2022-11-12', species: 'Teddiursa', dexId: 216, finalEvolution: 'Ursaluna', exclusiveMove: 'High Horsepower', isClassic: false, utility: 'Master League & Ground' },
+  { id: '2022-11-dratini-cdc', year: 2022, month: 'November', monthNum: 11, date: '2022-11-05', species: 'Dratini', dexId: 147, finalEvolution: 'Dragonite', exclusiveMove: 'Draco Meteor', isClassic: true, utility: 'Top ML & Shadow Dragon' },
+  { id: '2022-10-litwick', year: 2022, month: 'October', monthNum: 10, date: '2022-10-15', species: 'Litwick', dexId: 607, finalEvolution: 'Chandelure', exclusiveMove: 'Poltergeist', isClassic: false, utility: 'S-Tier Ghost/Fire Raider' },
+  { id: '2022-09-roggenrola', year: 2022, month: 'September', monthNum: 9, date: '2022-09-18', species: 'Roggenrola', dexId: 524, finalEvolution: 'Gigalith', exclusiveMove: 'Meteor Beam', isClassic: false, utility: 'Budget Rock Attacker' },
+  { id: '2022-08-zigzagoon', year: 2022, month: 'August', monthNum: 8, date: '2022-08-13', species: 'Galarian Zigzagoon', dexId: 263, finalEvolution: 'Obstagoon', exclusiveMove: 'Obstruct', isClassic: false, utility: 'GL/UL Obstagoon' },
+  { id: '2022-07-starly', year: 2022, month: 'July', monthNum: 7, date: '2022-07-17', species: 'Starly', dexId: 396, finalEvolution: 'Staraptor', exclusiveMove: 'Gust', isClassic: false, utility: 'Shadow Flying Raider' },
+  { id: '2022-06-deino', year: 2022, month: 'June', monthNum: 6, date: '2022-06-25', species: 'Deino', dexId: 633, finalEvolution: 'Hydreigon', exclusiveMove: 'Brutal Swing', isClassic: false, utility: 'S-Tier Dark Attacker' },
+  { id: '2022-05-geodude', year: 2022, month: 'May', monthNum: 5, date: '2022-05-21', species: 'Alolan Geodude', dexId: 74, finalEvolution: 'Alolan Golem', exclusiveMove: 'Rollout', isClassic: false, utility: 'Electric Cup Spice' },
+  { id: '2022-04-stufful', year: 2022, month: 'April', monthNum: 4, date: '2022-04-23', species: 'Stufful', dexId: 759, finalEvolution: 'Bewear', exclusiveMove: 'Drain Punch', isClassic: false, utility: 'Collectible 400-Candy Shiny' },
+  { id: '2022-04-mudkip-cdc', year: 2022, month: 'April', monthNum: 4, date: '2022-04-10', species: 'Mudkip', dexId: 258, finalEvolution: 'Swampert', exclusiveMove: 'Hydro Cannon', isClassic: true, utility: 'S-Tier Water Mega & GL/UL' },
+  { id: '2022-03-sandshrew', year: 2022, month: 'March', monthNum: 3, date: '2022-03-13', species: 'Sandshrew & Alolan Sandshrew', dexId: 27, finalEvolution: 'Alolan Sandslash', exclusiveMove: 'Shadow Claw / Night Slash', isClassic: false, utility: 'Top GL/UL Alolan Sandslash' },
+  { id: '2022-02-hoppip', year: 2022, month: 'February', monthNum: 2, date: '2022-02-12', species: 'Hoppip', dexId: 187, finalEvolution: 'Jumpluff', exclusiveMove: 'Acrobatics', isClassic: false, utility: 'Top GL Jumpluff Tank' },
+  { id: '2022-01-bulbasaur-cdc', year: 2022, month: 'January', monthNum: 1, date: '2022-01-22', species: 'Bulbasaur', dexId: 1, finalEvolution: 'Venusaur', exclusiveMove: 'Frenzy Plant', isClassic: true, utility: 'Grass Mega, G-Max & GL/UL' },
+  { id: '2022-01-spheal', year: 2022, month: 'January', monthNum: 1, date: '2022-01-16', species: 'Spheal', dexId: 363, finalEvolution: 'Walrein', exclusiveMove: 'Powder Snow & Icicle Spear', isClassic: false, utility: 'Double Legacy GL/UL Walrein' },
+
+  // ================= 2021 =================
+  { id: '2021-11-shinx', year: 2021, month: 'November', monthNum: 11, date: '2021-11-21', species: 'Shinx', dexId: 403, finalEvolution: 'Luxray', exclusiveMove: 'Psychic Fangs', isClassic: false, utility: 'Collectible Shiny' },
+  { id: '2021-10-duskull', year: 2021, month: 'October', monthNum: 10, date: '2021-10-09', species: 'Duskull', dexId: 355, finalEvolution: 'Dusknoir', exclusiveMove: 'Shadow Ball', isClassic: false, utility: 'Top GL Dusknoir & Dusclops' },
+  { id: '2021-09-oshawott', year: 2021, month: 'September', monthNum: 9, date: '2021-09-19', species: 'Oshawott', dexId: 501, finalEvolution: 'Samurott', exclusiveMove: 'Hydro Cannon', isClassic: false, utility: 'Water Raider & GL' },
+  { id: '2021-08-eevee', year: 2021, month: 'August', monthNum: 8, date: '2021-08-14', species: 'Eevee', dexId: 133, finalEvolution: 'Umbreon / Sylveon', exclusiveMove: 'Last Resort / Psyshock', isClassic: false, utility: 'Top GL/UL Umbreon & ML Sylveon' },
+  { id: '2021-07-tepig', year: 2021, month: 'July', monthNum: 7, date: '2021-07-03', species: 'Tepig', dexId: 498, finalEvolution: 'Emboar', exclusiveMove: 'Blast Burn', isClassic: false, utility: 'Budget Fire Attacker' },
+  { id: '2021-06-gible', year: 2021, month: 'June', monthNum: 6, date: '2021-06-06', species: 'Gible', dexId: 443, finalEvolution: 'Garchomp', exclusiveMove: 'Earth Power', isClassic: false, utility: 'S-Tier Ground/Dragon PvE & ML' },
+  { id: '2021-05-swablu', year: 2021, month: 'May', monthNum: 5, date: '2021-05-15', species: 'Swablu', dexId: 333, finalEvolution: 'Altaria', exclusiveMove: 'Moonblast', isClassic: false, utility: '#2 GL Altaria & Fairy Mega' },
+  { id: '2021-04-snivy', year: 2021, month: 'April', monthNum: 4, date: '2021-04-11', species: 'Snivy', dexId: 495, finalEvolution: 'Serperior', exclusiveMove: 'Frenzy Plant', isClassic: false, utility: 'Top 15 GL Serperior' },
+  { id: '2021-03-fletchling', year: 2021, month: 'March', monthNum: 3, date: '2021-03-06', species: 'Fletchling', dexId: 661, finalEvolution: 'Talonflame', exclusiveMove: 'Incinerate', isClassic: false, utility: 'Top 5 GL & UL Talonflame' },
+  { id: '2021-02-roselia', year: 2021, month: 'February', monthNum: 2, date: '2021-02-07', species: 'Roselia', dexId: 315, finalEvolution: 'Roserade', exclusiveMove: 'Bullet Seed & Weather Ball', isClassic: false, utility: 'Top Grass/Poison Raider' },
+  { id: '2021-01-machop', year: 2021, month: 'January', monthNum: 1, date: '2021-01-16', species: 'Machop', dexId: 66, finalEvolution: 'Machamp', exclusiveMove: 'Payback', isClassic: false, utility: 'Core Fighting Raid & G-Max/PvP' },
+
+  // ================= 2020 =================
+  { id: '2020-11-magmar', year: 2020, month: 'November', monthNum: 11, date: '2020-11-21', species: 'Magmar', dexId: 126, finalEvolution: 'Magmortar', exclusiveMove: 'Thunderbolt', isClassic: false, utility: 'Collectible Shiny' },
+  { id: '2020-11-electabuzz', year: 2020, month: 'November', monthNum: 11, date: '2020-11-15', species: 'Electabuzz', dexId: 125, finalEvolution: 'Electivire', exclusiveMove: 'Flamethrower', isClassic: false, utility: 'Shadow Electric Raider' },
+  { id: '2020-10-charmander', year: 2020, month: 'October', monthNum: 10, date: '2020-10-17', species: 'Charmander', dexId: 4, finalEvolution: 'Charizard', exclusiveMove: 'Dragon Breath', isClassic: false, utility: 'Fire Mega, G-Max & GL/UL' },
+  { id: '2020-09-porygon', year: 2020, month: 'September', monthNum: 9, date: '2020-09-20', species: 'Porygon', dexId: 137, finalEvolution: 'Porygon-Z', exclusiveMove: 'Tri Attack', isClassic: false, utility: 'Collectible Shiny' },
+  { id: '2020-08-magikarp', year: 2020, month: 'August', monthNum: 8, date: '2020-08-08', species: 'Magikarp', dexId: 129, finalEvolution: 'Gyarados', exclusiveMove: 'Aqua Tail', isClassic: false, utility: 'ML Premier, UL & Water Mega' },
+  { id: '2020-07-gastly', year: 2020, month: 'July', monthNum: 7, date: '2020-07-19', species: 'Gastly', dexId: 92, finalEvolution: 'Gengar', exclusiveMove: 'Shadow Punch', isClassic: false, utility: '#1 Ghost Mega, G-Max & PvP' },
+  { id: '2020-06-weedle', year: 2020, month: 'June', monthNum: 6, date: '2020-06-20', species: 'Weedle', dexId: 13, finalEvolution: 'Beedrill', exclusiveMove: 'Drill Run', isClassic: false, utility: 'GL Beedrill & Bug Mega' },
+  { id: '2020-05-seedot', year: 2020, month: 'May', monthNum: 5, date: '2020-05-24', species: 'Seedot', dexId: 273, finalEvolution: 'Shiftry', exclusiveMove: 'Bullet Seed', isClassic: false, utility: 'GL Spice' },
+  { id: '2020-04-abra', year: 2020, month: 'April', monthNum: 4, date: '2020-04-25', species: 'Abra', dexId: 63, finalEvolution: 'Alakazam', exclusiveMove: 'Counter', isClassic: false, utility: 'Psychic Mega' },
+  { id: '2020-02-rhyhorn', year: 2020, month: 'February', monthNum: 2, date: '2020-02-22', species: 'Rhyhorn', dexId: 111, finalEvolution: 'Rhyperior', exclusiveMove: 'Rock Wrecker', isClassic: false, utility: 'S-Tier Rock Raid & ML' },
+  { id: '2020-01-piplup', year: 2020, month: 'January', monthNum: 1, date: '2020-01-19', species: 'Piplup', dexId: 393, finalEvolution: 'Empoleon', exclusiveMove: 'Hydro Cannon', isClassic: false, utility: 'Top GL/UL Empoleon' },
+
+  // ================= 2019 =================
+  { id: '2019-11-chimchar', year: 2019, month: 'November', monthNum: 11, date: '2019-11-16', species: 'Chimchar', dexId: 390, finalEvolution: 'Infernape', exclusiveMove: 'Blast Burn', isClassic: false, utility: 'Collectible Shiny' },
+  { id: '2019-10-trapinch', year: 2019, month: 'October', monthNum: 10, date: '2019-10-12', species: 'Trapinch', dexId: 328, finalEvolution: 'Flygon', exclusiveMove: 'Earth Power', isClassic: false, utility: 'GL/UL Flygon' },
+  { id: '2019-09-turtwig', year: 2019, month: 'September', monthNum: 9, date: '2019-09-15', species: 'Turtwig', dexId: 387, finalEvolution: 'Torterra', exclusiveMove: 'Frenzy Plant', isClassic: false, utility: 'Shadow Grass Raider' },
+  { id: '2019-08-ralts', year: 2019, month: 'August', monthNum: 8, date: '2019-08-03', species: 'Ralts', dexId: 280, finalEvolution: 'Gardevoir / Gallade', exclusiveMove: 'Synchronoise', isClassic: false, utility: '#1 Fairy Mega & Shadow' },
+  { id: '2019-07-mudkip', year: 2019, month: 'July', monthNum: 7, date: '2019-07-21', species: 'Mudkip', dexId: 258, finalEvolution: 'Swampert', exclusiveMove: 'Hydro Cannon', isClassic: false, utility: 'S-Tier Water Mega & GL/UL' },
+  { id: '2019-06-slakoth', year: 2019, month: 'June', monthNum: 6, date: '2019-06-08', species: 'Slakoth', dexId: 287, finalEvolution: 'Slaking / Vigoroth', exclusiveMove: 'Body Slam', isClassic: false, utility: 'GL Vigoroth & Gym Defender' },
+  { id: '2019-05-torchic', year: 2019, month: 'May', monthNum: 5, date: '2019-05-19', species: 'Torchic', dexId: 255, finalEvolution: 'Blaziken', exclusiveMove: 'Blast Burn', isClassic: false, utility: '#1 Fire Mega & Shadow' },
+  { id: '2019-04-bagon', year: 2019, month: 'April', monthNum: 4, date: '2019-04-13', species: 'Bagon', dexId: 371, finalEvolution: 'Salamence', exclusiveMove: 'Outrage', isClassic: false, utility: 'S-Tier Dragon Mega & Shadow' },
+  { id: '2019-03-treecko', year: 2019, month: 'March', monthNum: 3, date: '2019-03-23', species: 'Treecko', dexId: 252, finalEvolution: 'Sceptile', exclusiveMove: 'Frenzy Plant', isClassic: false, utility: '#1 Grass Mega' },
+  { id: '2019-02-swinub', year: 2019, month: 'February', monthNum: 2, date: '2019-02-16', species: 'Swinub', dexId: 220, finalEvolution: 'Mamoswine', exclusiveMove: 'Ancient Power', isClassic: false, utility: 'S-Tier Ice/Ground Raider' },
+  { id: '2019-01-totodile', year: 2019, month: 'January', monthNum: 1, date: '2019-01-12', species: 'Totodile', dexId: 158, finalEvolution: 'Feraligatr', exclusiveMove: 'Hydro Cannon', isClassic: false, utility: '#1 GL & UL Meta Staple' },
+
+  // ================= 2018 =================
+  { id: '2018-11-cyndaquil', year: 2018, month: 'November', monthNum: 11, date: '2018-11-10', species: 'Cyndaquil', dexId: 155, finalEvolution: 'Typhlosion', exclusiveMove: 'Blast Burn', isClassic: false, utility: 'Top GL/UL Typhlosion' },
+  { id: '2018-10-beldum', year: 2018, month: 'October', monthNum: 10, date: '2018-10-21', species: 'Beldum', dexId: 374, finalEvolution: 'Metagross', exclusiveMove: 'Meteor Mash', isClassic: false, utility: 'S-Tier Steel PvE & ML' },
+  { id: '2018-09-chikorita', year: 2018, month: 'September', monthNum: 9, date: '2018-09-22', species: 'Chikorita', dexId: 152, finalEvolution: 'Meganium', exclusiveMove: 'Frenzy Plant', isClassic: false, utility: 'GL/UL Meganium' },
+  { id: '2018-08-eevee', year: 2018, month: 'August', monthNum: 8, date: '2018-08-11', species: 'Eevee', dexId: 133, finalEvolution: 'All Eeveelutions', exclusiveMove: 'Last Resort', isClassic: false, utility: 'GL/UL Umbreon' },
+  { id: '2018-07-squirtle', year: 2018, month: 'July', monthNum: 7, date: '2018-07-08', species: 'Squirtle (Sunglasses)', dexId: 7, finalEvolution: 'Blastoise', exclusiveMove: 'Hydro Cannon', isClassic: false, utility: 'Sunglasses Costume + Mega/G-Max' },
+  { id: '2018-06-larvitar', year: 2018, month: 'June', monthNum: 6, date: '2018-06-16', species: 'Larvitar', dexId: 246, finalEvolution: 'Tyranitar', exclusiveMove: 'Smack Down', isClassic: false, utility: 'S-Tier Rock/Dark Mega & Shadow' },
+  { id: '2018-05-charmander', year: 2018, month: 'May', monthNum: 5, date: '2018-05-19', species: 'Charmander', dexId: 4, finalEvolution: 'Charizard', exclusiveMove: 'Blast Burn', isClassic: false, utility: 'Fire Mega & G-Max' },
+  { id: '2018-04-mareep', year: 2018, month: 'April', monthNum: 4, date: '2018-04-15', species: 'Mareep', dexId: 179, finalEvolution: 'Ampharos', exclusiveMove: 'Dragon Pulse', isClassic: false, utility: 'Electric Mega & UL' },
+  { id: '2018-03-bulbasaur', year: 2018, month: 'March', monthNum: 3, date: '2018-03-25', species: 'Bulbasaur', dexId: 1, finalEvolution: 'Venusaur', exclusiveMove: 'Frenzy Plant', isClassic: false, utility: 'Grass Mega, G-Max & GL/UL' },
+  { id: '2018-02-dratini', year: 2018, month: 'February', monthNum: 2, date: '2018-02-24', species: 'Dratini', dexId: 147, finalEvolution: 'Dragonite', exclusiveMove: 'Draco Meteor', isClassic: false, utility: 'Top ML & Shadow Dragon' },
+  { id: '2018-01-pikachu', year: 2018, month: 'January', monthNum: 1, date: '2018-01-20', species: 'Pikachu', dexId: 25, finalEvolution: 'Pikachu (Surf)', exclusiveMove: 'Surf', isClassic: false, utility: 'Inaugural CD Trophy' },
+];
+
+export const COMMUNITY_DAY_EVENTS = RAW_COMMUNITY_DAYS.map((entry) => {
+  const baseFamily = getFamilyIds(entry.dexId);
+  const extra = entry.extraDexIds || [];
+  const familyIds = Array.from(new Set([...baseFamily, ...extra])).sort((a, b) => a - b);
+  // Pre-evolution IDs (every stage before the final stage, unless single-stage like Pikachu)
+  const preEvoIds = familyIds.length > 1 ? familyIds.slice(0, -1) : familyIds;
+
+  return {
+    ...entry,
+    familyIds,
+    preEvoIds,
+    sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${entry.dexId}.png`,
+  };
+});
+
+/**
+ * Returns Community Day events grouped by Year (descending: 2026 -> 2018).
+ */
+export function getCommunityDaysByYear() {
+  const byYear = new Map();
+  COMMUNITY_DAY_EVENTS.forEach((ev) => {
+    if (!byYear.has(ev.year)) {
+      byYear.set(ev.year, []);
+    }
+    byYear.get(ev.year).push(ev);
+  });
+  return Array.from(byYear.entries())
+    .sort((a, b) => b[0] - a[0])
+    .map(([year, events]) => ({
+      year,
+      events,
+      allFamilyIds: Array.from(new Set(events.flatMap((e) => e.familyIds))).sort((a, b) => a - b),
+    }));
+}
+
+/**
+ * All unique National Pokédex IDs across every Community Day evolutionary family (2018–2026).
+ */
+export const ALL_COMMUNITY_DAY_FAMILY_IDS = Array.from(
+  new Set(COMMUNITY_DAY_EVENTS.flatMap((e) => e.familyIds))
+).sort((a, b) => a - b);
+
+/**
+ * Pre-evolution IDs for high-value Community Day species worth holding until a December recap / Classic event.
+ */
+export const ALL_COMMUNITY_DAY_PRE_EVO_IDS = Array.from(
+  new Set(COMMUNITY_DAY_EVENTS.flatMap((e) => e.preEvoIds))
+).sort((a, b) => a - b);
