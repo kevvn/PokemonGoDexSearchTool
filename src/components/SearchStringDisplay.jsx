@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useCallback, useRef, useId } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useId, useMemo } from 'react';
 import SavedSearchMenu from './SavedSearchMenu';
+import { inspectAndFixPogoQuery } from '../utils/searchUtils';
 
 function SearchStringDisplay({
   viewMode = 'triage',
@@ -90,6 +91,8 @@ function SearchStringDisplay({
   const isHighLength = charLength > 600;
   const isVeryHighLength = charLength > 1000;
 
+  const precedenceCheck = useMemo(() => inspectAndFixPogoQuery(inputValue), [inputValue]);
+
   return (
     <>
       {/* Native <dialog> QR Modal (Desktop -> Mobile Scan) */}
@@ -142,6 +145,26 @@ function SearchStringDisplay({
       {/* Sleek Mobile-First Bottom Dock */}
       <div className="mwg-touch-scope bg-white/95 border-t border-teal-200 pt-2 sticky bottom-0 z-40 shadow-[0_-4px_18px_rgba(20,80,70,0.10)] backdrop-blur-md safe-bottom-dock">
         <div className="max-w-7xl mx-auto flex flex-col gap-1.5">
+          {/* PoGO `,` (OR) vs `&` (AND) Precedence Auto-Fixer Banner (Only shown when a precedence trap is detected) */}
+          {precedenceCheck.hasPrecedenceTrap && (
+            <div className="flex items-center justify-between gap-2 bg-amber-50 border border-amber-300 rounded-xl px-2.5 py-1 text-[11px]">
+              <span className="font-bold text-amber-950 truncate">
+                ⚠️ PoGO evaluates <code className="font-mono font-black">,</code> (OR) before <code className="font-mono font-black">&amp;</code> (AND).
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  setDraftValue(precedenceCheck.fixedCnfQuery);
+                  setIsTyping(false);
+                  onSearchUpdate(precedenceCheck.fixedCnfQuery);
+                }}
+                className="compact-inline-chip shrink-0 px-2.5 py-0.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-[10px] uppercase tracking-wide cursor-pointer"
+              >
+                ✨ Fix AND/OR Precedence
+              </button>
+            </div>
+          )}
+
           {/* Secondary Strip — ONLY rendered in Pokédex Grid mode on mobile so Triage stays 1 single compact row */}
           {viewMode === 'grid' && (
             <div className="flex items-center justify-between gap-2 text-xs">

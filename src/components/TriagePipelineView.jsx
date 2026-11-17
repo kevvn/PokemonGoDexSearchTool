@@ -22,7 +22,7 @@ import {
   syncLivePvPokeAndDialgaDex,
   computeMetaIdSets,
 } from '../utils/metaSyncService';
-import { compressIdRanges } from '../utils/searchUtils';
+import { compressIdRanges, compileDnfToPogoCnf } from '../utils/searchUtils';
 
 const GLOBAL_REGIONAL_NEGATION = GLOBAL_REGIONAL_ROTOM_UNOWN_RANGES
   .split(',')
@@ -499,6 +499,18 @@ function TriagePipelineView({
   const [activeMetaLeagueTab, setActiveMetaLeagueTab] = useState('great_league');
   const [metaSearchFilter, setMetaSearchFilter] = useState('');
 
+  // Interactive AND (&) / OR (,) CNF Rule Combiner state
+  const [cnfBranches, setCnfBranches] = useState([
+    '4*',
+    'gigantamax',
+    'shiny&shadow',
+    'shiny&legendary',
+    'shiny&mythical',
+    'shiny&ultra beasts',
+    'shiny&locationbackground',
+  ]);
+  const [newBranchInput, setNewBranchInput] = useState('');
+
   // Load Temporal + Focusgroup polyfill (mwg: tabs & calculate-event-differentials)
   useEffect(() => {
     ensureTemporalReady().then(() => {
@@ -877,6 +889,28 @@ function TriagePipelineView({
 
   const prefix = untaggedOnly ? '!#&' : '';
 
+  const crownJewelsCnfString = useMemo(
+    () =>
+      compileDnfToPogoCnf(
+        [
+          '4*',
+          'gigantamax',
+          'shiny&shadow',
+          'shiny&legendary',
+          'shiny&mythical',
+          'shiny&ultra beasts',
+          'shiny&locationbackground',
+        ],
+        untaggedOnly ? ['!#'] : []
+      ),
+    [untaggedOnly]
+  );
+
+  const customCompiledCnfString = useMemo(
+    () => compileDnfToPogoCnf(cnfBranches, untaggedOnly ? ['!#'] : []),
+    [cnfBranches, untaggedOnly]
+  );
+
   // Timeline Year Slicer Plan
   const yearSlicerPlan = useMemo(
     () =>
@@ -1064,7 +1098,7 @@ function TriagePipelineView({
   return (
     <div className="max-w-7xl mx-auto w-full pb-24">
       {/* Sticky Single-Row Tablist + Compact Quick Controls */}
-      <div className="sticky top-[48px] sm:top-[52px] z-30 bg-white/95 backdrop-blur-md border-b border-teal-200/90 shadow-2xs">
+      <div className="sticky top-[44px] sm:top-[48px] z-30 bg-white/95 backdrop-blur-md border-b border-teal-200/90 shadow-2xs">
         <div className="max-w-7xl mx-auto px-2 sm:px-4">
           {/* Single-Row Horizontally Scrolling Tablist (mwg: tabs) */}
           <div
@@ -1158,11 +1192,11 @@ function TriagePipelineView({
               </summary>
               <div className="p-2.5 border-t border-amber-100 mwg-card-grid">
                 <SearchRecipeCard
-                  badge="1A • Crown Jewels"
+                  badge="1A • Crown Jewels (CNF)"
                   title="4*, Gigantamax, Shiny Shadows, Shiny Legendaries & Shiny Location BGs"
                   tagSuggestion="Trophy"
-                  subtitle="Permanent account locks across 100% IVs, G-Max factor, and apex shiny variants."
-                  searchString={`${prefix}4*,gigantamax,shiny&shadow,shiny&legendary,shiny&mythical,shiny&ultra beasts,shiny&locationbackground`}
+                  subtitle="Distributed CNF (X,Y & X,Z) so PoGO matches any 4*, any G-Max, OR any Shiny Shadow/Legendary/Mythical/UB/Location BG."
+                  searchString={crownJewelsCnfString}
                   accent="amber"
                   onLoadToBar={onLoadSearchString}
                 />
@@ -1484,6 +1518,131 @@ function TriagePipelineView({
                   subtitle={`Max Battles cap at 3 per team. Male Combee/Salandit: ${prefix}415,757&male&!shiny&!4*&!favorite`}
                   searchString={`${prefix}dynamax&!gigantamax&count4-&0*,1*,2*&!shiny&!background&!costume&!favorite&!lucky`}
                   accent="rose"
+                  onLoadToBar={onLoadSearchString}
+                />
+              </div>
+            </details>
+
+            {/* Phase 7: Interactive AND (&) / OR (,) Rule Combiner (PoGO CNF Compiler) */}
+            <details className="rounded-2xl border border-teal-300 bg-white/95 overflow-hidden shadow-2xs">
+              <summary className="px-3.5 py-2.5 bg-teal-50/80 text-xs font-black text-teal-950 select-none">
+                <span className="flex-1 flex items-center justify-between gap-2">
+                  <span>🔗 AND (&amp;) / OR (,) Rule Combiner (PoGO CNF Compiler)</span>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-teal-600 text-white">
+                    (X,Y)&amp;(X,Z)
+                  </span>
+                </span>
+              </summary>
+              <div className="p-3 border-t border-teal-100 space-y-2.5 text-xs">
+                <p className="text-[11px] text-slate-600 leading-snug">
+                  In Pokémon GO, <code className="font-mono font-bold text-slate-900">,</code> (OR) has <strong>higher precedence</strong> than <code className="font-mono font-bold text-slate-900">&amp;</code> (AND). Writing <code className="font-mono text-rose-700">A,B&amp;C</code> is parsed as <code className="font-mono text-rose-700">(A OR B) AND C</code>. This compiler distributes <code className="font-mono font-bold">OR</code> over <code className="font-mono font-bold">AND</code> (<code className="font-mono font-bold text-teal-800">A,B &amp; A,C</code>) so every branch works properly.
+                </p>
+
+                {/* Quick Presets */}
+                <div className="flex flex-wrap gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setCnfBranches([
+                        '4*',
+                        'gigantamax',
+                        'shiny&shadow',
+                        'shiny&legendary',
+                        'shiny&mythical',
+                        'shiny&ultra beasts',
+                        'shiny&locationbackground',
+                      ])
+                    }
+                    className="compact-inline-chip min-h-[28px] px-2.5 py-0.5 rounded-lg text-[10px] font-black bg-amber-50 hover:bg-amber-100 text-amber-950 border border-amber-300 cursor-pointer"
+                  >
+                    Preset: Crown Jewels
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setCnfBranches([
+                        'shiny&legendary',
+                        '4*&legendary',
+                        'locationbackground&legendary',
+                      ])
+                    }
+                    className="compact-inline-chip min-h-[28px] px-2.5 py-0.5 rounded-lg text-[10px] font-black bg-purple-50 hover:bg-purple-100 text-purple-950 border border-purple-300 cursor-pointer"
+                  >
+                    Preset: Trophy Legendaries
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setCnfBranches([
+                        '3*,4*&shadow',
+                        '0-1attack&3-4defense&3-4hp&cp-2500',
+                      ])
+                    }
+                    className="compact-inline-chip min-h-[28px] px-2.5 py-0.5 rounded-lg text-[10px] font-black bg-emerald-50 hover:bg-emerald-100 text-emerald-950 border border-emerald-300 cursor-pointer"
+                  >
+                    Preset: Shadow 3*-4* OR PvP Bulk
+                  </button>
+                </div>
+
+                {/* Active OR Branches (each branch can contain & conditions) */}
+                <div className="flex flex-wrap items-center gap-1.5 bg-slate-50 p-2 rounded-xl border border-slate-200">
+                  {cnfBranches.map((br, idx) => (
+                    <React.Fragment key={`${br}-${idx}`}>
+                      {idx > 0 && (
+                        <span className="text-[10px] font-black text-teal-700 px-0.5">OR</span>
+                      )}
+                      <span className="inline-flex items-center gap-1 bg-white border border-teal-300 rounded-lg px-2 py-0.5 font-mono text-[11px] font-bold text-slate-900">
+                        <span>({br})</span>
+                        <button
+                          type="button"
+                          onClick={() => setCnfBranches((prev) => prev.filter((_, i) => i !== idx))}
+                          aria-label={`Remove branch ${br}`}
+                          className="compact-inline-chip text-rose-600 hover:text-rose-800 font-black ml-0.5 cursor-pointer"
+                        >
+                          ✕
+                        </button>
+                      </span>
+                    </React.Fragment>
+                  ))}
+                </div>
+
+                {/* Add New AND-Branch Input */}
+                <div className="flex items-center gap-1.5">
+                  <input
+                    type="text"
+                    value={newBranchInput}
+                    onChange={(e) => setNewBranchInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && newBranchInput.trim()) {
+                        e.preventDefault();
+                        setCnfBranches((prev) => [...prev, newBranchInput.trim()]);
+                        setNewBranchInput('');
+                      }
+                    }}
+                    placeholder="Add branch (e.g. shiny&costume or 4*)"
+                    aria-label="Add OR branch with AND conditions"
+                    className="flex-1 min-w-0 px-3 py-1.5 rounded-xl border border-slate-300 text-base sm:text-xs font-mono font-bold text-slate-800 bg-slate-50 focus:outline-none focus:bg-white focus:border-teal-500"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (newBranchInput.trim()) {
+                        setCnfBranches((prev) => [...prev, newBranchInput.trim()]);
+                        setNewBranchInput('');
+                      }
+                    }}
+                    className="compact-inline-chip min-h-[34px] px-3 py-1.5 rounded-xl text-xs font-black bg-teal-600 hover:bg-teal-700 text-white cursor-pointer shrink-0"
+                  >
+                    + OR Branch
+                  </button>
+                </div>
+
+                <SearchRecipeCard
+                  badge={`${customCompiledCnfString.split('&').filter(Boolean).length} CNF AND-Clauses`}
+                  title="Compiled Pokémon GO CNF Search String"
+                  subtitle="Distributes OR (,) over AND (&) and absorbs redundant supersets."
+                  searchString={customCompiledCnfString}
+                  accent="teal"
                   onLoadToBar={onLoadSearchString}
                 />
               </div>

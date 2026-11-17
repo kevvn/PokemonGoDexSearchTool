@@ -31,7 +31,10 @@
     font-family: 'Outfit', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     background-color: #e4f4ee;
     color: #1e293b;
-    overflow-wrap: anywhere;
+  }
+
+  p, li {
+    overflow-wrap: break-word;
   }
 
   h1, h2, h3 {
@@ -89,9 +92,17 @@
   padding-right: max(0.75rem, env(safe-area-inset-right, 0px));
 }
 
-/* Container-query adaptive short/long label (mwg: single-line-overflow) */
-.mwg-adaptive-slot {
+/* Container-query adaptive short/long label (mwg: single-line-overflow)
+   IMPORTANT: `container-type: inline-size` MUST live on the full-width `.mwg-header-row` wrapper,
+   NEVER on an intrinsic-width `<button>`, otherwise CSS size containment collapses the button's
+   intrinsic inline content width to 0px! */
+.mwg-header-row {
   container-type: inline-size;
+  width: 100%;
+}
+
+.mwg-adaptive-slot {
+  white-space: nowrap;
 }
 
 .mwg-adaptive-slot .short {
@@ -99,7 +110,7 @@
   user-select: none;
 }
 
-@container (inline-size < 13em) {
+@container (inline-size < 32rem) {
   .mwg-adaptive-slot .long {
     position: absolute;
     inline-size: 1px;

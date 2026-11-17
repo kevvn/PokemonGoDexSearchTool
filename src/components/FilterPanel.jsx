@@ -60,6 +60,7 @@ function FilterPanel({ filters, setFilters, onClose, handleInvertSelection }) {
       ageMin: '',
       ageMax: '',
       types: [],
+      attributeLogic: 'AND',
       ...ATTRIBUTES.reduce((acc, attr) => ({ ...acc, [attr]: null }), {})
     });
   };
@@ -266,9 +267,41 @@ function FilterPanel({ filters, setFilters, onClose, handleInvertSelection }) {
 
         {/* Attributes Segmented Control with Category Tabs */}
         <div className="space-y-2.5">
-          <h4 className="font-black text-slate-600 text-[10px] tracking-widest uppercase border-b border-teal-100 pb-1 flex items-center gap-1.5">
-            <span>🏷️</span> Attributes & Modifiers
-          </h4>
+          <div className="flex items-center justify-between gap-2 border-b border-teal-100 pb-1.5">
+            <h4 className="font-black text-slate-600 text-[10px] tracking-widest uppercase flex items-center gap-1.5">
+              <span>🏷️</span> Attributes & Modifiers
+            </h4>
+
+            {/* AND (&) vs OR (,) Combiner Toggle for Positive Attributes */}
+            <div className="inline-flex items-center rounded-full bg-slate-100 p-0.5 border border-slate-200 text-[10px] font-black select-none">
+              <button
+                type="button"
+                onClick={() => setFilters(prev => ({ ...prev, attributeLogic: 'AND' }))}
+                aria-pressed={(filters.attributeLogic || 'AND') === 'AND'}
+                className={`px-2 py-0.5 rounded-full transition-colors cursor-pointer ${
+                  (filters.attributeLogic || 'AND') === 'AND'
+                    ? 'bg-teal-600 text-white shadow-2xs'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+                title="Join included attributes with & (AND — must match all)"
+              >
+                &amp; AND
+              </button>
+              <button
+                type="button"
+                onClick={() => setFilters(prev => ({ ...prev, attributeLogic: 'OR' }))}
+                aria-pressed={filters.attributeLogic === 'OR'}
+                className={`px-2 py-0.5 rounded-full transition-colors cursor-pointer ${
+                  filters.attributeLogic === 'OR'
+                    ? 'bg-indigo-600 text-white shadow-2xs'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+                title="Join included attributes with , (OR — match any)"
+              >
+                , OR
+              </button>
+            </div>
+          </div>
 
           {/* Category Tabs */}
           <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1 select-none">
