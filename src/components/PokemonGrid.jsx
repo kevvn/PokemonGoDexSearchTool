@@ -3,7 +3,7 @@ import { areRegionPropsEqual } from '../utils/gridUtils';
 import { getFamilyIds } from '../utils/familyUtils';
 
 // Fallback Pokéball SVG data URL for broken sprite image handling
-const FALLBACK_SPRITE = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%23ef4444'/%3E%3Cpath d='M5 50h90A45 45 0 0 1 5 50' fill='%23f8fafc'/%3E%3Cpath d='M5 50h90' stroke='%230f172a' stroke-width='8'/%3E%3Ccircle cx='50' cy='50' r='16' fill='%230f172a'/%3E%3Ccircle cx='50' cy='50' r='10' fill='%23f8fafc'/%3E%3C/svg%3E";
+const FALLBACK_SPRITE = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%23ff385c'/%3E%3Cpath d='M5 50h90A45 45 0 0 1 5 50' fill='%23f8fafc'/%3E%3Cpath d='M5 50h90' stroke='%23112d35' stroke-width='8'/%3E%3Ccircle cx='50' cy='50' r='16' fill='%23112d35'/%3E%3Ccircle cx='50' cy='50' r='10' fill='%23f8fafc'/%3E%3C/svg%3E";
 
 const PokemonCard = React.memo(({ pokemon, selected, toggle, onSelectFamily }) => {
   const primaryType = pokemon.types[0] || 'normal';
@@ -26,6 +26,9 @@ const PokemonCard = React.memo(({ pokemon, selected, toggle, onSelectFamily }) =
     e.currentTarget.src = FALLBACK_SPRITE;
   };
 
+  // Format ID with leading zeros (e.g., #001, #025, #150)
+  const formattedId = String(pokemon.id).padStart(3, '0');
+
   return (
     <div
       role="button"
@@ -34,63 +37,69 @@ const PokemonCard = React.memo(({ pokemon, selected, toggle, onSelectFamily }) =
       tabIndex={0}
       onClick={(e) => toggle(pokemon.id, e)}
       onKeyDown={handleKeyDown}
-      className={`relative cursor-pointer rounded-2xl p-3 flex flex-col items-center transition-all duration-200 select-none border group/card hover:scale-[1.04] hover:active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${
-        selected
-          ? `bg-slate-900 border-slate-700 ring-2 ring-blue-500/40 shadow-type-${primaryType}`
-          : 'bg-slate-900/60 border-slate-800/80 hover:bg-slate-850 hover:border-slate-700'
+      className={`relative cursor-pointer rounded-3xl p-3 flex flex-col items-center select-none group/card focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 ${
+        selected ? 'pogo-card-selected' : 'pogo-card'
       }`}
     >
       {/* Pokédex ID and Family Shortcut */}
-      <div className="flex justify-between w-full items-center mb-1">
-        <span className="text-[10px] text-slate-500 font-mono font-bold tracking-wider">#{pokemon.id}</span>
+      <div className="flex justify-between w-full items-center mb-1 z-10">
+        <span className="text-[11px] font-black text-slate-500 font-mono tracking-wider">
+          #{formattedId}
+        </span>
         
         <button
           onClick={handleFamilyClick}
-          title={`Select entire evolution line for ${pokemon.name}`}
+          title={`Select entire evolution family for ${pokemon.name}`}
           aria-label={`Select evolution family for ${pokemon.name}`}
-          className="opacity-0 group-hover/card:opacity-100 focus:opacity-100 text-[9px] bg-slate-800 hover:bg-slate-750 text-blue-400 hover:text-blue-300 font-bold px-1.5 py-0.5 rounded border border-slate-700 transition-all cursor-pointer"
+          className="opacity-0 group-hover/card:opacity-100 focus:opacity-100 text-[9px] bg-teal-50 hover:bg-teal-100 text-teal-800 hover:text-teal-900 font-black px-2 py-0.5 rounded-full border border-teal-200 transition-all cursor-pointer shadow-sm"
         >
-          + Family
+          🍬 Family
         </button>
       </div>
 
-      {/* Image with glow effect */}
-      <div className="relative w-20 h-20 flex items-center justify-center mb-2">
-        <div className={`absolute inset-0 rounded-full blur-xl opacity-0 group-hover/card:opacity-20 transition-opacity duration-300 bg-type-${primaryType}`}></div>
+      {/* Pokémon GO Spotlight Platform with Sprite */}
+      <div className="relative w-24 h-24 flex items-center justify-center my-1">
+        {/* Grassy / Circular Stage Pedestal */}
+        <div className="pogo-pedestal" />
+        
+        {/* Soft Type Glow */}
+        <div className={`absolute inset-0 rounded-full blur-xl opacity-15 group-hover/card:opacity-35 transition-opacity duration-300 bg-type-${primaryType}`}></div>
+        
         <img
           src={pokemon.sprite}
           alt={pokemon.name}
           onError={handleImageError}
-          className="w-20 h-20 object-contain rendering-pixelated relative z-10 drop-shadow-[0_4px_6px_rgba(0,0,0,0.3)] transition-transform duration-300 group-hover/card:scale-110"
+          className="w-20 h-20 object-contain rendering-pixelated relative z-10 drop-shadow-[0_4px_6px_rgba(0,40,30,0.25)] transition-transform duration-200 group-hover/card:scale-110"
           loading="lazy"
           width="80"
           height="80"
         />
       </div>
 
-      {/* Name */}
-      <div className="text-xs font-bold capitalize text-slate-200 text-center truncate w-full px-1 mb-2 group-hover/card:text-white">
+      {/* Name in Bold PoGo Style */}
+      <div className="text-xs font-black capitalize text-slate-800 text-center truncate w-full px-1 mb-2 group-hover/card:text-teal-700 tracking-tight">
         {pokemon.name.replace(/-/g, ' ')}
       </div>
 
-      {/* Modern Type Badges */}
-      <div className="flex gap-1 justify-center w-full mt-auto">
+      {/* Pokémon GO Type Capsules */}
+      <div className="flex gap-1 justify-center w-full mt-auto z-10">
         {pokemon.types.map(t => (
           <span
             key={t}
-            className={`text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded-md text-white/90 shadow-sm border border-white/5 bg-type-${t}`}
+            className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full text-white shadow-sm border border-white/20 bg-type-${t} tracking-wider`}
           >
             {t.substring(0, 4)}
           </span>
         ))}
       </div>
 
-      {/* Selection Checkmark Bubble */}
+      {/* Pokémon GO Selection Badge */}
       {selected && (
-        <div className="absolute -top-1.5 -right-1.5 bg-blue-500 text-slate-950 rounded-full w-5 h-5 flex items-center justify-center border-2 border-slate-950 shadow-[0_0_10px_rgba(59,130,246,0.6)] animate-float">
-          <svg className="w-3.5 h-3.5 fill-current text-white" viewBox="0 0 20 20">
-            <path d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" fillRule="evenodd"/>
-          </svg>
+        <div className="absolute -top-1.5 -right-1.5 pokeball-badge shadow-md animate-float z-20">
+          <div className="pokeball-badge-top" />
+          <div className="pokeball-badge-bottom" />
+          <div className="pokeball-badge-band" />
+          <div className="pokeball-badge-center" />
         </div>
       )}
     </div>
@@ -108,29 +117,29 @@ const RegionSection = React.memo(({ region, pokemons, selectedIds, togglePokemon
   return (
     <div 
       id={`region-${region}`} 
-      className="scroll-mt-48 bg-slate-900/30 rounded-3xl p-5 border border-slate-900/80 shadow-md mb-8 region-section-optimized"
+      className="scroll-mt-48 bg-white/70 rounded-3xl p-5 border border-teal-100 shadow-sm mb-8 region-section-optimized backdrop-blur-md"
       style={{ contentVisibility: 'auto', containIntrinsicSize: '0 500px' }}
     >
       {/* Region Section Header (Desktop) */}
-      <div className="hidden md:flex items-center justify-between mb-6 pb-4 border-b border-slate-800/80">
+      <div className="hidden md:flex items-center justify-between mb-6 pb-4 border-b border-teal-100">
         <div 
-          className="flex items-center gap-3 cursor-pointer select-none" 
+          className="flex items-center gap-3.5 cursor-pointer select-none group/title" 
           onClick={() => toggleCollapse(region)}
           role="button"
           tabIndex={0}
           aria-expanded={!isCollapsed}
           aria-controls={`region-grid-${region}`}
         >
-          <div className="bg-gradient-to-b from-blue-500 to-indigo-600 w-1.5 h-9 rounded-full shadow-[0_0_10px_rgba(59,130,246,0.5)]"></div>
+          <div className="bg-gradient-to-b from-[#00d2b4] to-[#1b7a69] w-2 h-9 rounded-full shadow-[0_0_8px_rgba(0,210,180,0.5)]"></div>
           <div>
-            <h2 className="text-xl font-extrabold text-slate-100 tracking-wide flex items-center gap-2 hover:text-white transition-colors">
+            <h2 className="text-lg font-black text-slate-800 tracking-wider uppercase flex items-center gap-2 group-hover/title:text-teal-700 transition-colors">
               {region}
-              <span className={`transition-transform duration-300 text-slate-500 text-xs ${isCollapsed ? '-rotate-90' : 'rotate-0'}`}>
+              <span className={`transition-transform duration-300 text-teal-600 text-xs ${isCollapsed ? '-rotate-90' : 'rotate-0'}`}>
                 ▼
               </span>
             </h2>
-            <span className="text-xs font-semibold text-slate-500 mt-0.5 block">
-              {selectedCount} selected / {totalCount} Species
+            <span className="text-[11px] font-bold text-slate-500 mt-0.5 block tracking-wide">
+              <span className="text-teal-700 font-black">{selectedCount}</span> Selected / {totalCount} Species
             </span>
           </div>
         </div>
@@ -140,7 +149,7 @@ const RegionSection = React.memo(({ region, pokemons, selectedIds, togglePokemon
           {!allSelected && (
             <button
               onClick={() => handleRegionSelection(pokemons.map(p => p.id), true)}
-              className="px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all duration-200 bg-slate-850 hover:bg-slate-800 border border-slate-850 text-slate-300 hover:text-white cursor-pointer"
+              className="px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider transition-all duration-200 bg-teal-50 hover:bg-teal-100 border border-teal-300 text-teal-800 cursor-pointer shadow-sm"
             >
               Select All
             </button>
@@ -148,7 +157,7 @@ const RegionSection = React.memo(({ region, pokemons, selectedIds, togglePokemon
           {someSelected && (
             <button
               onClick={() => handleRegionSelection(pokemons.map(p => p.id), false)}
-              className="px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all duration-200 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 text-blue-400 hover:text-blue-300 cursor-pointer"
+              className="px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider transition-all duration-200 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 cursor-pointer shadow-sm"
             >
               Deselect All
             </button>
@@ -183,7 +192,8 @@ function PokemonGrid({
   setSearchQuery,
   selectedOnly,
   setSelectedOnly,
-  onRegionVisible
+  onRegionVisible,
+  onOpenFilters
 }) {
   const [collapsedRegions, setCollapsedRegions] = useState({});
   const lastClickedId = useRef(null);
@@ -220,9 +230,12 @@ function PokemonGrid({
       }
     });
 
-    visibleListRef.current = visible;
     return { groupedRegions: grouped, visibleList: visible };
   }, [pokemonList, searchQuery, selectedOnly, selectedIds]);
+
+  useEffect(() => {
+    visibleListRef.current = visibleList;
+  }, [visibleList]);
 
   const toggleCollapse = useCallback((region) => {
     setCollapsedRegions(prev => ({
@@ -289,51 +302,63 @@ function PokemonGrid({
   return (
     <div className="space-y-6 pb-36 px-4 md:px-6 max-w-7xl mx-auto mt-4">
       
-      {/* Grid Toolbar */}
-      <div className="glass-panel rounded-3xl p-4 md:p-5 flex flex-col md:flex-row items-center gap-4 justify-between shadow-xl">
+      {/* Pokémon GO Style Search & Control Bar */}
+      <div className="bg-white/95 rounded-3xl p-4 md:p-5 flex flex-col md:flex-row items-center gap-4 justify-between shadow-lg border border-teal-100 backdrop-blur-md">
         
-        {/* Live Search Input */}
+        {/* Capsule Search Input */}
         <div className="relative w-full md:max-w-md">
-          <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
-            🔍
+          <span className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-teal-600">
+            <svg className="w-4 h-4 fill-current" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
+            </svg>
           </span>
           <input
             type="text"
-            placeholder="Search by Name, Dex #, or Type..."
+            placeholder="Search Pokémon by Name, Dex #, or Type..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             aria-label="Search Pokémon by Name, Dex Number, or Type"
-            className="w-full pl-10 pr-10 py-2.5 rounded-2xl bg-slate-950/80 border border-slate-800 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/50 transition-all font-medium"
+            className="w-full pl-11 pr-10 py-2.5 rounded-full bg-slate-50 border border-teal-200 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-teal-500 focus:ring-2 focus:ring-teal-400/20 transition-all font-semibold shadow-inner"
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery('')}
               aria-label="Clear search input"
-              className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-500 hover:text-slate-300 font-bold cursor-pointer"
+              className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-700 font-bold cursor-pointer"
             >
               ✕
             </button>
           )}
         </div>
 
-        {/* Filters and Utility Switches */}
-        <div className="flex flex-wrap items-center gap-4 w-full md:w-auto justify-end">
+        {/* Action Controls */}
+        <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto justify-end">
           
-          {/* Selected Only Toggle */}
+          {/* Quick Filter Sheet Button */}
+          <button
+            onClick={onOpenFilters}
+            aria-label="Open Filter Controls Sheet"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-full text-xs font-black uppercase tracking-wider bg-teal-600 hover:bg-teal-500 text-white transition-all cursor-pointer shadow-md"
+          >
+            <span>⚙️</span>
+            <span>Filters</span>
+          </button>
+
+          {/* Selected Only Toggle (PoGo Star Badge Style) */}
           <button
             onClick={() => setSelectedOnly(prev => !prev)}
             aria-pressed={selectedOnly}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all border cursor-pointer ${
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-xs font-black uppercase tracking-wider transition-all border cursor-pointer ${
               selectedOnly
-                ? 'bg-blue-500 text-slate-950 border-blue-400 shadow-[0_0_12px_rgba(59,130,246,0.3)] hover:bg-blue-400'
-                : 'bg-slate-950/80 border-slate-800 text-slate-400 hover:text-slate-350 hover:border-slate-700'
+                ? 'bg-amber-400 text-slate-900 border-amber-300 shadow-[0_0_12px_rgba(251,191,36,0.5)] font-black'
+                : 'bg-white border-teal-200 text-slate-700 hover:bg-teal-50 hover:border-teal-400 shadow-sm'
             }`}
           >
-            <span className="text-[14px]">⭐</span>
-            Selected Only ({selectedIds.size})
+            <span className="text-sm">⭐</span>
+            <span>Selected ({selectedIds.size})</span>
           </button>
 
-          {/* Quick Clear Current Search View Selection */}
+          {/* Quick Select / Deselect Visible */}
           {visibleList.length > 0 && (
             <button
               onClick={() => {
@@ -341,7 +366,7 @@ function PokemonGrid({
                 const hasAnySelected = visibleIds.some(id => selectedIds.has(id));
                 handleRegionSelection(visibleIds, !hasAnySelected);
               }}
-              className="px-4 py-2.5 rounded-2xl text-xs font-bold transition-all bg-slate-850 hover:bg-slate-800 border border-slate-800 text-slate-300 cursor-pointer"
+              className="px-4 py-2.5 rounded-full text-xs font-black uppercase tracking-wider transition-all bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-700 hover:text-slate-900 cursor-pointer shadow-sm"
             >
               {visibleList.some(p => selectedIds.has(p.id)) ? 'Deselect Visible' : 'Select Visible'}
             </button>
@@ -351,11 +376,11 @@ function PokemonGrid({
 
       {/* Grid Empty State */}
       {visibleList.length === 0 && (
-        <div className="glass-panel rounded-3xl p-12 text-center border border-slate-900 shadow-inner">
-          <div className="text-4xl mb-3">🕵️‍♂️</div>
-          <h3 className="text-lg font-bold text-slate-300">No Pokémon found</h3>
-          <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
-            Try adjusting your search query or toggling off the "Selected Only" filter state.
+        <div className="bg-white/80 rounded-3xl p-12 text-center border border-teal-100 shadow-sm">
+          <div className="text-5xl mb-3 animate-float">🔍</div>
+          <h3 className="text-lg font-black text-slate-700 uppercase tracking-wide">No Pokémon found</h3>
+          <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto font-medium">
+            Try adjusting your search query or toggling off the "Selected Only" filter.
           </p>
         </div>
       )}

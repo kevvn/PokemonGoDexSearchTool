@@ -1,0 +1,7718 @@
+{
+  "lastUpdated": "2026-11-12T05:33:17.780Z",
+  "source": {
+    "pvp": "PvPoke (raw.githubusercontent.com/pvpoke/pvpoke - Top 100 GL/UL/ML)",
+    "pve": "DialgaDex eDPS / DPS Raid Meta Benchmarks"
+  },
+  "pvp": {
+    "great_league": {
+      "entries": [
+        {
+          "rank": 1,
+          "speciesId": "melmetal",
+          "speciesName": "Melmetal",
+          "dexId": 809,
+          "familyIds": [
+            808,
+            809
+          ],
+          "score": 93.9,
+          "fastMove": "Thunder Shock",
+          "chargedMoves": [
+            "Double Iron Bash",
+            "Dynamic Punch"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 2,
+          "speciesId": "altaria",
+          "speciesName": "Altaria",
+          "dexId": 334,
+          "familyIds": [
+            333,
+            334
+          ],
+          "score": 92.8,
+          "fastMove": "Dragon Breath",
+          "chargedMoves": [
+            "Moonblast",
+            "Flamethrower"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 3,
+          "speciesId": "ninetales_shadow",
+          "speciesName": "Ninetales (Shadow)",
+          "dexId": 38,
+          "familyIds": [
+            37,
+            38
+          ],
+          "score": 92.6,
+          "fastMove": "Ember",
+          "chargedMoves": [
+            "Weather Ball Fire",
+            "Energy Ball"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 4,
+          "speciesId": "mimikyu",
+          "speciesName": "Mimikyu (Busted)",
+          "dexId": 778,
+          "familyIds": [
+            778
+          ],
+          "score": 92,
+          "fastMove": "Shadow Claw",
+          "chargedMoves": [
+            "Shadow Sneak",
+            "Play Rough"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 5,
+          "speciesId": "cramorant",
+          "speciesName": "Cramorant",
+          "dexId": 845,
+          "familyIds": [
+            845
+          ],
+          "score": 91.6,
+          "fastMove": "Peck",
+          "chargedMoves": [
+            "Surf",
+            "Fly"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 6,
+          "speciesId": "tinkaton",
+          "speciesName": "Tinkaton",
+          "dexId": 959,
+          "familyIds": [
+            957,
+            958,
+            959
+          ],
+          "score": 91.6,
+          "fastMove": "Fairy Wind",
+          "chargedMoves": [
+            "Gigaton Hammer",
+            "Bulldoze"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 7,
+          "speciesId": "altaria_shadow",
+          "speciesName": "Altaria (Shadow)",
+          "dexId": 334,
+          "familyIds": [
+            333,
+            334
+          ],
+          "score": 91.5,
+          "fastMove": "Dragon Breath",
+          "chargedMoves": [
+            "Moonblast",
+            "Flamethrower"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 8,
+          "speciesId": "corviknight",
+          "speciesName": "Corviknight",
+          "dexId": 823,
+          "familyIds": [
+            821,
+            822,
+            823
+          ],
+          "score": 91.4,
+          "fastMove": "Sand Attack",
+          "chargedMoves": [
+            "Air Cutter",
+            "Iron Head"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 9,
+          "speciesId": "corsola_galarian",
+          "speciesName": "Corsola (Galarian)",
+          "dexId": 222,
+          "familyIds": [
+            222,
+            864
+          ],
+          "score": 91.3,
+          "fastMove": "Astonish",
+          "chargedMoves": [
+            "Night Shade",
+            "Power Gem"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 10,
+          "speciesId": "florges",
+          "speciesName": "Florges",
+          "dexId": 671,
+          "familyIds": [
+            669,
+            670,
+            671
+          ],
+          "score": 91.3,
+          "fastMove": "Fairy Wind",
+          "chargedMoves": [
+            "Chilling Water",
+            "Moonblast"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 11,
+          "speciesId": "quagsire_shadow",
+          "speciesName": "Quagsire (Shadow)",
+          "dexId": 195,
+          "familyIds": [
+            194,
+            195,
+            980
+          ],
+          "score": 91.2,
+          "fastMove": "Mud Shot",
+          "chargedMoves": [
+            "Aqua Tail",
+            "Stone Edge"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 12,
+          "speciesId": "quagsire",
+          "speciesName": "Quagsire",
+          "dexId": 195,
+          "familyIds": [
+            194,
+            195,
+            980
+          ],
+          "score": 91.1,
+          "fastMove": "Mud Shot",
+          "chargedMoves": [
+            "Aqua Tail",
+            "Stone Edge"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 13,
+          "speciesId": "corviknight_shadow",
+          "speciesName": "Corviknight (Shadow)",
+          "dexId": 823,
+          "familyIds": [
+            821,
+            822,
+            823
+          ],
+          "score": 91,
+          "fastMove": "Sand Attack",
+          "chargedMoves": [
+            "Air Cutter",
+            "Iron Head"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 14,
+          "speciesId": "ninetales",
+          "speciesName": "Ninetales",
+          "dexId": 38,
+          "familyIds": [
+            37,
+            38
+          ],
+          "score": 90.9,
+          "fastMove": "Ember",
+          "chargedMoves": [
+            "Weather Ball Fire",
+            "Energy Ball"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 15,
+          "speciesId": "clodsire",
+          "speciesName": "Clodsire",
+          "dexId": 980,
+          "familyIds": [
+            194,
+            195,
+            980
+          ],
+          "score": 90.6,
+          "fastMove": "Poison Sting",
+          "chargedMoves": [
+            "Earthquake",
+            "Stone Edge"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 16,
+          "speciesId": "hydreigon_shadow",
+          "speciesName": "Hydreigon (Shadow)",
+          "dexId": 635,
+          "familyIds": [
+            633,
+            634,
+            635
+          ],
+          "score": 90.6,
+          "fastMove": "Dragon Breath",
+          "chargedMoves": [
+            "Brutal Swing",
+            "Fly"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 17,
+          "speciesId": "sableye_shadow",
+          "speciesName": "Sableye (Shadow)",
+          "dexId": 302,
+          "familyIds": [
+            302
+          ],
+          "score": 90.6,
+          "fastMove": "Shadow Claw",
+          "chargedMoves": [
+            "Foul Play",
+            "Drain Punch"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 18,
+          "speciesId": "thievul",
+          "speciesName": "Thievul",
+          "dexId": 828,
+          "familyIds": [
+            827,
+            828
+          ],
+          "score": 90.5,
+          "fastMove": "Sucker Punch",
+          "chargedMoves": [
+            "Night Slash",
+            "Icy Wind"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 19,
+          "speciesId": "araquanid",
+          "speciesName": "Araquanid",
+          "dexId": 752,
+          "familyIds": [
+            751,
+            752
+          ],
+          "score": 90.4,
+          "fastMove": "Infestation",
+          "chargedMoves": [
+            "Water Pulse",
+            "Mirror Coat"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 20,
+          "speciesId": "jellicent",
+          "speciesName": "Jellicent",
+          "dexId": 593,
+          "familyIds": [
+            592,
+            593
+          ],
+          "score": 90.3,
+          "fastMove": "Hex",
+          "chargedMoves": [
+            "Surf",
+            "Shadow Ball"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 21,
+          "speciesId": "stunfisk",
+          "speciesName": "Stunfisk",
+          "dexId": 618,
+          "familyIds": [
+            618
+          ],
+          "score": 90.3,
+          "fastMove": "Thunder Shock",
+          "chargedMoves": [
+            "Mud Bomb",
+            "Discharge"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 22,
+          "speciesId": "fearow",
+          "speciesName": "Fearow",
+          "dexId": 22,
+          "familyIds": [
+            21,
+            22
+          ],
+          "score": 90.2,
+          "fastMove": "Peck",
+          "chargedMoves": [
+            "Drill Peck",
+            "Drill Run"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 23,
+          "speciesId": "marowak",
+          "speciesName": "Marowak",
+          "dexId": 105,
+          "familyIds": [
+            104,
+            105
+          ],
+          "score": 90.1,
+          "fastMove": "Mud Slap",
+          "chargedMoves": [
+            "Bone Club",
+            "Rock Slide"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 24,
+          "speciesId": "snorlax",
+          "speciesName": "Snorlax",
+          "dexId": 143,
+          "familyIds": [
+            143,
+            446
+          ],
+          "score": 90.1,
+          "fastMove": "Psywave",
+          "chargedMoves": [
+            "Body Slam",
+            "Earthquake"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 25,
+          "speciesId": "umbreon",
+          "speciesName": "Umbreon",
+          "dexId": 197,
+          "familyIds": [
+            133,
+            134,
+            135,
+            136,
+            196,
+            197,
+            470,
+            471,
+            700
+          ],
+          "score": 90.1,
+          "fastMove": "Snarl",
+          "chargedMoves": [
+            "Dark Pulse",
+            "Last Resort"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 26,
+          "speciesId": "vigoroth",
+          "speciesName": "Vigoroth",
+          "dexId": 288,
+          "familyIds": [
+            287,
+            288,
+            289
+          ],
+          "score": 90.1,
+          "fastMove": "Scratch",
+          "chargedMoves": [
+            "Body Slam",
+            "Bulldoze"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 27,
+          "speciesId": "annihilape",
+          "speciesName": "Annihilape",
+          "dexId": 979,
+          "familyIds": [
+            56,
+            57,
+            979
+          ],
+          "score": 90,
+          "fastMove": "Low Kick",
+          "chargedMoves": [
+            "Rage Fist",
+            "Ice Punch"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 28,
+          "speciesId": "mantine",
+          "speciesName": "Mantine",
+          "dexId": 226,
+          "familyIds": [
+            226,
+            458
+          ],
+          "score": 90,
+          "fastMove": "Wing Attack",
+          "chargedMoves": [
+            "Twister",
+            "Water Pulse"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 29,
+          "speciesId": "rillaboom",
+          "speciesName": "Rillaboom",
+          "dexId": 812,
+          "familyIds": [
+            810,
+            811,
+            812
+          ],
+          "score": 90,
+          "fastMove": "Scratch",
+          "chargedMoves": [
+            "Drum Beating",
+            "Earth Power"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 30,
+          "speciesId": "azumarill",
+          "speciesName": "Azumarill",
+          "dexId": 184,
+          "familyIds": [
+            183,
+            184,
+            298
+          ],
+          "score": 89.9,
+          "fastMove": "Bubble",
+          "chargedMoves": [
+            "Ice Beam",
+            "Play Rough"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 31,
+          "speciesId": "carbink",
+          "speciesName": "Carbink",
+          "dexId": 703,
+          "familyIds": [
+            703
+          ],
+          "score": 89.9,
+          "fastMove": "Rock Throw",
+          "chargedMoves": [
+            "Rock Slide",
+            "Moonblast"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 32,
+          "speciesId": "electrode_hisuian",
+          "speciesName": "Electrode (Hisuian)",
+          "dexId": 101,
+          "familyIds": [
+            100,
+            101
+          ],
+          "score": 89.9,
+          "fastMove": "Thunder Shock",
+          "chargedMoves": [
+            "Wild Charge",
+            "Energy Ball"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 33,
+          "speciesId": "annihilape_shadow",
+          "speciesName": "Annihilape (Shadow)",
+          "dexId": 979,
+          "familyIds": [
+            56,
+            57,
+            979
+          ],
+          "score": 89.8,
+          "fastMove": "Low Kick",
+          "chargedMoves": [
+            "Rage Fist",
+            "Ice Punch"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 34,
+          "speciesId": "araquanid_shadow",
+          "speciesName": "Araquanid (Shadow)",
+          "dexId": 752,
+          "familyIds": [
+            751,
+            752
+          ],
+          "score": 89.8,
+          "fastMove": "Infestation",
+          "chargedMoves": [
+            "Water Pulse",
+            "Mirror Coat"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 35,
+          "speciesId": "empoleon",
+          "speciesName": "Empoleon",
+          "dexId": 395,
+          "familyIds": [
+            393,
+            394,
+            395
+          ],
+          "score": 89.8,
+          "fastMove": "Metal Sound",
+          "chargedMoves": [
+            "Hydro Cannon",
+            "Drill Peck"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 36,
+          "speciesId": "empoleon_shadow",
+          "speciesName": "Empoleon (Shadow)",
+          "dexId": 395,
+          "familyIds": [
+            393,
+            394,
+            395
+          ],
+          "score": 89.8,
+          "fastMove": "Metal Sound",
+          "chargedMoves": [
+            "Hydro Cannon",
+            "Drill Peck"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 37,
+          "speciesId": "lapras",
+          "speciesName": "Lapras",
+          "dexId": 131,
+          "familyIds": [
+            131
+          ],
+          "score": 89.8,
+          "fastMove": "Psywave",
+          "chargedMoves": [
+            "Sparkling Aria",
+            "Ice Beam"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 38,
+          "speciesId": "sableye",
+          "speciesName": "Sableye",
+          "dexId": 302,
+          "familyIds": [
+            302
+          ],
+          "score": 89.8,
+          "fastMove": "Shadow Claw",
+          "chargedMoves": [
+            "Foul Play",
+            "Power Gem"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 39,
+          "speciesId": "vigoroth_shadow",
+          "speciesName": "Vigoroth (Shadow)",
+          "dexId": 288,
+          "familyIds": [
+            287,
+            288,
+            289
+          ],
+          "score": 89.8,
+          "fastMove": "Scratch",
+          "chargedMoves": [
+            "Brick Break",
+            "Rock Slide"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 40,
+          "speciesId": "deoxys_defense",
+          "speciesName": "Deoxys (Defense)",
+          "dexId": 386,
+          "familyIds": [
+            386
+          ],
+          "score": 89.7,
+          "fastMove": "Low Kick",
+          "chargedMoves": [
+            "Psycho Boost",
+            "Thunderbolt"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 41,
+          "speciesId": "guzzlord",
+          "speciesName": "Guzzlord",
+          "dexId": 799,
+          "familyIds": [
+            799
+          ],
+          "score": 89.7,
+          "fastMove": "Dragon Tail",
+          "chargedMoves": [
+            "Brutal Swing",
+            "Sludge Bomb"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 42,
+          "speciesId": "malamar_shadow",
+          "speciesName": "Malamar (Shadow)",
+          "dexId": 687,
+          "familyIds": [
+            686,
+            687
+          ],
+          "score": 89.7,
+          "fastMove": "Psywave",
+          "chargedMoves": [
+            "Foul Play",
+            "Super Power"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 43,
+          "speciesId": "charjabug",
+          "speciesName": "Charjabug",
+          "dexId": 737,
+          "familyIds": [
+            736,
+            737,
+            738
+          ],
+          "score": 89.6,
+          "fastMove": "Volt Switch",
+          "chargedMoves": [
+            "X Scissor",
+            "Discharge"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 44,
+          "speciesId": "feraligatr",
+          "speciesName": "Feraligatr",
+          "dexId": 160,
+          "familyIds": [
+            158,
+            159,
+            160
+          ],
+          "score": 89.6,
+          "fastMove": "Shadow Claw",
+          "chargedMoves": [
+            "Hydro Cannon",
+            "Ice Beam"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 45,
+          "speciesId": "malamar",
+          "speciesName": "Malamar",
+          "dexId": 687,
+          "familyIds": [
+            686,
+            687
+          ],
+          "score": 89.6,
+          "fastMove": "Psywave",
+          "chargedMoves": [
+            "Super Power",
+            "Foul Play"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 46,
+          "speciesId": "snorlax_shadow",
+          "speciesName": "Snorlax (Shadow)",
+          "dexId": 143,
+          "familyIds": [
+            143,
+            446
+          ],
+          "score": 89.6,
+          "fastMove": "Psywave",
+          "chargedMoves": [
+            "Body Slam",
+            "Super Power"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 47,
+          "speciesId": "dondozo",
+          "speciesName": "Dondozo",
+          "dexId": 977,
+          "familyIds": [
+            977
+          ],
+          "score": 89.4,
+          "fastMove": "Waterfall",
+          "chargedMoves": [
+            "Surf",
+            "Outrage"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 48,
+          "speciesId": "charjabug_shadow",
+          "speciesName": "Charjabug (Shadow)",
+          "dexId": 737,
+          "familyIds": [
+            736,
+            737,
+            738
+          ],
+          "score": 89.3,
+          "fastMove": "Volt Switch",
+          "chargedMoves": [
+            "X Scissor",
+            "Discharge"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 49,
+          "speciesId": "furret",
+          "speciesName": "Furret",
+          "dexId": 162,
+          "familyIds": [
+            161,
+            162
+          ],
+          "score": 89.3,
+          "fastMove": "Sucker Punch",
+          "chargedMoves": [
+            "Swift",
+            "Trailblaze"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 50,
+          "speciesId": "hippowdon",
+          "speciesName": "Hippowdon",
+          "dexId": 450,
+          "familyIds": [
+            449,
+            450
+          ],
+          "score": 89.3,
+          "fastMove": "Sand Attack",
+          "chargedMoves": [
+            "Weather Ball Rock",
+            "Earth Power"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 51,
+          "speciesId": "mandibuzz",
+          "speciesName": "Mandibuzz",
+          "dexId": 630,
+          "familyIds": [
+            629,
+            630
+          ],
+          "score": 89.3,
+          "fastMove": "Snarl",
+          "chargedMoves": [
+            "Dark Pulse",
+            "Shadow Ball"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 52,
+          "speciesId": "medicham",
+          "speciesName": "Medicham",
+          "dexId": 308,
+          "familyIds": [
+            307,
+            308
+          ],
+          "score": 89.3,
+          "fastMove": "Psycho Cut",
+          "chargedMoves": [
+            "Ice Punch",
+            "Dynamic Punch"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 53,
+          "speciesId": "morpeko_full_belly",
+          "speciesName": "Morpeko (Hangry)",
+          "dexId": 877,
+          "familyIds": [
+            877
+          ],
+          "score": 89.3,
+          "fastMove": "Thunder Shock",
+          "chargedMoves": [
+            "Aura Wheel Electric",
+            "Psychic Fangs"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 54,
+          "speciesId": "kingdra",
+          "speciesName": "Kingdra",
+          "dexId": 230,
+          "familyIds": [
+            116,
+            117,
+            230
+          ],
+          "score": 89.2,
+          "fastMove": "Dragon Breath",
+          "chargedMoves": [
+            "Surf",
+            "Swift"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 55,
+          "speciesId": "forretress_shadow",
+          "speciesName": "Forretress (Shadow)",
+          "dexId": 205,
+          "familyIds": [
+            204,
+            205
+          ],
+          "score": 89.1,
+          "fastMove": "Volt Switch",
+          "chargedMoves": [
+            "Sand Tomb",
+            "Rock Tomb"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 56,
+          "speciesId": "jumpluff",
+          "speciesName": "Jumpluff",
+          "dexId": 189,
+          "familyIds": [
+            187,
+            188,
+            189
+          ],
+          "score": 89.1,
+          "fastMove": "Fairy Wind",
+          "chargedMoves": [
+            "Energy Ball",
+            "Acrobatics"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 57,
+          "speciesId": "blastoise",
+          "speciesName": "Blastoise",
+          "dexId": 9,
+          "familyIds": [
+            7,
+            8,
+            9
+          ],
+          "score": 89,
+          "fastMove": "Bite",
+          "chargedMoves": [
+            "Hydro Cannon",
+            "Skull Bash"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 58,
+          "speciesId": "feraligatr_shadow",
+          "speciesName": "Feraligatr (Shadow)",
+          "dexId": 160,
+          "familyIds": [
+            158,
+            159,
+            160
+          ],
+          "score": 89,
+          "fastMove": "Shadow Claw",
+          "chargedMoves": [
+            "Hydro Cannon",
+            "Ice Beam"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 59,
+          "speciesId": "kingdra_shadow",
+          "speciesName": "Kingdra (Shadow)",
+          "dexId": 230,
+          "familyIds": [
+            116,
+            117,
+            230
+          ],
+          "score": 89,
+          "fastMove": "Dragon Breath",
+          "chargedMoves": [
+            "Surf",
+            "Swift"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 60,
+          "speciesId": "dragonair_shadow",
+          "speciesName": "Dragonair (Shadow)",
+          "dexId": 148,
+          "familyIds": [
+            147,
+            148,
+            149
+          ],
+          "score": 88.9,
+          "fastMove": "Dragon Breath",
+          "chargedMoves": [
+            "Wrap",
+            "Aqua Tail"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 61,
+          "speciesId": "hippowdon_shadow",
+          "speciesName": "Hippowdon (Shadow)",
+          "dexId": 450,
+          "familyIds": [
+            449,
+            450
+          ],
+          "score": 88.9,
+          "fastMove": "Sand Attack",
+          "chargedMoves": [
+            "Weather Ball Rock",
+            "Earth Power"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 62,
+          "speciesId": "lapras_shadow",
+          "speciesName": "Lapras (Shadow)",
+          "dexId": 131,
+          "familyIds": [
+            131
+          ],
+          "score": 88.8,
+          "fastMove": "Psywave",
+          "chargedMoves": [
+            "Sparkling Aria",
+            "Ice Beam"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 63,
+          "speciesId": "turtonator",
+          "speciesName": "Turtonator",
+          "dexId": 776,
+          "familyIds": [
+            776
+          ],
+          "score": 88.8,
+          "fastMove": "Incinerate",
+          "chargedMoves": [
+            "Brutal Swing",
+            "Dragon Claw"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 64,
+          "speciesId": "cradily",
+          "speciesName": "Cradily",
+          "dexId": 346,
+          "familyIds": [
+            345,
+            346
+          ],
+          "score": 88.7,
+          "fastMove": "Acid",
+          "chargedMoves": [
+            "Rock Tomb",
+            "Grass Knot"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 65,
+          "speciesId": "ninetales_alolan",
+          "speciesName": "Ninetales (Alolan)",
+          "dexId": 38,
+          "familyIds": [
+            37,
+            38
+          ],
+          "score": 88.7,
+          "fastMove": "Powder Snow",
+          "chargedMoves": [
+            "Weather Ball Ice",
+            "Chilling Water"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 66,
+          "speciesId": "dusclops_shadow",
+          "speciesName": "Dusclops (Shadow)",
+          "dexId": 356,
+          "familyIds": [
+            355,
+            356,
+            477
+          ],
+          "score": 88.6,
+          "fastMove": "Hex",
+          "chargedMoves": [
+            "Ice Punch",
+            "Shadow Punch"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 67,
+          "speciesId": "forretress",
+          "speciesName": "Forretress",
+          "dexId": 205,
+          "familyIds": [
+            204,
+            205
+          ],
+          "score": 88.6,
+          "fastMove": "Volt Switch",
+          "chargedMoves": [
+            "Sand Tomb",
+            "Rock Tomb"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 68,
+          "speciesId": "pachirisu",
+          "speciesName": "Pachirisu",
+          "dexId": 417,
+          "familyIds": [
+            417
+          ],
+          "score": 88.6,
+          "fastMove": "Volt Switch",
+          "chargedMoves": [
+            "Thunderbolt",
+            "Thunder Punch"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 69,
+          "speciesId": "dewgong",
+          "speciesName": "Dewgong",
+          "dexId": 87,
+          "familyIds": [
+            86,
+            87
+          ],
+          "score": 88.5,
+          "fastMove": "Ice Shard",
+          "chargedMoves": [
+            "Icy Wind",
+            "Drill Run"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 70,
+          "speciesId": "ninetales_alolan_shadow",
+          "speciesName": "Ninetales (Alolan) (Shadow)",
+          "dexId": 38,
+          "familyIds": [
+            37,
+            38
+          ],
+          "score": 88.5,
+          "fastMove": "Powder Snow",
+          "chargedMoves": [
+            "Weather Ball Ice",
+            "Chilling Water"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 71,
+          "speciesId": "diggersby",
+          "speciesName": "Diggersby",
+          "dexId": 660,
+          "familyIds": [
+            659,
+            660
+          ],
+          "score": 88.4,
+          "fastMove": "Mud Shot",
+          "chargedMoves": [
+            "Fire Punch",
+            "Scorching Sands"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 72,
+          "speciesId": "hydreigon",
+          "speciesName": "Hydreigon",
+          "dexId": 635,
+          "familyIds": [
+            633,
+            634,
+            635
+          ],
+          "score": 88.4,
+          "fastMove": "Dragon Breath",
+          "chargedMoves": [
+            "Brutal Swing",
+            "Fly"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 73,
+          "speciesId": "moltres_galarian",
+          "speciesName": "Moltres (Galarian)",
+          "dexId": 146,
+          "familyIds": [
+            146
+          ],
+          "score": 88.4,
+          "fastMove": "Sucker Punch",
+          "chargedMoves": [
+            "Fly",
+            "Brave Bird"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 74,
+          "speciesId": "swampert",
+          "speciesName": "Swampert",
+          "dexId": 260,
+          "familyIds": [
+            258,
+            259,
+            260
+          ],
+          "score": 88.3,
+          "fastMove": "Mud Shot",
+          "chargedMoves": [
+            "Hydro Cannon",
+            "Earthquake"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 75,
+          "speciesId": "swampert_shadow",
+          "speciesName": "Swampert (Shadow)",
+          "dexId": 260,
+          "familyIds": [
+            258,
+            259,
+            260
+          ],
+          "score": 88.2,
+          "fastMove": "Mud Shot",
+          "chargedMoves": [
+            "Hydro Cannon",
+            "Earthquake"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 76,
+          "speciesId": "aegislash_shield",
+          "speciesName": "Aegislash (Blade)",
+          "dexId": 681,
+          "familyIds": [
+            679,
+            680,
+            681
+          ],
+          "score": 88,
+          "fastMove": "Aegislash Charge Psycho Cut",
+          "chargedMoves": [
+            "Shadow Ball",
+            "Gyro Ball"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 77,
+          "speciesId": "doublade",
+          "speciesName": "Doublade",
+          "dexId": 680,
+          "familyIds": [
+            679,
+            680,
+            681
+          ],
+          "score": 88,
+          "fastMove": "Shadow Claw",
+          "chargedMoves": [
+            "Sacred Sword",
+            "Iron Head"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 78,
+          "speciesId": "dusclops",
+          "speciesName": "Dusclops",
+          "dexId": 356,
+          "familyIds": [
+            355,
+            356,
+            477
+          ],
+          "score": 88,
+          "fastMove": "Hex",
+          "chargedMoves": [
+            "Ice Punch",
+            "Shadow Punch"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 79,
+          "speciesId": "dusknoir_shadow",
+          "speciesName": "Dusknoir (Shadow)",
+          "dexId": 477,
+          "familyIds": [
+            355,
+            356,
+            477
+          ],
+          "score": 87.8,
+          "fastMove": "Astonish",
+          "chargedMoves": [
+            "Dynamic Punch",
+            "Shadow Punch"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 80,
+          "speciesId": "marowak_shadow",
+          "speciesName": "Marowak (Shadow)",
+          "dexId": 105,
+          "familyIds": [
+            104,
+            105
+          ],
+          "score": 87.8,
+          "fastMove": "Mud Slap",
+          "chargedMoves": [
+            "Bone Club",
+            "Rock Slide"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 81,
+          "speciesId": "seismitoad",
+          "speciesName": "Seismitoad",
+          "dexId": 537,
+          "familyIds": [
+            535,
+            536,
+            537
+          ],
+          "score": 87.8,
+          "fastMove": "Mud Shot",
+          "chargedMoves": [
+            "Earth Power",
+            "Icy Wind"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 82,
+          "speciesId": "dragonair",
+          "speciesName": "Dragonair",
+          "dexId": 148,
+          "familyIds": [
+            147,
+            148,
+            149
+          ],
+          "score": 87.7,
+          "fastMove": "Dragon Breath",
+          "chargedMoves": [
+            "Aqua Tail",
+            "Dragon Pulse"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 83,
+          "speciesId": "talonflame",
+          "speciesName": "Talonflame",
+          "dexId": 663,
+          "familyIds": [
+            661,
+            662,
+            663
+          ],
+          "score": 87.7,
+          "fastMove": "Incinerate",
+          "chargedMoves": [
+            "Fly",
+            "Brave Bird"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 84,
+          "speciesId": "spidops",
+          "speciesName": "Spidops",
+          "dexId": 918,
+          "familyIds": [
+            917,
+            918
+          ],
+          "score": 87.6,
+          "fastMove": "Shadow Claw",
+          "chargedMoves": [
+            "Lunge",
+            "Rock Tomb"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 85,
+          "speciesId": "grumpig",
+          "speciesName": "Grumpig",
+          "dexId": 326,
+          "familyIds": [
+            325,
+            326
+          ],
+          "score": 87.3,
+          "fastMove": "Psywave",
+          "chargedMoves": [
+            "Dynamic Punch",
+            "Shadow Ball"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 86,
+          "speciesId": "clefable",
+          "speciesName": "Clefable",
+          "dexId": 36,
+          "familyIds": [
+            35,
+            36,
+            173
+          ],
+          "score": 87.2,
+          "fastMove": "Fairy Wind",
+          "chargedMoves": [
+            "Moonblast",
+            "Meteor Mash"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 87,
+          "speciesId": "gourgeist_large",
+          "speciesName": "Gourgeist (Large)",
+          "dexId": 711,
+          "familyIds": [
+            710,
+            711
+          ],
+          "score": 87.2,
+          "fastMove": "Incinerate",
+          "chargedMoves": [
+            "Shadow Ball",
+            "Seed Bomb"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 88,
+          "speciesId": "gourgeist_super",
+          "speciesName": "Gourgeist (Super)",
+          "dexId": 711,
+          "familyIds": [
+            710,
+            711
+          ],
+          "score": 87.2,
+          "fastMove": "Incinerate",
+          "chargedMoves": [
+            "Shadow Ball",
+            "Seed Bomb"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 89,
+          "speciesId": "steelix_shadow",
+          "speciesName": "Steelix (Shadow)",
+          "dexId": 208,
+          "familyIds": [
+            95,
+            208
+          ],
+          "score": 87.2,
+          "fastMove": "Thunder Fang",
+          "chargedMoves": [
+            "Psychic Fangs",
+            "Crunch"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 90,
+          "speciesId": "stunfisk_galarian",
+          "speciesName": "Stunfisk (Galarian)",
+          "dexId": 618,
+          "familyIds": [
+            618
+          ],
+          "score": 87.1,
+          "fastMove": "Mud Shot",
+          "chargedMoves": [
+            "Rock Slide",
+            "Earthquake"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 91,
+          "speciesId": "gourgeist_average",
+          "speciesName": "Gourgeist (Average)",
+          "dexId": 711,
+          "familyIds": [
+            710,
+            711
+          ],
+          "score": 87,
+          "fastMove": "Incinerate",
+          "chargedMoves": [
+            "Shadow Ball",
+            "Seed Bomb"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 92,
+          "speciesId": "registeel",
+          "speciesName": "Registeel",
+          "dexId": 379,
+          "familyIds": [
+            379
+          ],
+          "score": 87,
+          "fastMove": "Lock On",
+          "chargedMoves": [
+            "Flash Cannon",
+            "Focus Blast"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 93,
+          "speciesId": "oranguru",
+          "speciesName": "Oranguru",
+          "dexId": 765,
+          "familyIds": [
+            765
+          ],
+          "score": 86.9,
+          "fastMove": "Confusion",
+          "chargedMoves": [
+            "Brutal Swing",
+            "Trailblaze"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 94,
+          "speciesId": "shelgon_shadow",
+          "speciesName": "Shelgon (Shadow)",
+          "dexId": 372,
+          "familyIds": [
+            371,
+            372,
+            373
+          ],
+          "score": 86.9,
+          "fastMove": "Dragon Breath",
+          "chargedMoves": [
+            "Twister",
+            "Flamethrower"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 95,
+          "speciesId": "drapion_shadow",
+          "speciesName": "Drapion (Shadow)",
+          "dexId": 452,
+          "familyIds": [
+            451,
+            452
+          ],
+          "score": 86.8,
+          "fastMove": "Poison Sting",
+          "chargedMoves": [
+            "Crunch",
+            "Aqua Tail"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 96,
+          "speciesId": "gourgeist_small",
+          "speciesName": "Gourgeist (Small)",
+          "dexId": 711,
+          "familyIds": [
+            710,
+            711
+          ],
+          "score": 86.8,
+          "fastMove": "Incinerate",
+          "chargedMoves": [
+            "Shadow Ball",
+            "Seed Bomb"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 97,
+          "speciesId": "regidrago",
+          "speciesName": "Regidrago",
+          "dexId": 895,
+          "familyIds": [
+            895
+          ],
+          "score": 86.8,
+          "fastMove": "Dragon Breath",
+          "chargedMoves": [
+            "Dragon Energy",
+            "Vice Grip"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 98,
+          "speciesId": "talonflame_shadow",
+          "speciesName": "Talonflame (Shadow)",
+          "dexId": 663,
+          "familyIds": [
+            661,
+            662,
+            663
+          ],
+          "score": 86.8,
+          "fastMove": "Incinerate",
+          "chargedMoves": [
+            "Flame Charge",
+            "Fly"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 99,
+          "speciesId": "jumpluff_shadow",
+          "speciesName": "Jumpluff (Shadow)",
+          "dexId": 189,
+          "familyIds": [
+            187,
+            188,
+            189
+          ],
+          "score": 86.6,
+          "fastMove": "Fairy Wind",
+          "chargedMoves": [
+            "Energy Ball",
+            "Acrobatics"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 100,
+          "speciesId": "wigglytuff",
+          "speciesName": "Wigglytuff",
+          "dexId": 40,
+          "familyIds": [
+            39,
+            40,
+            174
+          ],
+          "score": 86.5,
+          "fastMove": "Charm",
+          "chargedMoves": [
+            "Icy Wind",
+            "Swift"
+          ],
+          "isShadow": false
+        }
+      ],
+      "dexIds": [
+        9,
+        22,
+        36,
+        38,
+        40,
+        87,
+        101,
+        105,
+        131,
+        143,
+        146,
+        148,
+        160,
+        162,
+        184,
+        189,
+        195,
+        197,
+        205,
+        208,
+        222,
+        226,
+        230,
+        260,
+        288,
+        302,
+        308,
+        326,
+        334,
+        346,
+        356,
+        372,
+        379,
+        386,
+        395,
+        417,
+        450,
+        452,
+        477,
+        537,
+        593,
+        618,
+        630,
+        635,
+        660,
+        663,
+        671,
+        680,
+        681,
+        687,
+        703,
+        711,
+        737,
+        752,
+        765,
+        776,
+        778,
+        799,
+        809,
+        812,
+        823,
+        828,
+        845,
+        877,
+        895,
+        918,
+        959,
+        977,
+        979,
+        980
+      ],
+      "familyIds": [
+        7,
+        8,
+        9,
+        21,
+        22,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        56,
+        57,
+        86,
+        87,
+        95,
+        100,
+        101,
+        104,
+        105,
+        116,
+        117,
+        131,
+        133,
+        134,
+        135,
+        136,
+        143,
+        146,
+        147,
+        148,
+        149,
+        158,
+        159,
+        160,
+        161,
+        162,
+        173,
+        174,
+        183,
+        184,
+        187,
+        188,
+        189,
+        194,
+        195,
+        196,
+        197,
+        204,
+        205,
+        208,
+        222,
+        226,
+        230,
+        258,
+        259,
+        260,
+        287,
+        288,
+        289,
+        298,
+        302,
+        307,
+        308,
+        325,
+        326,
+        333,
+        334,
+        345,
+        346,
+        355,
+        356,
+        371,
+        372,
+        373,
+        379,
+        386,
+        393,
+        394,
+        395,
+        417,
+        446,
+        449,
+        450,
+        451,
+        452,
+        458,
+        470,
+        471,
+        477,
+        535,
+        536,
+        537,
+        592,
+        593,
+        618,
+        629,
+        630,
+        633,
+        634,
+        635,
+        659,
+        660,
+        661,
+        662,
+        663,
+        669,
+        670,
+        671,
+        679,
+        680,
+        681,
+        686,
+        687,
+        700,
+        703,
+        710,
+        711,
+        736,
+        737,
+        738,
+        751,
+        752,
+        765,
+        776,
+        778,
+        799,
+        808,
+        809,
+        810,
+        811,
+        812,
+        821,
+        822,
+        823,
+        827,
+        828,
+        845,
+        864,
+        877,
+        895,
+        917,
+        918,
+        957,
+        958,
+        959,
+        977,
+        979,
+        980
+      ]
+    },
+    "ultra_league": {
+      "entries": [
+        {
+          "rank": 1,
+          "speciesId": "tinkaton",
+          "speciesName": "Tinkaton",
+          "dexId": 959,
+          "familyIds": [
+            957,
+            958,
+            959
+          ],
+          "score": 94.3,
+          "fastMove": "Fairy Wind",
+          "chargedMoves": [
+            "Gigaton Hammer",
+            "Bulldoze"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 2,
+          "speciesId": "corviknight",
+          "speciesName": "Corviknight",
+          "dexId": 823,
+          "familyIds": [
+            821,
+            822,
+            823
+          ],
+          "score": 93.9,
+          "fastMove": "Sand Attack",
+          "chargedMoves": [
+            "Air Cutter",
+            "Iron Head"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 3,
+          "speciesId": "snorlax_shadow",
+          "speciesName": "Snorlax (Shadow)",
+          "dexId": 143,
+          "familyIds": [
+            143,
+            446
+          ],
+          "score": 93.4,
+          "fastMove": "Psywave",
+          "chargedMoves": [
+            "Body Slam",
+            "Earthquake"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 4,
+          "speciesId": "corviknight_shadow",
+          "speciesName": "Corviknight (Shadow)",
+          "dexId": 823,
+          "familyIds": [
+            821,
+            822,
+            823
+          ],
+          "score": 93.2,
+          "fastMove": "Sand Attack",
+          "chargedMoves": [
+            "Air Cutter",
+            "Payback"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 5,
+          "speciesId": "zygarde_complete",
+          "speciesName": "Zygarde (Complete Forme)",
+          "dexId": 718,
+          "familyIds": [
+            718
+          ],
+          "score": 92.9,
+          "fastMove": "Dragon Tail",
+          "chargedMoves": [
+            "Crunch",
+            "Bulldoze"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 6,
+          "speciesId": "virizion",
+          "speciesName": "Virizion",
+          "dexId": 640,
+          "familyIds": [
+            640
+          ],
+          "score": 92.3,
+          "fastMove": "Double Kick",
+          "chargedMoves": [
+            "Leaf Blade",
+            "Sacred Sword"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 7,
+          "speciesId": "mimikyu",
+          "speciesName": "Mimikyu (Busted)",
+          "dexId": 778,
+          "familyIds": [
+            778
+          ],
+          "score": 92.1,
+          "fastMove": "Shadow Claw",
+          "chargedMoves": [
+            "Shadow Sneak",
+            "Play Rough"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 8,
+          "speciesId": "florges",
+          "speciesName": "Florges",
+          "dexId": 671,
+          "familyIds": [
+            669,
+            670,
+            671
+          ],
+          "score": 92,
+          "fastMove": "Fairy Wind",
+          "chargedMoves": [
+            "Chilling Water",
+            "Disarming Voice"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 9,
+          "speciesId": "empoleon",
+          "speciesName": "Empoleon",
+          "dexId": 395,
+          "familyIds": [
+            393,
+            394,
+            395
+          ],
+          "score": 91.9,
+          "fastMove": "Metal Sound",
+          "chargedMoves": [
+            "Hydro Cannon",
+            "Drill Peck"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 10,
+          "speciesId": "moltres_galarian",
+          "speciesName": "Moltres (Galarian)",
+          "dexId": 146,
+          "familyIds": [
+            146
+          ],
+          "score": 91.9,
+          "fastMove": "Sucker Punch",
+          "chargedMoves": [
+            "Fly",
+            "Brave Bird"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 11,
+          "speciesId": "empoleon_shadow",
+          "speciesName": "Empoleon (Shadow)",
+          "dexId": 395,
+          "familyIds": [
+            393,
+            394,
+            395
+          ],
+          "score": 91.8,
+          "fastMove": "Metal Sound",
+          "chargedMoves": [
+            "Hydro Cannon",
+            "Drill Peck"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 12,
+          "speciesId": "melmetal",
+          "speciesName": "Melmetal",
+          "dexId": 809,
+          "familyIds": [
+            808,
+            809
+          ],
+          "score": 91.7,
+          "fastMove": "Thunder Shock",
+          "chargedMoves": [
+            "Double Iron Bash",
+            "Dynamic Punch"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 13,
+          "speciesId": "snorlax",
+          "speciesName": "Snorlax",
+          "dexId": 143,
+          "familyIds": [
+            143,
+            446
+          ],
+          "score": 91.7,
+          "fastMove": "Psywave",
+          "chargedMoves": [
+            "Body Slam",
+            "Earthquake"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 14,
+          "speciesId": "feraligatr_shadow",
+          "speciesName": "Feraligatr (Shadow)",
+          "dexId": 160,
+          "familyIds": [
+            158,
+            159,
+            160
+          ],
+          "score": 91.4,
+          "fastMove": "Shadow Claw",
+          "chargedMoves": [
+            "Hydro Cannon",
+            "Ice Beam"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 15,
+          "speciesId": "feraligatr",
+          "speciesName": "Feraligatr",
+          "dexId": 160,
+          "familyIds": [
+            158,
+            159,
+            160
+          ],
+          "score": 91.3,
+          "fastMove": "Shadow Claw",
+          "chargedMoves": [
+            "Hydro Cannon",
+            "Ice Beam"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 16,
+          "speciesId": "giratina_altered",
+          "speciesName": "Giratina (Altered)",
+          "dexId": 487,
+          "familyIds": [
+            487
+          ],
+          "score": 91.2,
+          "fastMove": "Dragon Breath",
+          "chargedMoves": [
+            "Ancient Power",
+            "Shadow Force"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 17,
+          "speciesId": "jellicent",
+          "speciesName": "Jellicent",
+          "dexId": 593,
+          "familyIds": [
+            592,
+            593
+          ],
+          "score": 91.1,
+          "fastMove": "Hex",
+          "chargedMoves": [
+            "Surf",
+            "Shadow Ball"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 18,
+          "speciesId": "guzzlord",
+          "speciesName": "Guzzlord",
+          "dexId": 799,
+          "familyIds": [
+            799
+          ],
+          "score": 91,
+          "fastMove": "Dragon Tail",
+          "chargedMoves": [
+            "Brutal Swing",
+            "Sludge Bomb"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 19,
+          "speciesId": "cramorant",
+          "speciesName": "Cramorant",
+          "dexId": 845,
+          "familyIds": [
+            845
+          ],
+          "score": 90.8,
+          "fastMove": "Peck",
+          "chargedMoves": [
+            "Dive",
+            "Fly"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 20,
+          "speciesId": "skeledirge",
+          "speciesName": "Skeledirge",
+          "dexId": 911,
+          "familyIds": [
+            909,
+            910,
+            911
+          ],
+          "score": 90.5,
+          "fastMove": "Incinerate",
+          "chargedMoves": [
+            "Torch Song",
+            "Shadow Ball"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 21,
+          "speciesId": "lapras",
+          "speciesName": "Lapras",
+          "dexId": 131,
+          "familyIds": [
+            131
+          ],
+          "score": 90.4,
+          "fastMove": "Psywave",
+          "chargedMoves": [
+            "Sparkling Aria",
+            "Ice Beam"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 22,
+          "speciesId": "lapras_shadow",
+          "speciesName": "Lapras (Shadow)",
+          "dexId": 131,
+          "familyIds": [
+            131
+          ],
+          "score": 90.3,
+          "fastMove": "Psywave",
+          "chargedMoves": [
+            "Sparkling Aria",
+            "Ice Beam"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 23,
+          "speciesId": "ninetales_alolan",
+          "speciesName": "Ninetales (Alolan)",
+          "dexId": 38,
+          "familyIds": [
+            37,
+            38
+          ],
+          "score": 90.3,
+          "fastMove": "Powder Snow",
+          "chargedMoves": [
+            "Weather Ball Ice",
+            "Chilling Water"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 24,
+          "speciesId": "rillaboom",
+          "speciesName": "Rillaboom",
+          "dexId": 812,
+          "familyIds": [
+            810,
+            811,
+            812
+          ],
+          "score": 90.3,
+          "fastMove": "Scratch",
+          "chargedMoves": [
+            "Drum Beating",
+            "Earth Power"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 25,
+          "speciesId": "dusknoir",
+          "speciesName": "Dusknoir",
+          "dexId": 477,
+          "familyIds": [
+            355,
+            356,
+            477
+          ],
+          "score": 90.2,
+          "fastMove": "Astonish",
+          "chargedMoves": [
+            "Dynamic Punch",
+            "Shadow Punch"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 26,
+          "speciesId": "dusknoir_shadow",
+          "speciesName": "Dusknoir (Shadow)",
+          "dexId": 477,
+          "familyIds": [
+            355,
+            356,
+            477
+          ],
+          "score": 90.2,
+          "fastMove": "Astonish",
+          "chargedMoves": [
+            "Dynamic Punch",
+            "Shadow Punch"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 27,
+          "speciesId": "dondozo",
+          "speciesName": "Dondozo",
+          "dexId": 977,
+          "familyIds": [
+            977
+          ],
+          "score": 90.1,
+          "fastMove": "Waterfall",
+          "chargedMoves": [
+            "Surf",
+            "Outrage"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 28,
+          "speciesId": "giratina_altered_shadow",
+          "speciesName": "Giratina (Altered) (Shadow)",
+          "dexId": 487,
+          "familyIds": [
+            487
+          ],
+          "score": 90,
+          "fastMove": "Dragon Breath",
+          "chargedMoves": [
+            "Ancient Power",
+            "Shadow Sneak"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 29,
+          "speciesId": "regidrago",
+          "speciesName": "Regidrago",
+          "dexId": 895,
+          "familyIds": [
+            895
+          ],
+          "score": 90,
+          "fastMove": "Dragon Breath",
+          "chargedMoves": [
+            "Dragon Energy",
+            "Vice Grip"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 30,
+          "speciesId": "registeel",
+          "speciesName": "Registeel",
+          "dexId": 379,
+          "familyIds": [
+            379
+          ],
+          "score": 90,
+          "fastMove": "Lock On",
+          "chargedMoves": [
+            "Flash Cannon",
+            "Focus Blast"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 31,
+          "speciesId": "ninetales_alolan_shadow",
+          "speciesName": "Ninetales (Alolan) (Shadow)",
+          "dexId": 38,
+          "familyIds": [
+            37,
+            38
+          ],
+          "score": 89.9,
+          "fastMove": "Powder Snow",
+          "chargedMoves": [
+            "Weather Ball Ice",
+            "Chilling Water"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 32,
+          "speciesId": "forretress",
+          "speciesName": "Forretress",
+          "dexId": 205,
+          "familyIds": [
+            204,
+            205
+          ],
+          "score": 89.8,
+          "fastMove": "Volt Switch",
+          "chargedMoves": [
+            "Rock Tomb",
+            "Sand Tomb"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 33,
+          "speciesId": "cresselia",
+          "speciesName": "Cresselia",
+          "dexId": 488,
+          "familyIds": [
+            488
+          ],
+          "score": 89.6,
+          "fastMove": "Psycho Cut",
+          "chargedMoves": [
+            "Grass Knot",
+            "Moonblast"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 34,
+          "speciesId": "blastoise",
+          "speciesName": "Blastoise",
+          "dexId": 9,
+          "familyIds": [
+            7,
+            8,
+            9
+          ],
+          "score": 89.3,
+          "fastMove": "Bite",
+          "chargedMoves": [
+            "Hydro Cannon",
+            "Skull Bash"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 35,
+          "speciesId": "muk_alolan",
+          "speciesName": "Muk (Alolan)",
+          "dexId": 89,
+          "familyIds": [
+            88,
+            89
+          ],
+          "score": 89.3,
+          "fastMove": "Poison Jab",
+          "chargedMoves": [
+            "Brutal Swing",
+            "Ice Punch"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 36,
+          "speciesId": "clefable",
+          "speciesName": "Clefable",
+          "dexId": 36,
+          "familyIds": [
+            35,
+            36,
+            173
+          ],
+          "score": 89.2,
+          "fastMove": "Fairy Wind",
+          "chargedMoves": [
+            "Meteor Mash",
+            "Draining Kiss"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 37,
+          "speciesId": "talonflame",
+          "speciesName": "Talonflame",
+          "dexId": 663,
+          "familyIds": [
+            661,
+            662,
+            663
+          ],
+          "score": 89.2,
+          "fastMove": "Incinerate",
+          "chargedMoves": [
+            "Fly",
+            "Brave Bird"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 38,
+          "speciesId": "ninetales",
+          "speciesName": "Ninetales",
+          "dexId": 38,
+          "familyIds": [
+            37,
+            38
+          ],
+          "score": 89,
+          "fastMove": "Ember",
+          "chargedMoves": [
+            "Weather Ball Fire",
+            "Energy Ball"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 39,
+          "speciesId": "walrein_shadow",
+          "speciesName": "Walrein (Shadow)",
+          "dexId": 365,
+          "familyIds": [
+            363,
+            364,
+            365
+          ],
+          "score": 89,
+          "fastMove": "Powder Snow",
+          "chargedMoves": [
+            "Icicle Spear",
+            "Earthquake"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 40,
+          "speciesId": "deoxys_defense",
+          "speciesName": "Deoxys (Defense)",
+          "dexId": 386,
+          "familyIds": [
+            386
+          ],
+          "score": 88.9,
+          "fastMove": "Low Kick",
+          "chargedMoves": [
+            "Psycho Boost",
+            "Thunderbolt"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 41,
+          "speciesId": "runerigus",
+          "speciesName": "Runerigus",
+          "dexId": 867,
+          "familyIds": [
+            562,
+            563,
+            867
+          ],
+          "score": 88.9,
+          "fastMove": "Shadow Claw",
+          "chargedMoves": [
+            "Rock Tomb",
+            "Shadow Ball"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 42,
+          "speciesId": "walrein",
+          "speciesName": "Walrein",
+          "dexId": 365,
+          "familyIds": [
+            363,
+            364,
+            365
+          ],
+          "score": 88.9,
+          "fastMove": "Powder Snow",
+          "chargedMoves": [
+            "Icicle Spear",
+            "Earthquake"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 43,
+          "speciesId": "forretress_shadow",
+          "speciesName": "Forretress (Shadow)",
+          "dexId": 205,
+          "familyIds": [
+            204,
+            205
+          ],
+          "score": 88.8,
+          "fastMove": "Volt Switch",
+          "chargedMoves": [
+            "Rock Tomb",
+            "Sand Tomb"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 44,
+          "speciesId": "toucannon",
+          "speciesName": "Toucannon",
+          "dexId": 733,
+          "familyIds": [
+            731,
+            732,
+            733
+          ],
+          "score": 88.8,
+          "fastMove": "Peck",
+          "chargedMoves": [
+            "Beak Blast",
+            "Drill Peck"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 45,
+          "speciesId": "steelix",
+          "speciesName": "Steelix",
+          "dexId": 208,
+          "familyIds": [
+            95,
+            208
+          ],
+          "score": 88.7,
+          "fastMove": "Thunder Fang",
+          "chargedMoves": [
+            "Psychic Fangs",
+            "Earthquake"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 46,
+          "speciesId": "cresselia_shadow",
+          "speciesName": "Cresselia (Shadow)",
+          "dexId": 488,
+          "familyIds": [
+            488
+          ],
+          "score": 88.6,
+          "fastMove": "Psycho Cut",
+          "chargedMoves": [
+            "Grass Knot",
+            "Moonblast"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 47,
+          "speciesId": "steelix_shadow",
+          "speciesName": "Steelix (Shadow)",
+          "dexId": 208,
+          "familyIds": [
+            95,
+            208
+          ],
+          "score": 88.6,
+          "fastMove": "Thunder Fang",
+          "chargedMoves": [
+            "Psychic Fangs",
+            "Crunch"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 48,
+          "speciesId": "primarina",
+          "speciesName": "Primarina",
+          "dexId": 730,
+          "familyIds": [
+            728,
+            729,
+            730
+          ],
+          "score": 88.5,
+          "fastMove": "Waterfall",
+          "chargedMoves": [
+            "Hydro Cannon",
+            "Moonblast"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 49,
+          "speciesId": "seaking",
+          "speciesName": "Seaking",
+          "dexId": 119,
+          "familyIds": [
+            118,
+            119
+          ],
+          "score": 88.5,
+          "fastMove": "Peck",
+          "chargedMoves": [
+            "Drill Run",
+            "Icy Wind"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 50,
+          "speciesId": "toucannon_shadow",
+          "speciesName": "Toucannon (Shadow)",
+          "dexId": 733,
+          "familyIds": [
+            731,
+            732,
+            733
+          ],
+          "score": 88.5,
+          "fastMove": "Peck",
+          "chargedMoves": [
+            "Beak Blast",
+            "Drill Peck"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 51,
+          "speciesId": "ampharos",
+          "speciesName": "Ampharos",
+          "dexId": 181,
+          "familyIds": [
+            179,
+            180,
+            181
+          ],
+          "score": 88.4,
+          "fastMove": "Volt Switch",
+          "chargedMoves": [
+            "Brutal Swing",
+            "Trailblaze"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 52,
+          "speciesId": "malamar_shadow",
+          "speciesName": "Malamar (Shadow)",
+          "dexId": 687,
+          "familyIds": [
+            686,
+            687
+          ],
+          "score": 88.4,
+          "fastMove": "Psywave",
+          "chargedMoves": [
+            "Foul Play",
+            "Super Power"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 53,
+          "speciesId": "ampharos_shadow",
+          "speciesName": "Ampharos (Shadow)",
+          "dexId": 181,
+          "familyIds": [
+            179,
+            180,
+            181
+          ],
+          "score": 88.3,
+          "fastMove": "Volt Switch",
+          "chargedMoves": [
+            "Brutal Swing",
+            "Trailblaze"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 54,
+          "speciesId": "cradily_shadow",
+          "speciesName": "Cradily (Shadow)",
+          "dexId": 346,
+          "familyIds": [
+            345,
+            346
+          ],
+          "score": 88.3,
+          "fastMove": "Acid",
+          "chargedMoves": [
+            "Rock Tomb",
+            "Grass Knot"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 55,
+          "speciesId": "golisopod_shadow",
+          "speciesName": "Golisopod (Shadow)",
+          "dexId": 768,
+          "familyIds": [
+            767,
+            768
+          ],
+          "score": 88.3,
+          "fastMove": "Fury Cutter",
+          "chargedMoves": [
+            "Aqua Jet",
+            "X Scissor"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 56,
+          "speciesId": "talonflame_shadow",
+          "speciesName": "Talonflame (Shadow)",
+          "dexId": 663,
+          "familyIds": [
+            661,
+            662,
+            663
+          ],
+          "score": 88.3,
+          "fastMove": "Incinerate",
+          "chargedMoves": [
+            "Fly",
+            "Brave Bird"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 57,
+          "speciesId": "annihilape",
+          "speciesName": "Annihilape",
+          "dexId": 979,
+          "familyIds": [
+            56,
+            57,
+            979
+          ],
+          "score": 88.2,
+          "fastMove": "Low Kick",
+          "chargedMoves": [
+            "Rage Fist",
+            "Ice Punch"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 58,
+          "speciesId": "bellibolt",
+          "speciesName": "Bellibolt",
+          "dexId": 939,
+          "familyIds": [
+            938,
+            939
+          ],
+          "score": 88.2,
+          "fastMove": "Sucker Punch",
+          "chargedMoves": [
+            "Parabolic Charge",
+            "Zap Cannon"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 59,
+          "speciesId": "kingdra",
+          "speciesName": "Kingdra",
+          "dexId": 230,
+          "familyIds": [
+            116,
+            117,
+            230
+          ],
+          "score": 88.1,
+          "fastMove": "Dragon Breath",
+          "chargedMoves": [
+            "Surf",
+            "Swift"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 60,
+          "speciesId": "malamar",
+          "speciesName": "Malamar",
+          "dexId": 687,
+          "familyIds": [
+            686,
+            687
+          ],
+          "score": 88.1,
+          "fastMove": "Psywave",
+          "chargedMoves": [
+            "Super Power",
+            "Foul Play"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 61,
+          "speciesId": "milotic_shadow",
+          "speciesName": "Milotic (Shadow)",
+          "dexId": 350,
+          "familyIds": [
+            349,
+            350
+          ],
+          "score": 88.1,
+          "fastMove": "Waterfall",
+          "chargedMoves": [
+            "Aqua Tail",
+            "Wrap"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 62,
+          "speciesId": "togekiss",
+          "speciesName": "Togekiss",
+          "dexId": 468,
+          "familyIds": [
+            175,
+            176,
+            468
+          ],
+          "score": 88.1,
+          "fastMove": "Peck",
+          "chargedMoves": [
+            "Psyshock",
+            "Aura Sphere"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 63,
+          "speciesId": "swampert",
+          "speciesName": "Swampert",
+          "dexId": 260,
+          "familyIds": [
+            258,
+            259,
+            260
+          ],
+          "score": 87.9,
+          "fastMove": "Mud Shot",
+          "chargedMoves": [
+            "Hydro Cannon",
+            "Earthquake"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 64,
+          "speciesId": "kingdra_shadow",
+          "speciesName": "Kingdra (Shadow)",
+          "dexId": 230,
+          "familyIds": [
+            116,
+            117,
+            230
+          ],
+          "score": 87.7,
+          "fastMove": "Dragon Breath",
+          "chargedMoves": [
+            "Surf",
+            "Swift"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 65,
+          "speciesId": "seismitoad",
+          "speciesName": "Seismitoad",
+          "dexId": 537,
+          "familyIds": [
+            535,
+            536,
+            537
+          ],
+          "score": 87.7,
+          "fastMove": "Mud Shot",
+          "chargedMoves": [
+            "Earth Power",
+            "Icy Wind"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 66,
+          "speciesId": "miltank",
+          "speciesName": "Miltank",
+          "dexId": 241,
+          "familyIds": [
+            241
+          ],
+          "score": 87.6,
+          "fastMove": "Rollout",
+          "chargedMoves": [
+            "Body Slam",
+            "High Horsepower"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 67,
+          "speciesId": "muk_alolan_shadow",
+          "speciesName": "Muk (Alolan) (Shadow)",
+          "dexId": 89,
+          "familyIds": [
+            88,
+            89
+          ],
+          "score": 87.6,
+          "fastMove": "Poison Jab",
+          "chargedMoves": [
+            "Brutal Swing",
+            "Ice Punch"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 68,
+          "speciesId": "golisopod",
+          "speciesName": "Golisopod",
+          "dexId": 768,
+          "familyIds": [
+            767,
+            768
+          ],
+          "score": 87.5,
+          "fastMove": "Fury Cutter",
+          "chargedMoves": [
+            "X Scissor",
+            "Aqua Jet"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 69,
+          "speciesId": "gyarados_shadow",
+          "speciesName": "Gyarados (Shadow)",
+          "dexId": 130,
+          "familyIds": [
+            129,
+            130
+          ],
+          "score": 87.5,
+          "fastMove": "Dragon Breath",
+          "chargedMoves": [
+            "Aqua Tail",
+            "Twister"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 70,
+          "speciesId": "oranguru",
+          "speciesName": "Oranguru",
+          "dexId": 765,
+          "familyIds": [
+            765
+          ],
+          "score": 87.5,
+          "fastMove": "Confusion",
+          "chargedMoves": [
+            "Brutal Swing",
+            "Trailblaze"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 71,
+          "speciesId": "samurott",
+          "speciesName": "Samurott",
+          "dexId": 503,
+          "familyIds": [
+            501,
+            502,
+            503
+          ],
+          "score": 87.5,
+          "fastMove": "Fury Cutter",
+          "chargedMoves": [
+            "Hydro Cannon",
+            "Megahorn"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 72,
+          "speciesId": "ninetales_shadow",
+          "speciesName": "Ninetales (Shadow)",
+          "dexId": 38,
+          "familyIds": [
+            37,
+            38
+          ],
+          "score": 87.4,
+          "fastMove": "Ember",
+          "chargedMoves": [
+            "Weather Ball Fire",
+            "Energy Ball"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 73,
+          "speciesId": "annihilape_shadow",
+          "speciesName": "Annihilape (Shadow)",
+          "dexId": 979,
+          "familyIds": [
+            56,
+            57,
+            979
+          ],
+          "score": 87.3,
+          "fastMove": "Low Kick",
+          "chargedMoves": [
+            "Rage Fist",
+            "Ice Punch"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 74,
+          "speciesId": "bombirdier",
+          "speciesName": "Bombirdier",
+          "dexId": 962,
+          "familyIds": [
+            962
+          ],
+          "score": 87.3,
+          "fastMove": "Sucker Punch",
+          "chargedMoves": [
+            "Fly",
+            "Drill Run"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 75,
+          "speciesId": "turtonator",
+          "speciesName": "Turtonator",
+          "dexId": 776,
+          "familyIds": [
+            776
+          ],
+          "score": 87.3,
+          "fastMove": "Incinerate",
+          "chargedMoves": [
+            "Brutal Swing",
+            "Dragon Claw"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 76,
+          "speciesId": "aromatisse",
+          "speciesName": "Aromatisse",
+          "dexId": 683,
+          "familyIds": [
+            682,
+            683
+          ],
+          "score": 87.2,
+          "fastMove": "Fairy Wind",
+          "chargedMoves": [
+            "Moonblast",
+            "Psyshock"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 77,
+          "speciesId": "milotic",
+          "speciesName": "Milotic",
+          "dexId": 350,
+          "familyIds": [
+            349,
+            350
+          ],
+          "score": 87.2,
+          "fastMove": "Waterfall",
+          "chargedMoves": [
+            "Aqua Tail",
+            "Wrap"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 78,
+          "speciesId": "gyarados",
+          "speciesName": "Gyarados",
+          "dexId": 130,
+          "familyIds": [
+            129,
+            130
+          ],
+          "score": 87.1,
+          "fastMove": "Dragon Breath",
+          "chargedMoves": [
+            "Aqua Tail",
+            "Twister"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 79,
+          "speciesId": "oinkologne_female",
+          "speciesName": "Oinkologne (Female)",
+          "dexId": 916,
+          "familyIds": [
+            915,
+            916
+          ],
+          "score": 87.1,
+          "fastMove": "Take Down",
+          "chargedMoves": [
+            "Body Slam",
+            "Trailblaze"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 80,
+          "speciesId": "articuno",
+          "speciesName": "Articuno",
+          "dexId": 144,
+          "familyIds": [
+            144
+          ],
+          "score": 86.9,
+          "fastMove": "Powder Snow",
+          "chargedMoves": [
+            "Icy Wind",
+            "Hurricane"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 81,
+          "speciesId": "cradily",
+          "speciesName": "Cradily",
+          "dexId": 346,
+          "familyIds": [
+            345,
+            346
+          ],
+          "score": 86.9,
+          "fastMove": "Acid",
+          "chargedMoves": [
+            "Rock Tomb",
+            "Grass Knot"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 82,
+          "speciesId": "tentacruel",
+          "speciesName": "Tentacruel",
+          "dexId": 73,
+          "familyIds": [
+            72,
+            73
+          ],
+          "score": 86.6,
+          "fastMove": "Acid",
+          "chargedMoves": [
+            "Scald",
+            "Payback"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 83,
+          "speciesId": "cofagrigus",
+          "speciesName": "Cofagrigus",
+          "dexId": 563,
+          "familyIds": [
+            562,
+            563,
+            867
+          ],
+          "score": 86.5,
+          "fastMove": "Shadow Claw",
+          "chargedMoves": [
+            "Shadow Ball",
+            "Energy Ball"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 84,
+          "speciesId": "crustle",
+          "speciesName": "Crustle",
+          "dexId": 558,
+          "familyIds": [
+            557,
+            558
+          ],
+          "score": 86.3,
+          "fastMove": "Fury Cutter",
+          "chargedMoves": [
+            "X Scissor",
+            "Rock Wrecker"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 85,
+          "speciesId": "doublade",
+          "speciesName": "Doublade",
+          "dexId": 680,
+          "familyIds": [
+            679,
+            680,
+            681
+          ],
+          "score": 86.3,
+          "fastMove": "Shadow Claw",
+          "chargedMoves": [
+            "Sacred Sword",
+            "Iron Head"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 86,
+          "speciesId": "kyurem",
+          "speciesName": "Kyurem",
+          "dexId": 646,
+          "familyIds": [
+            646
+          ],
+          "score": 86.3,
+          "fastMove": "Dragon Breath",
+          "chargedMoves": [
+            "Glaciate",
+            "Dragon Claw"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 87,
+          "speciesId": "orthworm",
+          "speciesName": "Orthworm",
+          "dexId": 968,
+          "familyIds": [
+            968
+          ],
+          "score": 86.3,
+          "fastMove": "Mud Slap",
+          "chargedMoves": [
+            "Iron Head",
+            "Rock Tomb"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 88,
+          "speciesId": "zapdos",
+          "speciesName": "Zapdos",
+          "dexId": 145,
+          "familyIds": [
+            145
+          ],
+          "score": 86.3,
+          "fastMove": "Thunder Shock",
+          "chargedMoves": [
+            "Drill Peck",
+            "Thunderbolt"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 89,
+          "speciesId": "blastoise_shadow",
+          "speciesName": "Blastoise (Shadow)",
+          "dexId": 9,
+          "familyIds": [
+            7,
+            8,
+            9
+          ],
+          "score": 86.2,
+          "fastMove": "Bite",
+          "chargedMoves": [
+            "Hydro Cannon",
+            "Skull Bash"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 90,
+          "speciesId": "drapion",
+          "speciesName": "Drapion",
+          "dexId": 452,
+          "familyIds": [
+            451,
+            452
+          ],
+          "score": 86.2,
+          "fastMove": "Poison Sting",
+          "chargedMoves": [
+            "Crunch",
+            "Aqua Tail"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 91,
+          "speciesId": "kommo_o",
+          "speciesName": "Kommo-o",
+          "dexId": 784,
+          "familyIds": [
+            782,
+            783,
+            784
+          ],
+          "score": 86.2,
+          "fastMove": "Dragon Tail",
+          "chargedMoves": [
+            "Clanging Scales",
+            "Upper Hand"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 92,
+          "speciesId": "hydreigon_shadow",
+          "speciesName": "Hydreigon (Shadow)",
+          "dexId": 635,
+          "familyIds": [
+            633,
+            634,
+            635
+          ],
+          "score": 86.1,
+          "fastMove": "Dragon Breath",
+          "chargedMoves": [
+            "Brutal Swing",
+            "Fly"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 93,
+          "speciesId": "piloswine_shadow",
+          "speciesName": "Piloswine (Shadow)",
+          "dexId": 221,
+          "familyIds": [
+            220,
+            221,
+            473
+          ],
+          "score": 86.1,
+          "fastMove": "Powder Snow",
+          "chargedMoves": [
+            "Icicle Spear",
+            "High Horsepower"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 94,
+          "speciesId": "swampert_shadow",
+          "speciesName": "Swampert (Shadow)",
+          "dexId": 260,
+          "familyIds": [
+            258,
+            259,
+            260
+          ],
+          "score": 86.1,
+          "fastMove": "Mud Shot",
+          "chargedMoves": [
+            "Hydro Cannon",
+            "Earthquake"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 95,
+          "speciesId": "politoed_shadow",
+          "speciesName": "Politoed (Shadow)",
+          "dexId": 186,
+          "familyIds": [
+            60,
+            61,
+            62,
+            186
+          ],
+          "score": 86,
+          "fastMove": "Mud Shot",
+          "chargedMoves": [
+            "Weather Ball Water",
+            "Earthquake"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 96,
+          "speciesId": "tentacruel_shadow",
+          "speciesName": "Tentacruel (Shadow)",
+          "dexId": 73,
+          "familyIds": [
+            72,
+            73
+          ],
+          "score": 86,
+          "fastMove": "Acid",
+          "chargedMoves": [
+            "Scald",
+            "Payback"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 97,
+          "speciesId": "genesect_shock",
+          "speciesName": "Genesect (Shock)",
+          "dexId": 649,
+          "familyIds": [
+            649
+          ],
+          "score": 85.9,
+          "fastMove": "Fury Cutter",
+          "chargedMoves": [
+            "Magnet Bomb",
+            "Techno Blast Shock"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 98,
+          "speciesId": "raikou_shadow",
+          "speciesName": "Raikou (Shadow)",
+          "dexId": 243,
+          "familyIds": [
+            243
+          ],
+          "score": 85.9,
+          "fastMove": "Thunder Shock",
+          "chargedMoves": [
+            "Wild Charge",
+            "Aura Sphere"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 99,
+          "speciesId": "sylveon",
+          "speciesName": "Sylveon",
+          "dexId": 700,
+          "familyIds": [
+            133,
+            134,
+            135,
+            136,
+            196,
+            197,
+            470,
+            471,
+            700
+          ],
+          "score": 85.9,
+          "fastMove": "Fairy Wind",
+          "chargedMoves": [
+            "Draining Kiss",
+            "Shadow Ball"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 100,
+          "speciesId": "lickilicky",
+          "speciesName": "Lickilicky",
+          "dexId": 463,
+          "familyIds": [
+            108,
+            463
+          ],
+          "score": 85.8,
+          "fastMove": "Rollout",
+          "chargedMoves": [
+            "Body Slam",
+            "Shadow Ball"
+          ],
+          "isShadow": false
+        }
+      ],
+      "dexIds": [
+        9,
+        36,
+        38,
+        73,
+        89,
+        119,
+        130,
+        131,
+        143,
+        144,
+        145,
+        146,
+        160,
+        181,
+        186,
+        205,
+        208,
+        221,
+        230,
+        241,
+        243,
+        260,
+        346,
+        350,
+        365,
+        379,
+        386,
+        395,
+        452,
+        463,
+        468,
+        477,
+        487,
+        488,
+        503,
+        537,
+        558,
+        563,
+        593,
+        635,
+        640,
+        646,
+        649,
+        663,
+        671,
+        680,
+        683,
+        687,
+        700,
+        718,
+        730,
+        733,
+        765,
+        768,
+        776,
+        778,
+        784,
+        799,
+        809,
+        812,
+        823,
+        845,
+        867,
+        895,
+        911,
+        916,
+        939,
+        959,
+        962,
+        968,
+        977,
+        979
+      ],
+      "familyIds": [
+        7,
+        8,
+        9,
+        35,
+        36,
+        37,
+        38,
+        56,
+        57,
+        60,
+        61,
+        62,
+        72,
+        73,
+        88,
+        89,
+        95,
+        108,
+        116,
+        117,
+        118,
+        119,
+        129,
+        130,
+        131,
+        133,
+        134,
+        135,
+        136,
+        143,
+        144,
+        145,
+        146,
+        158,
+        159,
+        160,
+        173,
+        175,
+        176,
+        179,
+        180,
+        181,
+        186,
+        196,
+        197,
+        204,
+        205,
+        208,
+        220,
+        221,
+        230,
+        241,
+        243,
+        258,
+        259,
+        260,
+        345,
+        346,
+        349,
+        350,
+        355,
+        356,
+        363,
+        364,
+        365,
+        379,
+        386,
+        393,
+        394,
+        395,
+        446,
+        451,
+        452,
+        463,
+        468,
+        470,
+        471,
+        473,
+        477,
+        487,
+        488,
+        501,
+        502,
+        503,
+        535,
+        536,
+        537,
+        557,
+        558,
+        562,
+        563,
+        592,
+        593,
+        633,
+        634,
+        635,
+        640,
+        646,
+        649,
+        661,
+        662,
+        663,
+        669,
+        670,
+        671,
+        679,
+        680,
+        681,
+        682,
+        683,
+        686,
+        687,
+        700,
+        718,
+        728,
+        729,
+        730,
+        731,
+        732,
+        733,
+        765,
+        767,
+        768,
+        776,
+        778,
+        782,
+        783,
+        784,
+        799,
+        808,
+        809,
+        810,
+        811,
+        812,
+        821,
+        822,
+        823,
+        845,
+        867,
+        895,
+        909,
+        910,
+        911,
+        915,
+        916,
+        938,
+        939,
+        957,
+        958,
+        959,
+        962,
+        968,
+        977,
+        979
+      ]
+    },
+    "master_league": {
+      "entries": [
+        {
+          "rank": 1,
+          "speciesId": "palkia_origin",
+          "speciesName": "Palkia (Origin)",
+          "dexId": 484,
+          "familyIds": [
+            484
+          ],
+          "score": 98.7,
+          "fastMove": "Dragon Breath",
+          "chargedMoves": [
+            "Aqua Tail",
+            "Spacial Rend"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 2,
+          "speciesId": "zacian_crowned_sword",
+          "speciesName": "Zacian (Crowned Sword)",
+          "dexId": 888,
+          "familyIds": [
+            888
+          ],
+          "score": 97.8,
+          "fastMove": "Metal Claw",
+          "chargedMoves": [
+            "Close Combat",
+            "Behemoth Blade"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 3,
+          "speciesId": "zygarde_complete",
+          "speciesName": "Zygarde (Complete Forme)",
+          "dexId": 718,
+          "familyIds": [
+            718
+          ],
+          "score": 94.4,
+          "fastMove": "Dragon Tail",
+          "chargedMoves": [
+            "Crunch",
+            "Bulldoze"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 4,
+          "speciesId": "metagross",
+          "speciesName": "Metagross",
+          "dexId": 376,
+          "familyIds": [
+            374,
+            375,
+            376
+          ],
+          "score": 94.3,
+          "fastMove": "Shadow Claw",
+          "chargedMoves": [
+            "Meteor Mash",
+            "Earthquake"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 5,
+          "speciesId": "kyurem_white",
+          "speciesName": "Kyurem (White)",
+          "dexId": 646,
+          "familyIds": [
+            646
+          ],
+          "score": 94.2,
+          "fastMove": "Dragon Breath",
+          "chargedMoves": [
+            "Fusion Flare",
+            "Ice Burn"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 6,
+          "speciesId": "reshiram",
+          "speciesName": "Reshiram",
+          "dexId": 643,
+          "familyIds": [
+            643
+          ],
+          "score": 94,
+          "fastMove": "Dragon Breath",
+          "chargedMoves": [
+            "Fusion Flare",
+            "Draco Meteor"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 7,
+          "speciesId": "xerneas",
+          "speciesName": "Xerneas",
+          "dexId": 716,
+          "familyIds": [
+            716
+          ],
+          "score": 94,
+          "fastMove": "Geomancy",
+          "chargedMoves": [
+            "Close Combat",
+            "Moonblast"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 8,
+          "speciesId": "kyogre",
+          "speciesName": "Kyogre",
+          "dexId": 382,
+          "familyIds": [
+            382
+          ],
+          "score": 93.9,
+          "fastMove": "Waterfall",
+          "chargedMoves": [
+            "Avalanche",
+            "Origin Pulse"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 9,
+          "speciesId": "dialga_origin",
+          "speciesName": "Dialga (Origin)",
+          "dexId": 483,
+          "familyIds": [
+            483
+          ],
+          "score": 93.8,
+          "fastMove": "Dragon Breath",
+          "chargedMoves": [
+            "Roar Of Time",
+            "Iron Head"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 10,
+          "speciesId": "eternatus",
+          "speciesName": "Eternatus",
+          "dexId": 890,
+          "familyIds": [
+            890
+          ],
+          "score": 92.9,
+          "fastMove": "Dragon Tail",
+          "chargedMoves": [
+            "Dynamax Cannon",
+            "Flamethrower"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 11,
+          "speciesId": "ursaluna",
+          "speciesName": "Ursaluna",
+          "dexId": 901,
+          "familyIds": [
+            216,
+            217,
+            901
+          ],
+          "score": 92.9,
+          "fastMove": "Scratch",
+          "chargedMoves": [
+            "Ice Punch",
+            "High Horsepower"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 12,
+          "speciesId": "kyurem_black",
+          "speciesName": "Kyurem (Black)",
+          "dexId": 646,
+          "familyIds": [
+            646
+          ],
+          "score": 92.7,
+          "fastMove": "Dragon Tail",
+          "chargedMoves": [
+            "Freeze Shock",
+            "Fusion Bolt"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 13,
+          "speciesId": "reshiram_shadow",
+          "speciesName": "Reshiram (Shadow)",
+          "dexId": 643,
+          "familyIds": [
+            643
+          ],
+          "score": 92.7,
+          "fastMove": "Dragon Breath",
+          "chargedMoves": [
+            "Fusion Flare",
+            "Draco Meteor"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 14,
+          "speciesId": "lugia",
+          "speciesName": "Lugia",
+          "dexId": 249,
+          "familyIds": [
+            249
+          ],
+          "score": 92.4,
+          "fastMove": "Dragon Tail",
+          "chargedMoves": [
+            "Aeroblast",
+            "Earth Power"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 15,
+          "speciesId": "lunala",
+          "speciesName": "Lunala",
+          "dexId": 792,
+          "familyIds": [
+            789,
+            790,
+            791,
+            792
+          ],
+          "score": 92.4,
+          "fastMove": "Shadow Claw",
+          "chargedMoves": [
+            "Shadow Ball",
+            "Moonblast"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 16,
+          "speciesId": "zamazenta_crowned_shield",
+          "speciesName": "Zamazenta (Crowned Shield)",
+          "dexId": 889,
+          "familyIds": [
+            889
+          ],
+          "score": 92.2,
+          "fastMove": "Ice Fang",
+          "chargedMoves": [
+            "Close Combat",
+            "Behemoth Bash"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 17,
+          "speciesId": "ursaluna_shadow",
+          "speciesName": "Ursaluna (Shadow)",
+          "dexId": 901,
+          "familyIds": [
+            216,
+            217,
+            901
+          ],
+          "score": 92,
+          "fastMove": "Scratch",
+          "chargedMoves": [
+            "Ice Punch",
+            "High Horsepower"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 18,
+          "speciesId": "necrozma_dawn_wings",
+          "speciesName": "Necrozma (Dawn Wings)",
+          "dexId": 800,
+          "familyIds": [
+            800
+          ],
+          "score": 91.8,
+          "fastMove": "Shadow Claw",
+          "chargedMoves": [
+            "Dark Pulse",
+            "Moongeist Beam"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 19,
+          "speciesId": "marshadow",
+          "speciesName": "Marshadow",
+          "dexId": 802,
+          "familyIds": [
+            802
+          ],
+          "score": 90.6,
+          "fastMove": "Shadow Claw",
+          "chargedMoves": [
+            "Close Combat",
+            "Ice Punch"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 20,
+          "speciesId": "zekrom",
+          "speciesName": "Zekrom",
+          "dexId": 644,
+          "familyIds": [
+            644
+          ],
+          "score": 90.6,
+          "fastMove": "Dragon Breath",
+          "chargedMoves": [
+            "Outrage",
+            "Fusion Bolt"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 21,
+          "speciesId": "zekrom_shadow",
+          "speciesName": "Zekrom (Shadow)",
+          "dexId": 644,
+          "familyIds": [
+            644
+          ],
+          "score": 90.4,
+          "fastMove": "Dragon Breath",
+          "chargedMoves": [
+            "Outrage",
+            "Fusion Bolt"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 22,
+          "speciesId": "necrozma_dusk_mane",
+          "speciesName": "Necrozma (Dusk Mane)",
+          "dexId": 800,
+          "familyIds": [
+            800
+          ],
+          "score": 90.3,
+          "fastMove": "Shadow Claw",
+          "chargedMoves": [
+            "Dark Pulse",
+            "Sunsteel Strike"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 23,
+          "speciesId": "lugia_shadow",
+          "speciesName": "Lugia (Shadow)",
+          "dexId": 249,
+          "familyIds": [
+            249
+          ],
+          "score": 90.1,
+          "fastMove": "Dragon Tail",
+          "chargedMoves": [
+            "Aeroblast",
+            "Earth Power"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 24,
+          "speciesId": "palkia_shadow",
+          "speciesName": "Palkia (Shadow)",
+          "dexId": 484,
+          "familyIds": [
+            484
+          ],
+          "score": 89.8,
+          "fastMove": "Dragon Breath",
+          "chargedMoves": [
+            "Aqua Tail",
+            "Draco Meteor"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 25,
+          "speciesId": "ho_oh",
+          "speciesName": "Ho-Oh",
+          "dexId": 250,
+          "familyIds": [
+            250
+          ],
+          "score": 89.4,
+          "fastMove": "Incinerate",
+          "chargedMoves": [
+            "Brave Bird",
+            "Sacred Fire"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 26,
+          "speciesId": "garchomp_shadow",
+          "speciesName": "Garchomp (Shadow)",
+          "dexId": 445,
+          "familyIds": [
+            443,
+            444,
+            445
+          ],
+          "score": 88.8,
+          "fastMove": "Dragon Tail",
+          "chargedMoves": [
+            "Twister",
+            "Earth Power"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 27,
+          "speciesId": "metagross_shadow",
+          "speciesName": "Metagross (Shadow)",
+          "dexId": 376,
+          "familyIds": [
+            374,
+            375,
+            376
+          ],
+          "score": 88.8,
+          "fastMove": "Shadow Claw",
+          "chargedMoves": [
+            "Meteor Mash",
+            "Earthquake"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 28,
+          "speciesId": "groudon",
+          "speciesName": "Groudon",
+          "dexId": 383,
+          "familyIds": [
+            383
+          ],
+          "score": 88.7,
+          "fastMove": "Dragon Tail",
+          "chargedMoves": [
+            "Fire Punch",
+            "Precipice Blades"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 29,
+          "speciesId": "melmetal",
+          "speciesName": "Melmetal",
+          "dexId": 809,
+          "familyIds": [
+            808,
+            809
+          ],
+          "score": 88.4,
+          "fastMove": "Thunder Shock",
+          "chargedMoves": [
+            "Double Iron Bash",
+            "Dynamic Punch"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 30,
+          "speciesId": "keldeo_resolute",
+          "speciesName": "Keldeo (Resolute)",
+          "dexId": 647,
+          "familyIds": [
+            647
+          ],
+          "score": 88.2,
+          "fastMove": "Low Kick",
+          "chargedMoves": [
+            "Secret Sword",
+            "Aqua Jet"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 31,
+          "speciesId": "garchomp",
+          "speciesName": "Garchomp",
+          "dexId": 445,
+          "familyIds": [
+            443,
+            444,
+            445
+          ],
+          "score": 87.8,
+          "fastMove": "Dragon Tail",
+          "chargedMoves": [
+            "Twister",
+            "Earth Power"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 32,
+          "speciesId": "gyarados_shadow",
+          "speciesName": "Gyarados (Shadow)",
+          "dexId": 130,
+          "familyIds": [
+            129,
+            130
+          ],
+          "score": 87.5,
+          "fastMove": "Dragon Breath",
+          "chargedMoves": [
+            "Aqua Tail",
+            "Twister"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 33,
+          "speciesId": "kyogre_shadow",
+          "speciesName": "Kyogre (Shadow)",
+          "dexId": 382,
+          "familyIds": [
+            382
+          ],
+          "score": 86.7,
+          "fastMove": "Waterfall",
+          "chargedMoves": [
+            "Avalanche",
+            "Origin Pulse"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 34,
+          "speciesId": "palkia",
+          "speciesName": "Palkia",
+          "dexId": 484,
+          "familyIds": [
+            484
+          ],
+          "score": 86.2,
+          "fastMove": "Dragon Breath",
+          "chargedMoves": [
+            "Aqua Tail",
+            "Fire Blast"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 35,
+          "speciesId": "latios_shadow",
+          "speciesName": "Latios (Shadow)",
+          "dexId": 381,
+          "familyIds": [
+            381
+          ],
+          "score": 86.1,
+          "fastMove": "Dragon Breath",
+          "chargedMoves": [
+            "Aura Sphere",
+            "Luster Purge"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 36,
+          "speciesId": "keldeo_ordinary",
+          "speciesName": "Keldeo (Ordinary)",
+          "dexId": 647,
+          "familyIds": [
+            647
+          ],
+          "score": 86,
+          "fastMove": "Low Kick",
+          "chargedMoves": [
+            "Aqua Jet",
+            "Sacred Sword"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 37,
+          "speciesId": "rillaboom",
+          "speciesName": "Rillaboom",
+          "dexId": 812,
+          "familyIds": [
+            810,
+            811,
+            812
+          ],
+          "score": 86,
+          "fastMove": "Scratch",
+          "chargedMoves": [
+            "Drum Beating",
+            "Earth Power"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 38,
+          "speciesId": "yveltal",
+          "speciesName": "Yveltal",
+          "dexId": 717,
+          "familyIds": [
+            717
+          ],
+          "score": 86,
+          "fastMove": "Sucker Punch",
+          "chargedMoves": [
+            "Dark Pulse",
+            "Oblivion Wing"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 39,
+          "speciesId": "giratina_altered_shadow",
+          "speciesName": "Giratina (Altered) (Shadow)",
+          "dexId": 487,
+          "familyIds": [
+            487
+          ],
+          "score": 85.9,
+          "fastMove": "Dragon Breath",
+          "chargedMoves": [
+            "Dragon Claw",
+            "Shadow Sneak"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 40,
+          "speciesId": "florges",
+          "speciesName": "Florges",
+          "dexId": 671,
+          "familyIds": [
+            669,
+            670,
+            671
+          ],
+          "score": 85.8,
+          "fastMove": "Fairy Wind",
+          "chargedMoves": [
+            "Moonblast",
+            "Chilling Water"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 41,
+          "speciesId": "landorus_therian",
+          "speciesName": "Landorus (Therian)",
+          "dexId": 645,
+          "familyIds": [
+            645
+          ],
+          "score": 85.8,
+          "fastMove": "Mud Shot",
+          "chargedMoves": [
+            "Sandsear Storm",
+            "Stone Edge"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 42,
+          "speciesId": "solgaleo",
+          "speciesName": "Solgaleo",
+          "dexId": 791,
+          "familyIds": [
+            789,
+            790,
+            791,
+            792
+          ],
+          "score": 85.7,
+          "fastMove": "Fire Spin",
+          "chargedMoves": [
+            "Psychic Fangs",
+            "Iron Head"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 43,
+          "speciesId": "dialga_shadow",
+          "speciesName": "Dialga (Shadow)",
+          "dexId": 483,
+          "familyIds": [
+            483
+          ],
+          "score": 85,
+          "fastMove": "Dragon Breath",
+          "chargedMoves": [
+            "Iron Head",
+            "Draco Meteor"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 44,
+          "speciesId": "meloetta_aria",
+          "speciesName": "Meloetta (Aria)",
+          "dexId": 648,
+          "familyIds": [
+            648
+          ],
+          "score": 85,
+          "fastMove": "Confusion",
+          "chargedMoves": [
+            "Psyshock",
+            "Dazzling Gleam"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 45,
+          "speciesId": "primarina",
+          "speciesName": "Primarina",
+          "dexId": 730,
+          "familyIds": [
+            728,
+            729,
+            730
+          ],
+          "score": 84.1,
+          "fastMove": "Waterfall",
+          "chargedMoves": [
+            "Moonblast",
+            "Hydro Cannon"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 46,
+          "speciesId": "dialga",
+          "speciesName": "Dialga",
+          "dexId": 483,
+          "familyIds": [
+            483
+          ],
+          "score": 84,
+          "fastMove": "Dragon Breath",
+          "chargedMoves": [
+            "Iron Head",
+            "Draco Meteor"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 47,
+          "speciesId": "gholdengo",
+          "speciesName": "Gholdengo",
+          "dexId": 1000,
+          "familyIds": [
+            999,
+            1000
+          ],
+          "score": 83.9,
+          "fastMove": "Hex",
+          "chargedMoves": [
+            "Shadow Ball",
+            "Focus Blast"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 48,
+          "speciesId": "kyurem",
+          "speciesName": "Kyurem",
+          "dexId": 646,
+          "familyIds": [
+            646
+          ],
+          "score": 83.8,
+          "fastMove": "Dragon Breath",
+          "chargedMoves": [
+            "Glaciate",
+            "Dragon Claw"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 49,
+          "speciesId": "latios",
+          "speciesName": "Latios",
+          "dexId": 381,
+          "familyIds": [
+            381
+          ],
+          "score": 83.7,
+          "fastMove": "Dragon Breath",
+          "chargedMoves": [
+            "Aura Sphere",
+            "Luster Purge"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 50,
+          "speciesId": "dragonite_shadow",
+          "speciesName": "Dragonite (Shadow)",
+          "dexId": 149,
+          "familyIds": [
+            147,
+            148,
+            149
+          ],
+          "score": 83.6,
+          "fastMove": "Dragon Breath",
+          "chargedMoves": [
+            "Thunder Punch",
+            "Super Power"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 51,
+          "speciesId": "mewtwo_shadow",
+          "speciesName": "Mewtwo (Shadow)",
+          "dexId": 150,
+          "familyIds": [
+            150
+          ],
+          "score": 83.6,
+          "fastMove": "Psycho Cut",
+          "chargedMoves": [
+            "Psystrike",
+            "Shadow Ball"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 52,
+          "speciesId": "giratina_altered",
+          "speciesName": "Giratina (Altered)",
+          "dexId": 487,
+          "familyIds": [
+            487
+          ],
+          "score": 83.5,
+          "fastMove": "Dragon Breath",
+          "chargedMoves": [
+            "Dragon Claw",
+            "Shadow Sneak"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 53,
+          "speciesId": "groudon_shadow",
+          "speciesName": "Groudon (Shadow)",
+          "dexId": 383,
+          "familyIds": [
+            383
+          ],
+          "score": 83.2,
+          "fastMove": "Dragon Tail",
+          "chargedMoves": [
+            "Fire Punch",
+            "Precipice Blades"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 54,
+          "speciesId": "hydreigon_shadow",
+          "speciesName": "Hydreigon (Shadow)",
+          "dexId": 635,
+          "familyIds": [
+            633,
+            634,
+            635
+          ],
+          "score": 83.1,
+          "fastMove": "Dragon Breath",
+          "chargedMoves": [
+            "Brutal Swing",
+            "Fly"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 55,
+          "speciesId": "goodra",
+          "speciesName": "Goodra",
+          "dexId": 706,
+          "familyIds": [
+            704,
+            705,
+            706
+          ],
+          "score": 82.6,
+          "fastMove": "Dragon Breath",
+          "chargedMoves": [
+            "Aqua Tail",
+            "Draco Meteor"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 56,
+          "speciesId": "ho_oh_shadow",
+          "speciesName": "Ho-Oh (Shadow)",
+          "dexId": 250,
+          "familyIds": [
+            250
+          ],
+          "score": 82.6,
+          "fastMove": "Incinerate",
+          "chargedMoves": [
+            "Brave Bird",
+            "Sacred Fire"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 57,
+          "speciesId": "latias_shadow",
+          "speciesName": "Latias (Shadow)",
+          "dexId": 380,
+          "familyIds": [
+            380
+          ],
+          "score": 82,
+          "fastMove": "Dragon Breath",
+          "chargedMoves": [
+            "Aura Sphere",
+            "Mist Ball"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 58,
+          "speciesId": "gyarados",
+          "speciesName": "Gyarados",
+          "dexId": 130,
+          "familyIds": [
+            129,
+            130
+          ],
+          "score": 81.8,
+          "fastMove": "Dragon Breath",
+          "chargedMoves": [
+            "Aqua Tail",
+            "Crunch"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 59,
+          "speciesId": "togekiss",
+          "speciesName": "Togekiss",
+          "dexId": 468,
+          "familyIds": [
+            175,
+            176,
+            468
+          ],
+          "score": 81.8,
+          "fastMove": "Peck",
+          "chargedMoves": [
+            "Dazzling Gleam",
+            "Aura Sphere"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 60,
+          "speciesId": "tapu_lele",
+          "speciesName": "Tapu Lele",
+          "dexId": 785,
+          "familyIds": [
+            785
+          ],
+          "score": 81.6,
+          "fastMove": "Astonish",
+          "chargedMoves": [
+            "Psyshock",
+            "Natures Madness"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 61,
+          "speciesId": "jirachi",
+          "speciesName": "Jirachi",
+          "dexId": 385,
+          "familyIds": [
+            385
+          ],
+          "score": 81.1,
+          "fastMove": "Confusion",
+          "chargedMoves": [
+            "Doom Desire",
+            "Aura Sphere"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 62,
+          "speciesId": "latias",
+          "speciesName": "Latias",
+          "dexId": 380,
+          "familyIds": [
+            380
+          ],
+          "score": 81.1,
+          "fastMove": "Dragon Breath",
+          "chargedMoves": [
+            "Aura Sphere",
+            "Mist Ball"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 63,
+          "speciesId": "enamorus_therian",
+          "speciesName": "Enamorus (Therian)",
+          "dexId": 905,
+          "familyIds": [
+            905
+          ],
+          "score": 81,
+          "fastMove": "Fairy Wind",
+          "chargedMoves": [
+            "Mystical Fire",
+            "Moonblast"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 64,
+          "speciesId": "tyranitar_shadow",
+          "speciesName": "Tyranitar (Shadow)",
+          "dexId": 248,
+          "familyIds": [
+            246,
+            247,
+            248
+          ],
+          "score": 80.7,
+          "fastMove": "Dragon Breath",
+          "chargedMoves": [
+            "Brutal Swing",
+            "Stone Edge"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 65,
+          "speciesId": "mewtwo",
+          "speciesName": "Mewtwo",
+          "dexId": 150,
+          "familyIds": [
+            150
+          ],
+          "score": 80.6,
+          "fastMove": "Psycho Cut",
+          "chargedMoves": [
+            "Psystrike",
+            "Shadow Ball"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 66,
+          "speciesId": "conkeldurr_shadow",
+          "speciesName": "Conkeldurr (Shadow)",
+          "dexId": 534,
+          "familyIds": [
+            532,
+            533,
+            534
+          ],
+          "score": 80.5,
+          "fastMove": "Force Palm",
+          "chargedMoves": [
+            "Dynamic Punch",
+            "Brutal Swing"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 67,
+          "speciesId": "dragonite",
+          "speciesName": "Dragonite",
+          "dexId": 149,
+          "familyIds": [
+            147,
+            148,
+            149
+          ],
+          "score": 80.4,
+          "fastMove": "Dragon Breath",
+          "chargedMoves": [
+            "Thunder Punch",
+            "Super Power"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 68,
+          "speciesId": "rhyperior_shadow",
+          "speciesName": "Rhyperior (Shadow)",
+          "dexId": 464,
+          "familyIds": [
+            111,
+            112,
+            464
+          ],
+          "score": 80.2,
+          "fastMove": "Mud Slap",
+          "chargedMoves": [
+            "Drill Run",
+            "Rock Wrecker"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 69,
+          "speciesId": "rhyperior",
+          "speciesName": "Rhyperior",
+          "dexId": 464,
+          "familyIds": [
+            111,
+            112,
+            464
+          ],
+          "score": 80.1,
+          "fastMove": "Mud Slap",
+          "chargedMoves": [
+            "Drill Run",
+            "Rock Wrecker"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 70,
+          "speciesId": "sylveon",
+          "speciesName": "Sylveon",
+          "dexId": 700,
+          "familyIds": [
+            133,
+            134,
+            135,
+            136,
+            196,
+            197,
+            470,
+            471,
+            700
+          ],
+          "score": 80.1,
+          "fastMove": "Fairy Wind",
+          "chargedMoves": [
+            "Draining Kiss",
+            "Shadow Ball"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 71,
+          "speciesId": "heatran_shadow",
+          "speciesName": "Heatran (Shadow)",
+          "dexId": 485,
+          "familyIds": [
+            485
+          ],
+          "score": 80,
+          "fastMove": "Fire Spin",
+          "chargedMoves": [
+            "Magma Storm",
+            "Earth Power"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 72,
+          "speciesId": "genesect_shock",
+          "speciesName": "Genesect (Shock)",
+          "dexId": 649,
+          "familyIds": [
+            649
+          ],
+          "score": 79.8,
+          "fastMove": "Fury Cutter",
+          "chargedMoves": [
+            "Magnet Bomb",
+            "Techno Blast Shock"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 73,
+          "speciesId": "genesect_chill",
+          "speciesName": "Genesect (Chill)",
+          "dexId": 649,
+          "familyIds": [
+            649
+          ],
+          "score": 79.6,
+          "fastMove": "Fury Cutter",
+          "chargedMoves": [
+            "Magnet Bomb",
+            "Techno Blast Chill"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 74,
+          "speciesId": "raikou_shadow",
+          "speciesName": "Raikou (Shadow)",
+          "dexId": 243,
+          "familyIds": [
+            243
+          ],
+          "score": 79.6,
+          "fastMove": "Thunder Shock",
+          "chargedMoves": [
+            "Wild Charge",
+            "Aura Sphere"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 75,
+          "speciesId": "baxcalibur",
+          "speciesName": "Baxcalibur",
+          "dexId": 998,
+          "familyIds": [
+            996,
+            997,
+            998
+          ],
+          "score": 79.5,
+          "fastMove": "Dragon Breath",
+          "chargedMoves": [
+            "Glaive Rush",
+            "Avalanche"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 76,
+          "speciesId": "salamence_shadow",
+          "speciesName": "Salamence (Shadow)",
+          "dexId": 373,
+          "familyIds": [
+            371,
+            372,
+            373
+          ],
+          "score": 79.5,
+          "fastMove": "Dragon Tail",
+          "chargedMoves": [
+            "Fly",
+            "Brutal Swing"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 77,
+          "speciesId": "urshifu_single_strike",
+          "speciesName": "Urshifu (Single Strike)",
+          "dexId": 892,
+          "familyIds": [
+            891,
+            892
+          ],
+          "score": 79.5,
+          "fastMove": "Sucker Punch",
+          "chargedMoves": [
+            "Dynamic Punch",
+            "Payback"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 78,
+          "speciesId": "darkrai_shadow",
+          "speciesName": "Darkrai (Shadow)",
+          "dexId": 491,
+          "familyIds": [
+            491
+          ],
+          "score": 79.2,
+          "fastMove": "Sucker Punch",
+          "chargedMoves": [
+            "Foul Play",
+            "Shadow Ball"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 79,
+          "speciesId": "kingambit",
+          "speciesName": "Kingambit",
+          "dexId": 983,
+          "familyIds": [
+            624,
+            625,
+            983
+          ],
+          "score": 79,
+          "fastMove": "Low Kick",
+          "chargedMoves": [
+            "Foul Play",
+            "Iron Head"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 80,
+          "speciesId": "snorlax_shadow",
+          "speciesName": "Snorlax (Shadow)",
+          "dexId": 143,
+          "familyIds": [
+            143,
+            446
+          ],
+          "score": 78.8,
+          "fastMove": "Psywave",
+          "chargedMoves": [
+            "Body Slam",
+            "Earthquake"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 81,
+          "speciesId": "hydreigon",
+          "speciesName": "Hydreigon",
+          "dexId": 635,
+          "familyIds": [
+            633,
+            634,
+            635
+          ],
+          "score": 78.6,
+          "fastMove": "Dragon Breath",
+          "chargedMoves": [
+            "Brutal Swing",
+            "Fly"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 82,
+          "speciesId": "volcanion",
+          "speciesName": "Volcanion",
+          "dexId": 721,
+          "familyIds": [
+            721
+          ],
+          "score": 78.5,
+          "fastMove": "Incinerate",
+          "chargedMoves": [
+            "Scald",
+            "Earth Power"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 83,
+          "speciesId": "golisopod_shadow",
+          "speciesName": "Golisopod (Shadow)",
+          "dexId": 768,
+          "familyIds": [
+            767,
+            768
+          ],
+          "score": 78.3,
+          "fastMove": "Fury Cutter",
+          "chargedMoves": [
+            "Aqua Jet",
+            "X Scissor"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 84,
+          "speciesId": "urshifu_rapid_strike",
+          "speciesName": "Urshifu (Rapid Strike)",
+          "dexId": 892,
+          "familyIds": [
+            891,
+            892
+          ],
+          "score": 78.1,
+          "fastMove": "Waterfall",
+          "chargedMoves": [
+            "Aqua Jet",
+            "Dynamic Punch"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 85,
+          "speciesId": "tyranitar",
+          "speciesName": "Tyranitar",
+          "dexId": 248,
+          "familyIds": [
+            246,
+            247,
+            248
+          ],
+          "score": 78,
+          "fastMove": "Dragon Breath",
+          "chargedMoves": [
+            "Brutal Swing",
+            "Stone Edge"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 86,
+          "speciesId": "heatran",
+          "speciesName": "Heatran",
+          "dexId": 485,
+          "familyIds": [
+            485
+          ],
+          "score": 77.9,
+          "fastMove": "Fire Spin",
+          "chargedMoves": [
+            "Magma Storm",
+            "Earth Power"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 87,
+          "speciesId": "raikou",
+          "speciesName": "Raikou",
+          "dexId": 243,
+          "familyIds": [
+            243
+          ],
+          "score": 77.8,
+          "fastMove": "Thunder Shock",
+          "chargedMoves": [
+            "Aura Sphere",
+            "Wild Charge"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 88,
+          "speciesId": "golisopod",
+          "speciesName": "Golisopod",
+          "dexId": 768,
+          "familyIds": [
+            767,
+            768
+          ],
+          "score": 77.7,
+          "fastMove": "Fury Cutter",
+          "chargedMoves": [
+            "Aqua Jet",
+            "X Scissor"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 89,
+          "speciesId": "zapdos",
+          "speciesName": "Zapdos",
+          "dexId": 145,
+          "familyIds": [
+            145
+          ],
+          "score": 77.6,
+          "fastMove": "Thunder Shock",
+          "chargedMoves": [
+            "Drill Peck",
+            "Thunderbolt"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 90,
+          "speciesId": "zapdos_shadow",
+          "speciesName": "Zapdos (Shadow)",
+          "dexId": 145,
+          "familyIds": [
+            145
+          ],
+          "score": 77.6,
+          "fastMove": "Thunder Shock",
+          "chargedMoves": [
+            "Drill Peck",
+            "Heat Wave"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 91,
+          "speciesId": "hippowdon_shadow",
+          "speciesName": "Hippowdon (Shadow)",
+          "dexId": 450,
+          "familyIds": [
+            449,
+            450
+          ],
+          "score": 77.5,
+          "fastMove": "Sand Attack",
+          "chargedMoves": [
+            "Weather Ball Rock",
+            "Earth Power"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 92,
+          "speciesId": "snorlax",
+          "speciesName": "Snorlax",
+          "dexId": 143,
+          "familyIds": [
+            143,
+            446
+          ],
+          "score": 77.2,
+          "fastMove": "Psywave",
+          "chargedMoves": [
+            "Body Slam",
+            "Earthquake"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 93,
+          "speciesId": "annihilape",
+          "speciesName": "Annihilape",
+          "dexId": 979,
+          "familyIds": [
+            56,
+            57,
+            979
+          ],
+          "score": 76.9,
+          "fastMove": "Counter",
+          "chargedMoves": [
+            "Rage Fist",
+            "Ice Punch"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 94,
+          "speciesId": "mamoswine_shadow",
+          "speciesName": "Mamoswine (Shadow)",
+          "dexId": 473,
+          "familyIds": [
+            220,
+            221,
+            473
+          ],
+          "score": 76.9,
+          "fastMove": "Powder Snow",
+          "chargedMoves": [
+            "High Horsepower",
+            "Icicle Spear"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 95,
+          "speciesId": "annihilape_shadow",
+          "speciesName": "Annihilape (Shadow)",
+          "dexId": 979,
+          "familyIds": [
+            56,
+            57,
+            979
+          ],
+          "score": 76.8,
+          "fastMove": "Counter",
+          "chargedMoves": [
+            "Rage Fist",
+            "Ice Punch"
+          ],
+          "isShadow": true
+        },
+        {
+          "rank": 96,
+          "speciesId": "zacian_hero",
+          "speciesName": "Zacian (Hero)",
+          "dexId": 888,
+          "familyIds": [
+            888
+          ],
+          "score": 76.8,
+          "fastMove": "Quick Attack",
+          "chargedMoves": [
+            "Wild Charge",
+            "Play Rough"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 97,
+          "speciesId": "zamazenta_hero",
+          "speciesName": "Zamazenta (Hero)",
+          "dexId": 889,
+          "familyIds": [
+            889
+          ],
+          "score": 76.8,
+          "fastMove": "Ice Fang",
+          "chargedMoves": [
+            "Close Combat",
+            "Crunch"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 98,
+          "speciesId": "genesect_burn",
+          "speciesName": "Genesect (Burn)",
+          "dexId": 649,
+          "familyIds": [
+            649
+          ],
+          "score": 76.7,
+          "fastMove": "Fury Cutter",
+          "chargedMoves": [
+            "Magnet Bomb",
+            "Techno Blast Burn"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 99,
+          "speciesId": "landorus_incarnate",
+          "speciesName": "Landorus (Incarnate)",
+          "dexId": 645,
+          "familyIds": [
+            645
+          ],
+          "score": 76.6,
+          "fastMove": "Mud Shot",
+          "chargedMoves": [
+            "Earth Power",
+            "Rock Slide"
+          ],
+          "isShadow": false
+        },
+        {
+          "rank": 100,
+          "speciesId": "kommo_o",
+          "speciesName": "Kommo-o",
+          "dexId": 784,
+          "familyIds": [
+            782,
+            783,
+            784
+          ],
+          "score": 76.5,
+          "fastMove": "Dragon Tail",
+          "chargedMoves": [
+            "Clanging Scales",
+            "Upper Hand"
+          ],
+          "isShadow": false
+        }
+      ],
+      "dexIds": [
+        130,
+        143,
+        145,
+        149,
+        150,
+        243,
+        248,
+        249,
+        250,
+        373,
+        376,
+        380,
+        381,
+        382,
+        383,
+        385,
+        445,
+        450,
+        464,
+        468,
+        473,
+        483,
+        484,
+        485,
+        487,
+        491,
+        534,
+        635,
+        643,
+        644,
+        645,
+        646,
+        647,
+        648,
+        649,
+        671,
+        700,
+        706,
+        716,
+        717,
+        718,
+        721,
+        730,
+        768,
+        784,
+        785,
+        791,
+        792,
+        800,
+        802,
+        809,
+        812,
+        888,
+        889,
+        890,
+        892,
+        901,
+        905,
+        979,
+        983,
+        998,
+        1000
+      ],
+      "familyIds": [
+        56,
+        57,
+        111,
+        112,
+        129,
+        130,
+        133,
+        134,
+        135,
+        136,
+        143,
+        145,
+        147,
+        148,
+        149,
+        150,
+        175,
+        176,
+        196,
+        197,
+        216,
+        217,
+        220,
+        221,
+        243,
+        246,
+        247,
+        248,
+        249,
+        250,
+        371,
+        372,
+        373,
+        374,
+        375,
+        376,
+        380,
+        381,
+        382,
+        383,
+        385,
+        443,
+        444,
+        445,
+        446,
+        449,
+        450,
+        464,
+        468,
+        470,
+        471,
+        473,
+        483,
+        484,
+        485,
+        487,
+        491,
+        532,
+        533,
+        534,
+        624,
+        625,
+        633,
+        634,
+        635,
+        643,
+        644,
+        645,
+        646,
+        647,
+        648,
+        649,
+        669,
+        670,
+        671,
+        700,
+        704,
+        705,
+        706,
+        716,
+        717,
+        718,
+        721,
+        728,
+        729,
+        730,
+        767,
+        768,
+        782,
+        783,
+        784,
+        785,
+        789,
+        790,
+        791,
+        792,
+        800,
+        802,
+        808,
+        809,
+        810,
+        811,
+        812,
+        888,
+        889,
+        890,
+        891,
+        892,
+        901,
+        905,
+        979,
+        983,
+        996,
+        997,
+        998,
+        999,
+        1000
+      ]
+    }
+  },
+  "pve": {
+    "entries": [
+      {
+        "rank": 1,
+        "dexId": 800,
+        "species": "Dusk Mane Necrozma",
+        "baseName": "necrozma",
+        "tier": "S+",
+        "role": "Steel",
+        "edps": 33.5,
+        "dps": 31,
+        "partyPower": "ELITE",
+        "fastMove": "Metal Claw",
+        "chargedMoves": [
+          "Sunsteel Strike"
+        ],
+        "isLegacyMove": true,
+        "notes": "#1 Steel Attacker",
+        "familyIds": [
+          800
+        ]
+      },
+      {
+        "rank": 2,
+        "dexId": 800,
+        "species": "Dawn Wings Necrozma",
+        "baseName": "necrozma",
+        "tier": "S+",
+        "role": "Ghost / Dark",
+        "edps": 33.8,
+        "dps": 31.5,
+        "partyPower": "ELITE",
+        "fastMove": "Shadow Claw",
+        "chargedMoves": [
+          "Moongeist Beam"
+        ],
+        "isLegacyMove": true,
+        "notes": "#1 Ghost Attacker",
+        "familyIds": [
+          800
+        ]
+      },
+      {
+        "rank": 3,
+        "dexId": 384,
+        "species": "Mega Rayquaza / Rayquaza",
+        "baseName": "rayquaza",
+        "tier": "S+",
+        "role": "Flying / Dragon",
+        "edps": 32.8,
+        "dps": 31.2,
+        "partyPower": "ELITE",
+        "fastMove": "Dragon Tail",
+        "chargedMoves": [
+          "Dragon Ascent",
+          "Breaking Swipe"
+        ],
+        "isLegacyMove": true,
+        "notes": "#1 Flying & Dragon Mega",
+        "familyIds": [
+          384
+        ]
+      },
+      {
+        "rank": 4,
+        "dexId": 383,
+        "species": "Primal Groudon / Groudon",
+        "baseName": "groudon",
+        "tier": "S+",
+        "role": "Ground",
+        "edps": 31.6,
+        "dps": 29.5,
+        "partyPower": "ELITE",
+        "fastMove": "Mud Shot",
+        "chargedMoves": [
+          "Precipice Blades"
+        ],
+        "isLegacyMove": true,
+        "notes": "#1 Ground Attacker",
+        "familyIds": [
+          383
+        ]
+      },
+      {
+        "rank": 5,
+        "dexId": 382,
+        "species": "Primal Kyogre / Kyogre",
+        "baseName": "kyogre",
+        "tier": "S+",
+        "role": "Water",
+        "edps": 31.4,
+        "dps": 29.2,
+        "partyPower": "ELITE",
+        "fastMove": "Waterfall",
+        "chargedMoves": [
+          "Origin Pulse"
+        ],
+        "isLegacyMove": true,
+        "notes": "#1 Water Attacker",
+        "familyIds": [
+          382
+        ]
+      },
+      {
+        "rank": 6,
+        "dexId": 150,
+        "species": "Shadow Mewtwo / Mewtwo",
+        "baseName": "mewtwo",
+        "tier": "S+",
+        "role": "Psychic / Ice / Ghost",
+        "edps": 35.4,
+        "dps": 33.6,
+        "partyPower": "HIGH",
+        "fastMove": "Psycho Cut",
+        "chargedMoves": [
+          "Psystrike",
+          "Shadow Ball"
+        ],
+        "isLegacyMove": true,
+        "notes": "#1 Psychic Attacker",
+        "familyIds": [
+          150
+        ]
+      },
+      {
+        "rank": 7,
+        "dexId": 448,
+        "species": "Mega Lucario / Lucario",
+        "baseName": "lucario",
+        "tier": "S+",
+        "role": "Fighting",
+        "edps": 32.1,
+        "dps": 30.8,
+        "partyPower": "HIGH",
+        "fastMove": "Force Palm",
+        "chargedMoves": [
+          "Aura Sphere"
+        ],
+        "isLegacyMove": true,
+        "notes": "#1 Fighting Attacker",
+        "familyIds": [
+          447,
+          448
+        ]
+      },
+      {
+        "rank": 8,
+        "dexId": 639,
+        "species": "Terrakion",
+        "baseName": "terrakion",
+        "tier": "S+",
+        "role": "Fighting / Rock",
+        "edps": 28,
+        "dps": 25.5,
+        "partyPower": "HIGH",
+        "fastMove": "Double Kick",
+        "chargedMoves": [
+          "Sacred Sword"
+        ],
+        "isLegacyMove": true,
+        "notes": "#1 Non-Mega Fighting",
+        "familyIds": [
+          639
+        ]
+      },
+      {
+        "rank": 9,
+        "dexId": 798,
+        "species": "Kartana",
+        "baseName": "kartana",
+        "tier": "S+",
+        "role": "Grass",
+        "edps": 28.8,
+        "dps": 30.5,
+        "partyPower": "HIGH",
+        "fastMove": "Razor Leaf",
+        "chargedMoves": [
+          "Leaf Blade"
+        ],
+        "isLegacyMove": false,
+        "notes": "#1 Grass Attacker",
+        "familyIds": [
+          798
+        ]
+      },
+      {
+        "rank": 10,
+        "dexId": 484,
+        "species": "Origin Palkia",
+        "baseName": "palkia",
+        "tier": "S+",
+        "role": "Dragon / Water",
+        "edps": 28,
+        "dps": 26.5,
+        "partyPower": "ELITE",
+        "fastMove": "Dragon Tail",
+        "chargedMoves": [
+          "Spacial Rend"
+        ],
+        "isLegacyMove": true,
+        "notes": "Adventure Effect + Top Dragon",
+        "familyIds": [
+          484
+        ]
+      },
+      {
+        "rank": 11,
+        "dexId": 483,
+        "species": "Origin Dialga",
+        "baseName": "dialga",
+        "tier": "S+",
+        "role": "Dragon / Steel",
+        "edps": 27.5,
+        "dps": 25.8,
+        "partyPower": "ELITE",
+        "fastMove": "Dragon Breath",
+        "chargedMoves": [
+          "Roar of Time"
+        ],
+        "isLegacyMove": true,
+        "notes": "Adventure Effect + Top Dragon",
+        "familyIds": [
+          483
+        ]
+      },
+      {
+        "rank": 12,
+        "dexId": 643,
+        "species": "Reshiram",
+        "baseName": "reshiram",
+        "tier": "S+",
+        "role": "Fire",
+        "edps": 28.2,
+        "dps": 26.5,
+        "partyPower": "ELITE",
+        "fastMove": "Fire Fang",
+        "chargedMoves": [
+          "Fusion Flare"
+        ],
+        "isLegacyMove": true,
+        "notes": "#1 Non-Mega Fire",
+        "familyIds": [
+          643
+        ]
+      },
+      {
+        "rank": 13,
+        "dexId": 644,
+        "species": "Zekrom",
+        "baseName": "zekrom",
+        "tier": "S+",
+        "role": "Electric",
+        "edps": 27.8,
+        "dps": 26,
+        "partyPower": "ELITE",
+        "fastMove": "Charge Beam",
+        "chargedMoves": [
+          "Fusion Bolt"
+        ],
+        "isLegacyMove": true,
+        "notes": "#1 Non-Mega Electric",
+        "familyIds": [
+          644
+        ]
+      },
+      {
+        "rank": 14,
+        "dexId": 646,
+        "species": "Black / White Kyurem",
+        "baseName": "kyurem",
+        "tier": "S+",
+        "role": "Ice / Dragon",
+        "edps": 31,
+        "dps": 29.4,
+        "partyPower": "ELITE",
+        "fastMove": "Dragon Tail",
+        "chargedMoves": [
+          "Glaciate",
+          "Freeze Shock",
+          "Ice Burn"
+        ],
+        "isLegacyMove": true,
+        "notes": "#1 Ice Attacker",
+        "familyIds": [
+          646
+        ]
+      },
+      {
+        "rank": 15,
+        "dexId": 376,
+        "species": "Shadow / Mega Metagross",
+        "baseName": "metagross",
+        "tier": "S",
+        "role": "Steel",
+        "edps": 31,
+        "dps": 29.4,
+        "partyPower": "HIGH",
+        "fastMove": "Bullet Punch",
+        "chargedMoves": [
+          "Meteor Mash"
+        ],
+        "isLegacyMove": true,
+        "notes": "Premier Steel Raid Anchor",
+        "familyIds": [
+          374,
+          375,
+          376
+        ]
+      },
+      {
+        "rank": 16,
+        "dexId": 464,
+        "species": "Shadow Rhyperior",
+        "baseName": "rhyperior",
+        "tier": "S",
+        "role": "Rock / Ground",
+        "edps": 31.2,
+        "dps": 28.8,
+        "partyPower": "ELITE",
+        "fastMove": "Smack Down / Mud-Slap",
+        "chargedMoves": [
+          "Rock Wrecker",
+          "Breaking Swipe"
+        ],
+        "isLegacyMove": true,
+        "notes": "#1 Shadow Rock / Ground",
+        "familyIds": [
+          111,
+          112,
+          464
+        ]
+      },
+      {
+        "rank": 17,
+        "dexId": 473,
+        "species": "Shadow Mamoswine",
+        "baseName": "mamoswine",
+        "tier": "S",
+        "role": "Ice / Ground",
+        "edps": 31,
+        "dps": 29,
+        "partyPower": "HIGH",
+        "fastMove": "Powder Snow",
+        "chargedMoves": [
+          "Avalanche",
+          "High Horsepower"
+        ],
+        "isLegacyMove": false,
+        "notes": "Top Shadow Ice & Ground",
+        "familyIds": [
+          220,
+          221,
+          473
+        ]
+      },
+      {
+        "rank": 18,
+        "dexId": 445,
+        "species": "Shadow / Mega Garchomp",
+        "baseName": "garchomp",
+        "tier": "S",
+        "role": "Ground / Dragon",
+        "edps": 31.8,
+        "dps": 30.2,
+        "partyPower": "ELITE",
+        "fastMove": "Mud Shot / Dragon Tail",
+        "chargedMoves": [
+          "Earth Power",
+          "Outrage"
+        ],
+        "isLegacyMove": true,
+        "notes": "Dual Ground/Dragon Elite",
+        "familyIds": [
+          443,
+          444,
+          445
+        ]
+      },
+      {
+        "rank": 19,
+        "dexId": 248,
+        "species": "Shadow / Mega Tyranitar",
+        "baseName": "tyranitar",
+        "tier": "S",
+        "role": "Dark / Rock",
+        "edps": 30.8,
+        "dps": 28.8,
+        "partyPower": "HIGH",
+        "fastMove": "Bite / Smack Down",
+        "chargedMoves": [
+          "Brutal Swing",
+          "Stone Edge"
+        ],
+        "isLegacyMove": true,
+        "notes": "#1 Dark Mega & Shadow",
+        "familyIds": [
+          246,
+          247,
+          248
+        ]
+      },
+      {
+        "rank": 20,
+        "dexId": 373,
+        "species": "Shadow / Mega Salamence",
+        "baseName": "salamence",
+        "tier": "S",
+        "role": "Dragon / Flying",
+        "edps": 32,
+        "dps": 31.2,
+        "partyPower": "ELITE",
+        "fastMove": "Dragon Tail",
+        "chargedMoves": [
+          "Outrage",
+          "Fly"
+        ],
+        "isLegacyMove": true,
+        "notes": "Elite Dragon DPS",
+        "familyIds": [
+          371,
+          372,
+          373
+        ]
+      },
+      {
+        "rank": 21,
+        "dexId": 409,
+        "species": "Shadow Rampardos",
+        "baseName": "rampardos",
+        "tier": "S",
+        "role": "Rock",
+        "edps": 30.5,
+        "dps": 34.2,
+        "partyPower": "ELITE",
+        "fastMove": "Smack Down",
+        "chargedMoves": [
+          "Rock Slide"
+        ],
+        "isLegacyMove": false,
+        "notes": "Highest Raw Rock DPS",
+        "familyIds": [
+          408,
+          409
+        ]
+      },
+      {
+        "rank": 22,
+        "dexId": 609,
+        "species": "Shadow Chandelure",
+        "baseName": "chandelure",
+        "tier": "S",
+        "role": "Ghost / Fire",
+        "edps": 30.2,
+        "dps": 32.4,
+        "partyPower": "ELITE",
+        "fastMove": "Hex / Fire Spin",
+        "chargedMoves": [
+          "Shadow Ball",
+          "Overheat"
+        ],
+        "isLegacyMove": false,
+        "notes": "Dual Ghost/Fire Glass Cannon",
+        "familyIds": [
+          607,
+          608,
+          609
+        ]
+      },
+      {
+        "rank": 23,
+        "dexId": 635,
+        "species": "Hydreigon",
+        "baseName": "hydreigon",
+        "tier": "S",
+        "role": "Dark",
+        "edps": 25.8,
+        "dps": 24.5,
+        "partyPower": "HIGH",
+        "fastMove": "Bite",
+        "chargedMoves": [
+          "Brutal Swing"
+        ],
+        "isLegacyMove": true,
+        "notes": "Top Non-Shadow Dark",
+        "familyIds": [
+          633,
+          634,
+          635
+        ]
+      },
+      {
+        "rank": 24,
+        "dexId": 998,
+        "species": "Baxcalibur",
+        "baseName": "baxcalibur",
+        "tier": "S",
+        "role": "Ice / Dragon",
+        "edps": 26,
+        "dps": 25.5,
+        "partyPower": "HIGH",
+        "fastMove": "Ice Fang",
+        "chargedMoves": [
+          "Avalanche",
+          "Glaive Rush"
+        ],
+        "isLegacyMove": true,
+        "notes": "Elite Ice/Dragon Pseudo",
+        "familyIds": [
+          996,
+          997,
+          998
+        ]
+      },
+      {
+        "rank": 25,
+        "dexId": 534,
+        "species": "Shadow Conkeldurr",
+        "baseName": "conkeldurr",
+        "tier": "S",
+        "role": "Fighting",
+        "edps": 29.5,
+        "dps": 28.2,
+        "partyPower": "HIGH",
+        "fastMove": "Counter",
+        "chargedMoves": [
+          "Dynamic Punch",
+          "Brutal Swing"
+        ],
+        "isLegacyMove": true,
+        "notes": "Top Shadow Fighting Tank",
+        "familyIds": [
+          532,
+          533,
+          534
+        ]
+      },
+      {
+        "rank": 26,
+        "dexId": 530,
+        "species": "Shadow Excadrill",
+        "baseName": "excadrill",
+        "tier": "S",
+        "role": "Ground / Steel",
+        "edps": 29.8,
+        "dps": 30.6,
+        "partyPower": "HIGH",
+        "fastMove": "Mud-Slap / Metal Claw",
+        "chargedMoves": [
+          "Scorching Sands",
+          "Iron Head"
+        ],
+        "isLegacyMove": false,
+        "notes": "Top Ground & Dynamax Anchor",
+        "familyIds": [
+          529,
+          530
+        ]
+      },
+      {
+        "rank": 27,
+        "dexId": 68,
+        "species": "Shadow Machamp",
+        "baseName": "machamp",
+        "tier": "S",
+        "role": "Fighting",
+        "edps": 27.8,
+        "dps": 27.6,
+        "partyPower": "HIGH",
+        "fastMove": "Counter",
+        "chargedMoves": [
+          "Dynamic Punch"
+        ],
+        "isLegacyMove": false,
+        "notes": "Core Fighting Raid Staple",
+        "familyIds": [
+          66,
+          67,
+          68
+        ]
+      },
+      {
+        "rank": 28,
+        "dexId": 796,
+        "species": "Xurkitree",
+        "baseName": "xurkitree",
+        "tier": "S",
+        "role": "Electric",
+        "edps": 27.5,
+        "dps": 29.8,
+        "partyPower": "HIGH",
+        "fastMove": "Thunder Shock",
+        "chargedMoves": [
+          "Discharge",
+          "Power Whip"
+        ],
+        "isLegacyMove": false,
+        "notes": "Top Electric Ultra Beast",
+        "familyIds": [
+          796
+        ]
+      },
+      {
+        "rank": 29,
+        "dexId": 806,
+        "species": "Blacephalon",
+        "baseName": "blacephalon",
+        "tier": "S",
+        "role": "Fire / Ghost",
+        "edps": 26.8,
+        "dps": 29.5,
+        "partyPower": "ELITE",
+        "fastMove": "Incinerate / Astonish",
+        "chargedMoves": [
+          "Mystical Fire",
+          "Shadow Ball"
+        ],
+        "isLegacyMove": false,
+        "notes": "Top Fire/Ghost Glass Cannon",
+        "familyIds": [
+          806
+        ]
+      },
+      {
+        "rank": 30,
+        "dexId": 793,
+        "species": "Nihilego",
+        "baseName": "nihilego",
+        "tier": "S",
+        "role": "Poison / Rock",
+        "edps": 25.2,
+        "dps": 25,
+        "partyPower": "HIGH",
+        "fastMove": "Poison Jab",
+        "chargedMoves": [
+          "Sludge Bomb"
+        ],
+        "isLegacyMove": false,
+        "notes": "#1 Poison Attacker",
+        "familyIds": [
+          793
+        ]
+      },
+      {
+        "rank": 31,
+        "dexId": 645,
+        "species": "Landorus (Therian)",
+        "baseName": "landorus",
+        "tier": "S",
+        "role": "Ground",
+        "edps": 26.8,
+        "dps": 26,
+        "partyPower": "ELITE",
+        "fastMove": "Mud Shot",
+        "chargedMoves": [
+          "Sandsear Storm"
+        ],
+        "isLegacyMove": true,
+        "notes": "Top Ground Legendary",
+        "familyIds": [
+          645
+        ]
+      },
+      {
+        "rank": 32,
+        "dexId": 905,
+        "species": "Enamorus",
+        "baseName": "enamorus",
+        "tier": "S",
+        "role": "Fairy / Flying",
+        "edps": 26,
+        "dps": 26.5,
+        "partyPower": "HIGH",
+        "fastMove": "Fairy Wind",
+        "chargedMoves": [
+          "Fly",
+          "Dazzling Gleam"
+        ],
+        "isLegacyMove": false,
+        "notes": "#1 Non-Mega Fairy",
+        "familyIds": [
+          905
+        ]
+      },
+      {
+        "rank": 33,
+        "dexId": 637,
+        "species": "Volcarona",
+        "baseName": "volcarona",
+        "tier": "S",
+        "role": "Bug / Fire",
+        "edps": 25.5,
+        "dps": 26,
+        "partyPower": "ELITE",
+        "fastMove": "Bug Bite / Fire Spin",
+        "chargedMoves": [
+          "Bug Buzz",
+          "Overheat"
+        ],
+        "isLegacyMove": false,
+        "notes": "#1 Non-Mega Bug",
+        "familyIds": [
+          636,
+          637
+        ]
+      },
+      {
+        "rank": 34,
+        "dexId": 555,
+        "species": "Shadow / Galarian Darmanitan",
+        "baseName": "darmanitan",
+        "tier": "S",
+        "role": "Fire / Ice",
+        "edps": 28.4,
+        "dps": 31,
+        "partyPower": "ELITE",
+        "fastMove": "Fire Fang / Ice Fang",
+        "chargedMoves": [
+          "Overheat",
+          "Avalanche"
+        ],
+        "isLegacyMove": false,
+        "notes": "Top Fire & Ice DPS",
+        "familyIds": [
+          554,
+          555
+        ]
+      },
+      {
+        "rank": 35,
+        "dexId": 94,
+        "species": "Mega / Shadow Gengar",
+        "baseName": "gengar",
+        "tier": "S",
+        "role": "Ghost / Poison",
+        "edps": 28.8,
+        "dps": 33,
+        "partyPower": "HIGH",
+        "fastMove": "Lick / Shadow Claw",
+        "chargedMoves": [
+          "Shadow Ball",
+          "Sludge Bomb"
+        ],
+        "isLegacyMove": true,
+        "notes": "Premier Ghost Mega & G-Max",
+        "familyIds": [
+          92,
+          93,
+          94
+        ]
+      },
+      {
+        "rank": 36,
+        "dexId": 282,
+        "species": "Mega / Shadow Gardevoir",
+        "baseName": "gardevoir",
+        "tier": "S",
+        "role": "Fairy / Psychic",
+        "edps": 28.2,
+        "dps": 28.2,
+        "partyPower": "HIGH",
+        "fastMove": "Charm / Confusion",
+        "chargedMoves": [
+          "Dazzling Gleam",
+          "Psychic"
+        ],
+        "isLegacyMove": false,
+        "notes": "#1 Fairy Mega & Shadow",
+        "familyIds": [
+          280,
+          281,
+          282,
+          475
+        ]
+      },
+      {
+        "rank": 37,
+        "dexId": 257,
+        "species": "Mega / Shadow Blaziken",
+        "baseName": "blaziken",
+        "tier": "S",
+        "role": "Fire / Fighting",
+        "edps": 28.5,
+        "dps": 29,
+        "partyPower": "HIGH",
+        "fastMove": "Counter / Fire Spin",
+        "chargedMoves": [
+          "Blast Burn",
+          "Aura Sphere"
+        ],
+        "isLegacyMove": true,
+        "notes": "#1 Fire Mega",
+        "familyIds": [
+          255,
+          256,
+          257
+        ]
+      },
+      {
+        "rank": 38,
+        "dexId": 260,
+        "species": "Mega / Shadow Swampert",
+        "baseName": "swampert",
+        "tier": "S",
+        "role": "Water / Ground",
+        "edps": 27.6,
+        "dps": 27,
+        "partyPower": "HIGH",
+        "fastMove": "Water Gun / Mud Shot",
+        "chargedMoves": [
+          "Hydro Cannon",
+          "Earthquake"
+        ],
+        "isLegacyMove": true,
+        "notes": "Top Water/Ground Mega",
+        "familyIds": [
+          258,
+          259,
+          260
+        ]
+      },
+      {
+        "rank": 39,
+        "dexId": 254,
+        "species": "Mega Sceptile",
+        "baseName": "sceptile",
+        "tier": "S",
+        "role": "Grass",
+        "edps": 28.9,
+        "dps": 29.5,
+        "partyPower": "HIGH",
+        "fastMove": "Fury Cutter",
+        "chargedMoves": [
+          "Frenzy Plant"
+        ],
+        "isLegacyMove": true,
+        "notes": "#1 Grass Mega",
+        "familyIds": [
+          252,
+          253,
+          254
+        ]
+      },
+      {
+        "rank": 40,
+        "dexId": 6,
+        "species": "Mega Charizard Y / Shadow",
+        "baseName": "charizard",
+        "tier": "S",
+        "role": "Fire / Flying",
+        "edps": 28,
+        "dps": 27.5,
+        "partyPower": "HIGH",
+        "fastMove": "Fire Spin / Wing Attack",
+        "chargedMoves": [
+          "Blast Burn"
+        ],
+        "isLegacyMove": true,
+        "notes": "Elite Fire Mega & G-Max",
+        "familyIds": [
+          4,
+          5,
+          6
+        ]
+      },
+      {
+        "rank": 41,
+        "dexId": 719,
+        "species": "Mega Diancie",
+        "baseName": "diancie",
+        "tier": "S",
+        "role": "Rock",
+        "edps": 29.2,
+        "dps": 31,
+        "partyPower": "HIGH",
+        "fastMove": "Rock Throw",
+        "chargedMoves": [
+          "Rock Slide"
+        ],
+        "isLegacyMove": false,
+        "notes": "#1 Rock Mega",
+        "familyIds": [
+          719
+        ]
+      },
+      {
+        "rank": 42,
+        "dexId": 214,
+        "species": "Mega Heracross",
+        "baseName": "heracross",
+        "tier": "S",
+        "role": "Bug / Fighting",
+        "edps": 28.1,
+        "dps": 27.5,
+        "partyPower": "ELITE",
+        "fastMove": "Counter / Struggle Bug",
+        "chargedMoves": [
+          "Megahorn",
+          "Close Combat"
+        ],
+        "isLegacyMove": false,
+        "notes": "#1 Bug Mega",
+        "familyIds": [
+          214
+        ]
+      },
+      {
+        "rank": 43,
+        "dexId": 3,
+        "species": "Mega / Shadow Venusaur",
+        "baseName": "venusaur",
+        "tier": "A",
+        "role": "Grass / Poison",
+        "edps": 24.5,
+        "dps": 24,
+        "partyPower": "HIGH",
+        "fastMove": "Vine Whip",
+        "chargedMoves": [
+          "Frenzy Plant"
+        ],
+        "isLegacyMove": true,
+        "notes": "Core Grass Mega & G-Max",
+        "familyIds": [
+          1,
+          2,
+          3
+        ]
+      },
+      {
+        "rank": 44,
+        "dexId": 9,
+        "species": "Mega / G-Max Blastoise",
+        "baseName": "blastoise",
+        "tier": "A",
+        "role": "Water",
+        "edps": 23.8,
+        "dps": 23,
+        "partyPower": "HIGH",
+        "fastMove": "Water Gun",
+        "chargedMoves": [
+          "Hydro Cannon"
+        ],
+        "isLegacyMove": true,
+        "notes": "Water Mega & G-Max Tank",
+        "familyIds": [
+          7,
+          8,
+          9
+        ]
+      },
+      {
+        "rank": 45,
+        "dexId": 149,
+        "species": "Shadow Dragonite",
+        "baseName": "dragonite",
+        "tier": "A",
+        "role": "Dragon",
+        "edps": 27.2,
+        "dps": 26.8,
+        "partyPower": "ELITE",
+        "fastMove": "Dragon Tail",
+        "chargedMoves": [
+          "Outrage",
+          "Draco Meteor"
+        ],
+        "isLegacyMove": false,
+        "notes": "Reliable Shadow Dragon",
+        "familyIds": [
+          147,
+          148,
+          149
+        ]
+      },
+      {
+        "rank": 46,
+        "dexId": 466,
+        "species": "Shadow Electivire",
+        "baseName": "electivire",
+        "tier": "A",
+        "role": "Electric",
+        "edps": 26.5,
+        "dps": 29,
+        "partyPower": "HIGH",
+        "fastMove": "Thunder Shock",
+        "chargedMoves": [
+          "Wild Charge"
+        ],
+        "isLegacyMove": false,
+        "notes": "Top Shadow Electric",
+        "familyIds": [
+          125,
+          239,
+          466
+        ]
+      },
+      {
+        "rank": 47,
+        "dexId": 462,
+        "species": "Shadow Magnezone",
+        "baseName": "magnezone",
+        "tier": "A",
+        "role": "Electric / Steel",
+        "edps": 25.8,
+        "dps": 26.5,
+        "partyPower": "HIGH",
+        "fastMove": "Spark",
+        "chargedMoves": [
+          "Wild Charge"
+        ],
+        "isLegacyMove": false,
+        "notes": "Bulky Shadow Electric",
+        "familyIds": [
+          81,
+          82,
+          462
+        ]
+      },
+      {
+        "rank": 48,
+        "dexId": 461,
+        "species": "Shadow Weavile",
+        "baseName": "weavile",
+        "tier": "A",
+        "role": "Ice / Dark",
+        "edps": 25.5,
+        "dps": 27.2,
+        "partyPower": "HIGH",
+        "fastMove": "Ice Shard / Snarl",
+        "chargedMoves": [
+          "Triple Axel",
+          "Foul Play"
+        ],
+        "isLegacyMove": false,
+        "notes": "Dual Ice/Dark Raider",
+        "familyIds": [
+          215,
+          461,
+          903
+        ]
+      },
+      {
+        "rank": 49,
+        "dexId": 407,
+        "species": "Roserade",
+        "baseName": "roserade",
+        "tier": "A",
+        "role": "Grass / Poison",
+        "edps": 23.5,
+        "dps": 24.5,
+        "partyPower": "HIGH",
+        "fastMove": "Magical Leaf / Poison Jab",
+        "chargedMoves": [
+          "Grass Knot",
+          "Sludge Bomb"
+        ],
+        "isLegacyMove": false,
+        "notes": "Top Budget Grass/Poison",
+        "familyIds": [
+          315,
+          406,
+          407
+        ]
+      },
+      {
+        "rank": 50,
+        "dexId": 612,
+        "species": "Haxorus",
+        "baseName": "haxorus",
+        "tier": "A",
+        "role": "Dragon",
+        "edps": 25,
+        "dps": 26.2,
+        "partyPower": "HIGH",
+        "fastMove": "Dragon Tail",
+        "chargedMoves": [
+          "Breaking Swipe"
+        ],
+        "isLegacyMove": true,
+        "notes": "High Attack Dragon",
+        "familyIds": [
+          610,
+          611,
+          612
+        ]
+      },
+      {
+        "rank": 51,
+        "dexId": 983,
+        "species": "Kingambit",
+        "baseName": "kingambit",
+        "tier": "A",
+        "role": "Dark / Steel",
+        "edps": 25.4,
+        "dps": 24.8,
+        "partyPower": "HIGH",
+        "fastMove": "Snarl / Metal Claw",
+        "chargedMoves": [
+          "Kowtow Cleave",
+          "Dark Pulse"
+        ],
+        "isLegacyMove": true,
+        "notes": "Bulky Dark/Steel Attacker",
+        "familyIds": [
+          624,
+          625,
+          983
+        ]
+      },
+      {
+        "rank": 52,
+        "dexId": 243,
+        "species": "Shadow Raikou",
+        "baseName": "raikou",
+        "tier": "A",
+        "role": "Electric",
+        "edps": 27,
+        "dps": 26.2,
+        "partyPower": "HIGH",
+        "fastMove": "Thunder Shock",
+        "chargedMoves": [
+          "Wild Charge"
+        ],
+        "isLegacyMove": false,
+        "notes": "Elite Shadow Electric",
+        "familyIds": [
+          243
+        ]
+      },
+      {
+        "rank": 53,
+        "dexId": 244,
+        "species": "Shadow Entei",
+        "baseName": "entei",
+        "tier": "A",
+        "role": "Fire",
+        "edps": 26.5,
+        "dps": 25.8,
+        "partyPower": "ELITE",
+        "fastMove": "Fire Fang",
+        "chargedMoves": [
+          "Overheat"
+        ],
+        "isLegacyMove": false,
+        "notes": "Elite Shadow Fire",
+        "familyIds": [
+          244
+        ]
+      },
+      {
+        "rank": 54,
+        "dexId": 146,
+        "species": "Shadow Moltres",
+        "baseName": "moltres",
+        "tier": "A",
+        "role": "Flying / Fire",
+        "edps": 27.2,
+        "dps": 27.8,
+        "partyPower": "HIGH",
+        "fastMove": "Wing Attack / Fire Spin",
+        "chargedMoves": [
+          "Sky Attack",
+          "Overheat"
+        ],
+        "isLegacyMove": true,
+        "notes": "Top Shadow Flying/Fire",
+        "familyIds": [
+          146
+        ]
+      },
+      {
+        "rank": 55,
+        "dexId": 485,
+        "species": "Shadow / Magma Storm Heatran",
+        "baseName": "heatran",
+        "tier": "A",
+        "role": "Fire",
+        "edps": 27.5,
+        "dps": 26,
+        "partyPower": "HIGH",
+        "fastMove": "Fire Spin",
+        "chargedMoves": [
+          "Magma Storm"
+        ],
+        "isLegacyMove": true,
+        "notes": "Bulky Fire Raid Anchor",
+        "familyIds": [
+          485
+        ]
+      },
+      {
+        "rank": 56,
+        "dexId": 491,
+        "species": "Darkrai",
+        "baseName": "darkrai",
+        "tier": "A",
+        "role": "Dark",
+        "edps": 25.2,
+        "dps": 26,
+        "partyPower": "HIGH",
+        "fastMove": "Snarl",
+        "chargedMoves": [
+          "Dark Pulse",
+          "Shadow Ball"
+        ],
+        "isLegacyMove": false,
+        "notes": "Mythical Dark Attacker",
+        "familyIds": [
+          491
+        ]
+      },
+      {
+        "rank": 57,
+        "dexId": 487,
+        "species": "Origin Giratina",
+        "baseName": "giratina",
+        "tier": "A",
+        "role": "Ghost",
+        "edps": 26,
+        "dps": 24.8,
+        "partyPower": "ELITE",
+        "fastMove": "Shadow Claw",
+        "chargedMoves": [
+          "Shadow Force",
+          "Shadow Ball"
+        ],
+        "isLegacyMove": true,
+        "notes": "Tanky Ghost Raid Anchor",
+        "familyIds": [
+          487
+        ]
+      },
+      {
+        "rank": 58,
+        "dexId": 716,
+        "species": "Xerneas",
+        "baseName": "xerneas",
+        "tier": "A",
+        "role": "Fairy",
+        "edps": 25.8,
+        "dps": 25,
+        "partyPower": "ELITE",
+        "fastMove": "Geomancy",
+        "chargedMoves": [
+          "Moonblast"
+        ],
+        "isLegacyMove": true,
+        "notes": "Top Fairy Legendary",
+        "familyIds": [
+          716
+        ]
+      },
+      {
+        "rank": 59,
+        "dexId": 717,
+        "species": "Yveltal",
+        "baseName": "yveltal",
+        "tier": "A",
+        "role": "Flying / Dark",
+        "edps": 25.6,
+        "dps": 24.8,
+        "partyPower": "HIGH",
+        "fastMove": "Gust / Snarl",
+        "chargedMoves": [
+          "Oblivion Wing",
+          "Dark Pulse"
+        ],
+        "isLegacyMove": true,
+        "notes": "Top Flying/Dark Legendary",
+        "familyIds": [
+          717
+        ]
+      },
+      {
+        "rank": 60,
+        "dexId": 812,
+        "species": "G-Max / Rillaboom",
+        "baseName": "rillaboom",
+        "tier": "A",
+        "role": "Grass",
+        "edps": 25.2,
+        "dps": 24.8,
+        "partyPower": "HIGH",
+        "fastMove": "Scratch / Razor Leaf",
+        "chargedMoves": [
+          "Frenzy Plant",
+          "Grass Knot"
+        ],
+        "isLegacyMove": true,
+        "notes": "Top Grass Dynamax/G-Max",
+        "familyIds": [
+          810,
+          811,
+          812
+        ]
+      },
+      {
+        "rank": 61,
+        "dexId": 815,
+        "species": "G-Max / Cinderace",
+        "baseName": "cinderace",
+        "tier": "A",
+        "role": "Fire",
+        "edps": 25,
+        "dps": 25.5,
+        "partyPower": "ELITE",
+        "fastMove": "Fire Spin",
+        "chargedMoves": [
+          "Blast Burn",
+          "Flame Charge"
+        ],
+        "isLegacyMove": true,
+        "notes": "Top Fire Dynamax/G-Max",
+        "familyIds": [
+          813,
+          814,
+          815
+        ]
+      },
+      {
+        "rank": 62,
+        "dexId": 818,
+        "species": "G-Max / Inteleon",
+        "baseName": "inteleon",
+        "tier": "A",
+        "role": "Water",
+        "edps": 25.4,
+        "dps": 26.8,
+        "partyPower": "HIGH",
+        "fastMove": "Water Gun",
+        "chargedMoves": [
+          "Hydro Cannon",
+          "Surf"
+        ],
+        "isLegacyMove": true,
+        "notes": "Top Water Dynamax/G-Max",
+        "familyIds": [
+          816,
+          817,
+          818
+        ]
+      },
+      {
+        "rank": 63,
+        "dexId": 888,
+        "species": "Zacian",
+        "baseName": "zacian",
+        "tier": "A",
+        "role": "Fairy",
+        "edps": 25.5,
+        "dps": 25.2,
+        "partyPower": "ELITE",
+        "fastMove": "Metal Claw / Quick Attack",
+        "chargedMoves": [
+          "Play Rough",
+          "Wild Charge"
+        ],
+        "isLegacyMove": false,
+        "notes": "ML & Raid Hybrid",
+        "familyIds": [
+          888
+        ]
+      },
+      {
+        "rank": 64,
+        "dexId": 242,
+        "species": "Blissey (Gym Tank & D-Max Healer)",
+        "baseName": "blissey",
+        "tier": "A",
+        "role": "Gym / Max Healer",
+        "edps": 15,
+        "dps": 14,
+        "partyPower": "STANDARD",
+        "fastMove": "Pound",
+        "chargedMoves": [
+          "Dazzling Gleam",
+          "Psychic"
+        ],
+        "isLegacyMove": false,
+        "notes": "#1 Gym Defender & Max Spirit Tank",
+        "familyIds": [
+          113,
+          242,
+          440
+        ]
+      }
+    ],
+    "dexIds": [
+      3,
+      6,
+      9,
+      68,
+      94,
+      146,
+      149,
+      150,
+      214,
+      242,
+      243,
+      244,
+      248,
+      254,
+      257,
+      260,
+      282,
+      373,
+      376,
+      382,
+      383,
+      384,
+      407,
+      409,
+      445,
+      448,
+      461,
+      462,
+      464,
+      466,
+      473,
+      483,
+      484,
+      485,
+      487,
+      491,
+      530,
+      534,
+      555,
+      609,
+      612,
+      635,
+      637,
+      639,
+      643,
+      644,
+      645,
+      646,
+      716,
+      717,
+      719,
+      793,
+      796,
+      798,
+      800,
+      806,
+      812,
+      815,
+      818,
+      888,
+      905,
+      983,
+      998
+    ],
+    "familyIds": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      66,
+      67,
+      68,
+      81,
+      82,
+      92,
+      93,
+      94,
+      111,
+      112,
+      113,
+      125,
+      146,
+      147,
+      148,
+      149,
+      150,
+      214,
+      215,
+      220,
+      221,
+      239,
+      242,
+      243,
+      244,
+      246,
+      247,
+      248,
+      252,
+      253,
+      254,
+      255,
+      256,
+      257,
+      258,
+      259,
+      260,
+      280,
+      281,
+      282,
+      315,
+      371,
+      372,
+      373,
+      374,
+      375,
+      376,
+      382,
+      383,
+      384,
+      406,
+      407,
+      408,
+      409,
+      440,
+      443,
+      444,
+      445,
+      447,
+      448,
+      461,
+      462,
+      464,
+      466,
+      473,
+      475,
+      483,
+      484,
+      485,
+      487,
+      491,
+      529,
+      530,
+      532,
+      533,
+      534,
+      554,
+      555,
+      607,
+      608,
+      609,
+      610,
+      611,
+      612,
+      624,
+      625,
+      633,
+      634,
+      635,
+      636,
+      637,
+      639,
+      643,
+      644,
+      645,
+      646,
+      716,
+      717,
+      719,
+      793,
+      796,
+      798,
+      800,
+      806,
+      810,
+      811,
+      812,
+      813,
+      814,
+      815,
+      816,
+      817,
+      818,
+      888,
+      903,
+      905,
+      983,
+      996,
+      997,
+      998
+    ]
+  },
+  "combinedMetaFamilyIds": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    21,
+    22,
+    35,
+    36,
+    37,
+    38,
+    39,
+    40,
+    56,
+    57,
+    60,
+    61,
+    62,
+    66,
+    67,
+    68,
+    72,
+    73,
+    81,
+    82,
+    86,
+    87,
+    88,
+    89,
+    92,
+    93,
+    94,
+    95,
+    100,
+    101,
+    104,
+    105,
+    108,
+    111,
+    112,
+    113,
+    116,
+    117,
+    118,
+    119,
+    125,
+    129,
+    130,
+    131,
+    133,
+    134,
+    135,
+    136,
+    143,
+    144,
+    145,
+    146,
+    147,
+    148,
+    149,
+    150,
+    158,
+    159,
+    160,
+    161,
+    162,
+    173,
+    174,
+    175,
+    176,
+    179,
+    180,
+    181,
+    183,
+    184,
+    186,
+    187,
+    188,
+    189,
+    194,
+    195,
+    196,
+    197,
+    204,
+    205,
+    208,
+    214,
+    215,
+    216,
+    217,
+    220,
+    221,
+    222,
+    226,
+    230,
+    239,
+    241,
+    242,
+    243,
+    244,
+    246,
+    247,
+    248,
+    249,
+    250,
+    252,
+    253,
+    254,
+    255,
+    256,
+    257,
+    258,
+    259,
+    260,
+    280,
+    281,
+    282,
+    287,
+    288,
+    289,
+    298,
+    302,
+    307,
+    308,
+    315,
+    325,
+    326,
+    333,
+    334,
+    345,
+    346,
+    349,
+    350,
+    355,
+    356,
+    363,
+    364,
+    365,
+    371,
+    372,
+    373,
+    374,
+    375,
+    376,
+    379,
+    380,
+    381,
+    382,
+    383,
+    384,
+    385,
+    386,
+    393,
+    394,
+    395,
+    406,
+    407,
+    408,
+    409,
+    417,
+    440,
+    443,
+    444,
+    445,
+    446,
+    447,
+    448,
+    449,
+    450,
+    451,
+    452,
+    458,
+    461,
+    462,
+    463,
+    464,
+    466,
+    468,
+    470,
+    471,
+    473,
+    475,
+    477,
+    483,
+    484,
+    485,
+    487,
+    488,
+    491,
+    501,
+    502,
+    503,
+    529,
+    530,
+    532,
+    533,
+    534,
+    535,
+    536,
+    537,
+    554,
+    555,
+    557,
+    558,
+    562,
+    563,
+    592,
+    593,
+    607,
+    608,
+    609,
+    610,
+    611,
+    612,
+    618,
+    624,
+    625,
+    629,
+    630,
+    633,
+    634,
+    635,
+    636,
+    637,
+    639,
+    640,
+    643,
+    644,
+    645,
+    646,
+    647,
+    648,
+    649,
+    659,
+    660,
+    661,
+    662,
+    663,
+    669,
+    670,
+    671,
+    679,
+    680,
+    681,
+    682,
+    683,
+    686,
+    687,
+    700,
+    703,
+    704,
+    705,
+    706,
+    710,
+    711,
+    716,
+    717,
+    718,
+    719,
+    721,
+    728,
+    729,
+    730,
+    731,
+    732,
+    733,
+    736,
+    737,
+    738,
+    751,
+    752,
+    765,
+    767,
+    768,
+    776,
+    778,
+    782,
+    783,
+    784,
+    785,
+    789,
+    790,
+    791,
+    792,
+    793,
+    796,
+    798,
+    799,
+    800,
+    802,
+    806,
+    808,
+    809,
+    810,
+    811,
+    812,
+    813,
+    814,
+    815,
+    816,
+    817,
+    818,
+    821,
+    822,
+    823,
+    827,
+    828,
+    845,
+    864,
+    867,
+    877,
+    888,
+    889,
+    890,
+    891,
+    892,
+    895,
+    901,
+    903,
+    905,
+    909,
+    910,
+    911,
+    915,
+    916,
+    917,
+    918,
+    938,
+    939,
+    957,
+    958,
+    959,
+    962,
+    968,
+    977,
+    979,
+    980,
+    983,
+    996,
+    997,
+    998,
+    999,
+    1000
+  ]
+}

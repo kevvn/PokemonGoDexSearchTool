@@ -2,13 +2,311 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Top-level @property registrations for scroll-driven tablist edge fades (mwg: tabs) */
+@property --fade-start {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+@property --fade-end {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+:root {
+  --target-size: 24px;
+  --tab-accent: #0f766e;
+}
+
+@media (pointer: coarse) {
+  :root {
+    --target-size: 44px;
+  }
+}
+
 @layer base {
   body {
-    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-family: 'Outfit', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: #e4f4ee;
+    color: #1e293b;
   }
-  
+
+  p, li {
+    overflow-wrap: break-word;
+  }
+
+  h1, h2, h3 {
+    text-wrap: balance;
+  }
+
+  p, li {
+    text-wrap: pretty;
+  }
+
+  img, video {
+    max-inline-size: 100%;
+    block-size: auto;
+  }
+
   code, pre {
     font-family: 'JetBrains Mono', monospace;
+  }
+}
+
+/* Coarse-pointer touch target sizing (mwg: form-factor-adaptation) */
+.mwg-touch-scope :where(
+  button:not(.compact-inline-chip),
+  select,
+  textarea,
+  input:not([type="checkbox"], [type="radio"]),
+  [role="button"],
+  [role="tab"],
+  label:has(input[type="checkbox"], input[type="radio"])
+) {
+  min-block-size: var(--target-size);
+  min-inline-size: var(--target-size);
+}
+
+.mwg-icon-hit {
+  position: relative;
+}
+
+.mwg-icon-hit::after {
+  content: "";
+  position: absolute;
+  inset: -8px;
+}
+
+/* Safe-area inset helpers for notched / home-indicator phones (mwg: form-factor-adaptation) */
+.safe-top-header {
+  padding-top: max(0.45rem, env(safe-area-inset-top, 0px));
+  padding-left: max(0.75rem, env(safe-area-inset-left, 0px));
+  padding-right: max(0.75rem, env(safe-area-inset-right, 0px));
+}
+
+.safe-bottom-dock {
+  padding-bottom: max(0.55rem, env(safe-area-inset-bottom, 0px));
+  padding-left: max(0.75rem, env(safe-area-inset-left, 0px));
+  padding-right: max(0.75rem, env(safe-area-inset-right, 0px));
+}
+
+/* Container-query adaptive short/long label (mwg: single-line-overflow)
+   IMPORTANT: `container-type: inline-size` MUST live on the full-width `.mwg-header-row` wrapper,
+   NEVER on an intrinsic-width `<button>`, otherwise CSS size containment collapses the button's
+   intrinsic inline content width to 0px! */
+.mwg-header-row {
+  container-type: inline-size;
+  width: 100%;
+}
+
+.mwg-adaptive-slot {
+  white-space: nowrap;
+}
+
+.mwg-adaptive-slot .short {
+  display: none;
+  user-select: none;
+}
+
+@container (inline-size < 32rem) {
+  .mwg-adaptive-slot .long {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .mwg-adaptive-slot .short {
+    display: inline;
+  }
+}
+
+/* Container-query responsive card grids (mwg: form-factor-adaptation) */
+.mwg-card-container {
+  container: cards / inline-size;
+}
+
+.mwg-card-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.65rem;
+}
+
+@container cards (inline-size > 40rem) {
+  .mwg-card-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.85rem;
+  }
+}
+
+@container cards (inline-size > 64rem) {
+  .mwg-card-grid-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* Single-row horizontally scrolling Tablist with animated edge fades (mwg: tabs) */
+.mwg-tablist {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  scroll-snap-type: inline proximity;
+  --fade-size: 2rem;
+  scroll-padding-inline: var(--fade-size);
+  --fade-dir: right;
+  --fade-start-pos: 0;
+  --fade-end-pos: 100%;
+  mask:
+    linear-gradient(black, black) no-clip subtract,
+    linear-gradient(to var(--fade-dir), black, transparent) var(--fade-start-pos) 0 / var(--fade-start) 100% no-repeat no-clip,
+    linear-gradient(to var(--fade-dir), transparent, black) var(--fade-end-pos) 0 / var(--fade-end) 100% no-repeat no-clip;
+  animation: reveal-fade-start linear both, hide-fade-end linear both;
+  animation-timeline: scroll(self inline);
+  animation-range: 0 var(--fade-size), calc(100% - var(--fade-size)) 100%;
+  transition: --fade-start 0.2s, --fade-end 0.2s;
+}
+
+.mwg-tablist::-webkit-scrollbar {
+  display: none;
+}
+
+.mwg-tablist:dir(rtl) {
+  --fade-dir: left;
+  --fade-start-pos: 100%;
+  --fade-end-pos: 0;
+}
+
+.mwg-tablist.more-start {
+  --fade-start: var(--fade-size);
+}
+
+.mwg-tablist.more-end {
+  --fade-end: var(--fade-size);
+}
+
+@keyframes reveal-fade-start {
+  to {
+    --fade-start: var(--fade-size);
+  }
+}
+
+@keyframes hide-fade-end {
+  from {
+    --fade-end: var(--fade-size);
+  }
+}
+
+.mwg-tablist [role="tab"] {
+  flex: none;
+  position: relative;
+  scroll-snap-align: start;
+  white-space: nowrap;
+  padding-inline: 0.75rem;
+  padding-block: 0.5rem;
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #475569;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  outline-offset: -2px;
+}
+
+.mwg-tablist [role="tab"]:hover {
+  color: #0f766e;
+}
+
+/* Selected tab styled strictly from aria-selected with a border underline — zero dimension change (mwg: tabs) */
+.mwg-tablist [role="tab"][aria-selected="true"] {
+  color: var(--tab-accent);
+}
+
+.mwg-tablist [role="tab"][aria-selected="true"]::after {
+  content: "";
+  position: absolute;
+  inset: auto 0.35rem 0;
+  border-block-end: 3px solid var(--tab-accent);
+  border-radius: 999px;
+}
+
+/* Copy Button with Accessible Live Region Status Bubble (mwg: copy-button) */
+.mwg-copy {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+}
+
+.mwg-copy-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  cursor: pointer;
+}
+
+.mwg-copy-btn .icon-check {
+  display: none;
+}
+
+.mwg-copy-btn[data-copied] {
+  background-color: #059669 !important;
+  color: #ffffff !important;
+  border-color: #059669 !important;
+}
+
+.mwg-copy-btn[data-copied] .icon-copy {
+  display: none;
+}
+
+.mwg-copy-btn[data-copied] .icon-check {
+  display: inline;
+}
+
+.mwg-copy-btn[data-failed] {
+  background-color: #e11d48 !important;
+  color: #ffffff !important;
+}
+
+/* Keep live region in accessibility tree via opacity (never display:none or visibility:hidden) */
+.mwg-copy-tip {
+  position: absolute;
+  inset-block-end: calc(100% + 6px);
+  inset-inline-end: 0;
+  padding: 0.2rem 0.5rem;
+  border-radius: 0.5rem;
+  font-size: 0.68rem;
+  font-weight: 800;
+  white-space: nowrap;
+  background: #0f172a;
+  color: #f8fafc;
+  pointer-events: none;
+  opacity: 0;
+  z-index: 50;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.22);
+  transition: opacity 0.16s ease, transform 0.16s ease;
+  transform: translateY(3px);
+}
+
+.mwg-copy-btn[data-copied] + .mwg-copy-tip,
+.mwg-copy-btn[data-failed] + .mwg-copy-tip {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mwg-copy-tip {
+    transition: opacity 0.15s linear;
+    transform: none;
   }
 }
 
@@ -18,21 +316,21 @@
 
 /* Custom scrollbars */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(15, 23, 42, 0.6);
+  background: rgba(220, 240, 235, 0.6);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.2);
+  background: rgba(0, 180, 155, 0.4);
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(148, 163, 184, 0.4);
+  background: rgba(0, 180, 155, 0.7);
 }
 
 .no-scrollbar::-webkit-scrollbar {
@@ -43,58 +341,144 @@
   scrollbar-width: none;
 }
 
-/* Glassmorphism Styles */
-.glass-panel {
-  background: rgba(30, 41, 59, 0.7);
-  backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+/* Authentic Pokémon GO Storage & Pokédex Background */
+.pogo-storage-bg {
+  background: linear-gradient(180deg, #3db8a2 0%, #60ceba 100px, #caeee4 340px, #e8f7f2 680px, #f4fbf8 100%);
+  min-height: 100dvh;
 }
 
-.glass-panel-light {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+.pogo-header-gradient {
+  background: linear-gradient(180deg, #1b7a69 0%, #299b87 60%, #35b09b 100%);
+  border-bottom: 2px solid rgba(255, 255, 255, 0.22);
+  box-shadow: 0 3px 12px rgba(10, 60, 50, 0.14);
 }
 
-/* Premium Pokemon Type Colors & Glowing Shadows */
-.bg-type-normal { background: linear-gradient(135deg, #a8a77a, #7d7c58); }
-.bg-type-fire { background: linear-gradient(135deg, #ee8130, #b8540b); }
-.bg-type-water { background: linear-gradient(135deg, #6390f0, #1754db); }
-.bg-type-grass { background: linear-gradient(135deg, #78c850, #418220); }
-.bg-type-electric { background: linear-gradient(135deg, #f7d02c, #cca305); }
-.bg-type-ice { background: linear-gradient(135deg, #96d9d6, #41ada9); }
-.bg-type-fighting { background: linear-gradient(135deg, #c22e28, #7a120e); }
-.bg-type-poison { background: linear-gradient(135deg, #a33ea1, #621461); }
-.bg-type-ground { background: linear-gradient(135deg, #e2bf65, #a38128); }
-.bg-type-flying { background: linear-gradient(135deg, #a98ff3, #6742d8); }
-.bg-type-psychic { background: linear-gradient(135deg, #f95587, #c11046); }
-.bg-type-bug { background: linear-gradient(135deg, #a6b91a, #657304); }
-.bg-type-rock { background: linear-gradient(135deg, #b6a136, #736417); }
-.bg-type-ghost { background: linear-gradient(135deg, #705746, #403026); }
-.bg-type-dragon { background: linear-gradient(135deg, #6f35fc, #3b05bd); }
-.bg-type-steel { background: linear-gradient(135deg, #b7b7ce, #777793); }
-.bg-type-dark { background: linear-gradient(135deg, #3c2d23, #150f0b); }
-.bg-type-fairy { background: linear-gradient(135deg, #d685ad, #a84877); }
+.pogo-storage-counter {
+  background: rgba(255, 255, 255, 0.95);
+  border: 1.5px solid #299b87;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
 
-/* Selection Glows */
-.shadow-type-normal { box-shadow: 0 0 15px rgba(168, 167, 122, 0.4); }
-.shadow-type-fire { box-shadow: 0 0 15px rgba(238, 129, 48, 0.5); }
-.shadow-type-water { box-shadow: 0 0 15px rgba(99, 144, 240, 0.5); }
-.shadow-type-grass { box-shadow: 0 0 15px rgba(120, 200, 80, 0.5); }
-.shadow-type-electric { box-shadow: 0 0 15px rgba(247, 208, 44, 0.5); }
-.shadow-type-ice { box-shadow: 0 0 15px rgba(150, 217, 214, 0.5); }
-.shadow-type-fighting { box-shadow: 0 0 15px rgba(194, 46, 40, 0.5); }
-.shadow-type-poison { box-shadow: 0 0 15px rgba(163, 62, 161, 0.5); }
-.shadow-type-ground { box-shadow: 0 0 15px rgba(226, 191, 101, 0.5); }
-.shadow-type-flying { box-shadow: 0 0 15px rgba(169, 143, 243, 0.5); }
-.shadow-type-psychic { box-shadow: 0 0 15px rgba(249, 85, 135, 0.5); }
-.shadow-type-bug { box-shadow: 0 0 15px rgba(166, 185, 26, 0.5); }
-.shadow-type-rock { box-shadow: 0 0 15px rgba(182, 161, 54, 0.5); }
-.shadow-type-ghost { box-shadow: 0 0 15px rgba(112, 87, 70, 0.5); }
-.shadow-type-dragon { box-shadow: 0 0 15px rgba(111, 53, 252, 0.5); }
-.shadow-type-steel { box-shadow: 0 0 15px rgba(183, 183, 206, 0.5); }
-.shadow-type-dark { box-shadow: 0 0 15px rgba(60, 45, 35, 0.5); }
-.shadow-type-fairy { box-shadow: 0 0 15px rgba(214, 133, 173, 0.5); }
+/* Pokémon GO Storage Slot Cards */
+.pogo-card {
+  background: #ffffff;
+  border-radius: 1.5rem;
+  border: 1.5px solid #d1ede4;
+  box-shadow: 0 4px 14px rgba(25, 80, 70, 0.08);
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.pogo-card:hover {
+  transform: translateY(-3px) scale(1.02);
+  border-color: #00d2b4;
+  box-shadow: 0 8px 24px rgba(0, 210, 180, 0.22), 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.pogo-card-selected {
+  background: linear-gradient(145deg, #ffffff 0%, #e6faf5 100%);
+  border: 2.5px solid #00c7ab;
+  box-shadow: 0 0 20px rgba(0, 210, 180, 0.35), 0 6px 18px rgba(0, 0, 0, 0.08);
+  transform: scale(1.02);
+}
+
+/* Authentic Pokémon Circular Pedestal Stage Platform */
+.pogo-pedestal {
+  position: absolute;
+  bottom: 2px;
+  width: 78px;
+  height: 24px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at 50% 50%, rgba(200, 245, 235, 0.9) 0%, rgba(160, 230, 215, 0.6) 65%, rgba(90, 200, 180, 0.8) 100%);
+  border: 1.5px solid rgba(0, 180, 155, 0.4);
+  box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.8), 0 3px 6px rgba(0, 60, 50, 0.1);
+}
+
+/* Signature Pokémon GO Close Button (Circular Rose/Pink with X) */
+.pogo-close-btn {
+  background: linear-gradient(135deg, #ff4d79 0%, #e6194b 100%);
+  box-shadow: 0 4px 12px rgba(230, 25, 75, 0.4), inset 0 1px 2px rgba(255, 255, 255, 0.6);
+  border: 2.5px solid #ffffff;
+  color: #ffffff;
+  transition: all 0.2s ease;
+}
+
+.pogo-close-btn:hover {
+  background: linear-gradient(135deg, #ff668c 0%, #ff2d5d 100%);
+  transform: scale(1.08) rotate(90deg);
+  box-shadow: 0 6px 16px rgba(230, 25, 75, 0.5);
+}
+
+/* Small Selection Pokéball Badge */
+.pokeball-badge {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid #112d35;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 0 8px rgba(0, 210, 180, 0.6);
+}
+
+.pokeball-badge-top {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 50%;
+  background: #ff385c;
+}
+
+.pokeball-badge-bottom {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 50%;
+  background: #ffffff;
+}
+
+.pokeball-badge-band {
+  position: absolute;
+  top: calc(50% - 1px);
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #112d35;
+  z-index: 2;
+}
+
+.pokeball-badge-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 6px;
+  height: 6px;
+  background: #ffffff;
+  border: 1.5px solid #112d35;
+  border-radius: 50%;
+  z-index: 3;
+}
+
+/* Authentic Pokémon GO Type Colors & Gradients */
+.bg-type-normal { background: linear-gradient(135deg, #a8a878, #8a8a59); }
+.bg-type-fire { background: linear-gradient(135deg, #f08030, #dd6610); }
+.bg-type-water { background: linear-gradient(135deg, #6890f0, #386ceb); }
+.bg-type-grass { background: linear-gradient(135deg, #78c850, #5ca935); }
+.bg-type-electric { background: linear-gradient(135deg, #f8d030, #e0b808); }
+.bg-type-ice { background: linear-gradient(135deg, #98d8d8, #69c6c6); }
+.bg-type-fighting { background: linear-gradient(135deg, #c03028, #9b2019); }
+.bg-type-poison { background: linear-gradient(135deg, #a040a0, #802680); }
+.bg-type-ground { background: linear-gradient(135deg, #e0c068, #c8a43c); }
+.bg-type-flying { background: linear-gradient(135deg, #a890f0, #8664eb); }
+.bg-type-psychic { background: linear-gradient(135deg, #f85888, #e82e66); }
+.bg-type-bug { background: linear-gradient(135deg, #a8b820, #8d9a1b); }
+.bg-type-rock { background: linear-gradient(135deg, #b8a038, #938024); }
+.bg-type-ghost { background: linear-gradient(135deg, #705898, #553e7d); }
+.bg-type-dragon { background: linear-gradient(135deg, #7038f8, #4c0ee3); }
+.bg-type-steel { background: linear-gradient(135deg, #b8b8d0, #9797ba); }
+.bg-type-dark { background: linear-gradient(135deg, #705848, #513e32); }
+.bg-type-fairy { background: linear-gradient(135deg, #ee99ac, #e36a84); }
 
 /* Animation Classes */
 @keyframes float {
@@ -106,12 +490,78 @@
   animation: float 3s ease-in-out infinite;
 }
 
-@keyframes pulse-ring {
-  0% { transform: scale(0.95); opacity: 1; }
-  50% { transform: scale(1.05); opacity: 0.8; }
-  100% { transform: scale(0.95); opacity: 1; }
+/* Modern Web Guidance Native <details> Accordion Styling */
+.mwg-accordion summary {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 0.55ch;
 }
 
-.animate-pulse-ring {
-  animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+.mwg-accordion summary::-webkit-details-marker {
+  display: none;
+}
+
+.mwg-accordion summary:where(:not([aria-disabled="true"])) {
+  cursor: pointer;
+}
+
+.mwg-accordion summary::before {
+  content: "";
+  inline-size: 1.1em;
+  block-size: 1.1em;
+  flex-shrink: 0;
+  background-color: currentColor;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='currentColor'%3E%3Cpath fill-rule='evenodd' d='M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z' clip-rule='evenodd'/%3E%3C/svg%3E") no-repeat center / contain;
+  rotate: -90deg;
+}
+
+.mwg-accordion summary:dir(rtl)::before {
+  rotate: 90deg;
+}
+
+.mwg-accordion details[open] > summary::before {
+  rotate: 0deg;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .mwg-accordion summary::before {
+    transition: rotate 0.2s;
+  }
+}
+
+.mwg-accordion details::details-content {
+  interpolate-size: allow-keywords;
+  overflow: clip;
+  contain: layout;
+}
+
+.mwg-accordion details:not([open])::details-content {
+  block-size: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .mwg-accordion details::details-content {
+    transition: block-size, content-visibility, display;
+    transition-duration: 0.25s;
+    transition-timing-function: ease-in-out;
+    transition-behavior: allow-discrete;
+  }
+}
+
+[command="--toggle-all"][aria-expanded="true"] .expand-text,
+[command="--toggle-all"][aria-expanded="false"] .collapse-text {
+  display: none;
+}
+
+/* Modern Web Guidance Native <dialog> Scroll Containment & Backdrop */
+dialog:modal {
+  overscroll-behavior: contain;
+}
+
+dialog::backdrop {
+  overflow: hidden;
+  overscroll-behavior: contain;
+  background: rgba(15, 23, 42, 0.58);
+  backdrop-filter: blur(4px);
 }

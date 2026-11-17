@@ -1,5 +1,18 @@
 import React, { useMemo, useEffect, useRef, useCallback } from 'react';
 
+// Regional Generation Roman Numerals
+const REGION_GENS = {
+  Kanto: 'GEN I',
+  Johto: 'GEN II',
+  Hoenn: 'GEN III',
+  Sinnoh: 'GEN IV',
+  Unova: 'GEN V',
+  Kalos: 'GEN VI',
+  Alola: 'GEN VII',
+  Galar: 'GEN VIII',
+  Paldea: 'GEN IX'
+};
+
 function RegionSelector({ regions, selectedIds, pokemonList, activeRegion, handleRegionSelection }) {
   const scrollContainerRef = useRef(null);
 
@@ -66,12 +79,12 @@ function RegionSelector({ regions, selectedIds, pokemonList, activeRegion, handl
   };
 
   return (
-    <nav aria-label="Region quick navigation" className="bg-slate-900/90 backdrop-blur-md z-30 border-b border-slate-800/80 sticky top-[72px] relative group">
+    <nav aria-label="Region quick navigation" className="bg-[#1b7a69] border-t border-white/10 z-30 sticky top-[68px] relative group shadow-sm">
       {/* Desktop Scroll Left Button */}
       <button
         onClick={handleScrollLeft}
         aria-label="Scroll regions left"
-        className="hidden md:flex absolute left-1 top-1/2 -translate-y-1/2 z-40 w-7 h-7 items-center justify-center rounded-full bg-slate-950/80 border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-850 opacity-0 group-hover:opacity-100 transition-opacity shadow-lg cursor-pointer"
+        className="hidden md:flex absolute left-2 top-1/2 -translate-y-1/2 z-40 w-7 h-7 items-center justify-center rounded-full bg-white text-teal-800 shadow-md hover:bg-teal-50 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer font-black text-sm"
       >
         ‹
       </button>
@@ -80,20 +93,21 @@ function RegionSelector({ regions, selectedIds, pokemonList, activeRegion, handl
       <button
         onClick={handleScrollRight}
         aria-label="Scroll regions right"
-        className="hidden md:flex absolute right-1 top-1/2 -translate-y-1/2 z-40 w-7 h-7 items-center justify-center rounded-full bg-slate-950/80 border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-850 opacity-0 group-hover:opacity-100 transition-opacity shadow-lg cursor-pointer"
+        className="hidden md:flex absolute right-2 top-1/2 -translate-y-1/2 z-40 w-7 h-7 items-center justify-center rounded-full bg-white text-teal-800 shadow-md hover:bg-teal-50 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer font-black text-sm"
       >
         ›
       </button>
 
       <div 
         ref={scrollContainerRef} 
-        className="flex overflow-x-auto p-3.5 gap-3.5 no-scrollbar max-w-7xl mx-auto px-4 md:px-8 scroll-smooth"
+        className="flex overflow-x-auto p-2.5 gap-2 no-scrollbar max-w-7xl mx-auto px-4 md:px-8 scroll-smooth"
       >
         {regions.map(region => {
           const stats = regionStats[region] || { total: 0, selected: 0 };
           const hasSelected = stats.selected > 0;
           const isAllSelected = stats.selected === stats.total && stats.total > 0;
           const isActive = region === activeRegion;
+          const genLabel = REGION_GENS[region] || 'REGION';
 
           return (
             <div 
@@ -105,63 +119,50 @@ function RegionSelector({ regions, selectedIds, pokemonList, activeRegion, handl
                 onClick={() => scrollToRegion(region)}
                 aria-current={isActive ? 'true' : undefined}
                 aria-label={`${region} region: ${stats.selected} of ${stats.total} species selected`}
-                className={`flex items-center gap-2.5 px-4 py-2 rounded-xl group/btn transition-all duration-200 border hover:scale-[1.03] active:scale-[0.98] cursor-pointer ${
+                className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full group/btn transition-all duration-150 border cursor-pointer shadow-xs ${
                   isActive
-                    ? 'bg-blue-500/10 border-blue-500 shadow-[0_0_12px_rgba(59,130,246,0.25)]'
+                    ? 'bg-white text-[#1b7a69] border-white shadow-md font-black scale-105'
                     : isAllSelected
-                      ? 'bg-emerald-500/5 border-emerald-500/50 hover:bg-slate-800/60'
+                      ? 'bg-[#145d50] border-teal-300/40 text-white hover:bg-[#186a5b]'
                       : hasSelected
-                        ? 'bg-blue-500/5 border-blue-500/40 hover:bg-slate-800/60'
-                        : 'bg-slate-950/40 border-slate-800/50 hover:bg-slate-800/60 hover:border-slate-700/80'
+                        ? 'bg-[#166456] border-teal-300/30 text-white hover:bg-[#1a7162]'
+                        : 'bg-[#155b4e]/80 border-transparent text-teal-100 hover:bg-[#186a5b] hover:text-white'
                 }`}
               >
-                {/* Badge Icon */}
-                <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs transition-all duration-300 ${
+                {/* Gen Badge */}
+                <span className={`text-[9px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-widest ${
                   isActive
-                    ? 'bg-blue-500 text-slate-950 shadow-[0_0_8px_rgba(59,130,246,0.4)]'
-                    : isAllSelected
-                      ? 'bg-emerald-500/20 border border-emerald-500 text-emerald-400'
-                      : hasSelected
-                        ? 'bg-blue-500/20 border border-blue-500 text-blue-400'
-                        : 'bg-slate-800 border border-slate-700/60 text-slate-400 group-hover/btn:text-slate-200'
+                    ? 'bg-[#1b7a69] text-white'
+                    : 'bg-black/20 text-teal-100'
                 }`}>
-                  {region.substring(0, 2).toUpperCase()}
-                </div>
+                  {genLabel}
+                </span>
 
-                {/* Region details */}
-                <div className="flex flex-col items-start select-none">
-                  <span className={`text-xs font-bold uppercase tracking-wider transition-colors ${
-                    isActive ? 'text-blue-400' : 'text-slate-300 group-hover/btn:text-white'
-                  }`}>
-                    {region}
-                  </span>
-                  
-                  {/* Selected count */}
-                  <div className="flex items-center gap-1 mt-0.5">
-                    <span className="text-[10px] font-semibold text-slate-500 group-hover/btn:text-slate-400">
-                      {stats.total} entries
-                    </span>
-                    {hasSelected && (
-                      <span className={`text-[10px] font-bold px-1.5 py-0.2 rounded-full ${
-                        isAllSelected 
-                          ? 'bg-emerald-500/20 text-emerald-400' 
-                          : 'bg-blue-500/20 text-blue-400'
-                      }`}>
-                        {stats.selected}
-                      </span>
-                    )}
-                  </div>
-                </div>
+                {/* Region name */}
+                <span className="text-xs font-black uppercase tracking-wider">
+                  {region}
+                </span>
+                
+                {/* Count badge */}
+                <span className={`text-[10px] font-black px-1.5 rounded-full ${
+                  isActive
+                    ? 'bg-amber-400 text-slate-900'
+                    : hasSelected
+                      ? 'bg-teal-300 text-teal-950 font-black'
+                      : 'text-teal-200'
+                }`}>
+                  {hasSelected ? `${stats.selected}/${stats.total}` : stats.total}
+                </span>
               </button>
 
-              {/* Mobile Quick Select All (only visible under active region on mobile) */}
+              {/* Mobile Quick Select All */}
               {isActive && (
-                <div className="md:hidden mt-2 flex justify-center w-full select-none animate-float">
+                <div className="md:hidden mt-1.5 flex justify-center w-full select-none animate-float">
                   {!isAllSelected ? (
                     <button
                       onClick={() => onSelectAllToggle(region, true)}
                       aria-label={`Select all ${region} Pokémon`}
-                      className="text-[9px] bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 text-blue-400 py-1 px-3 rounded-full font-bold shadow-sm transition-colors whitespace-nowrap cursor-pointer"
+                      className="text-[9px] bg-white text-[#1b7a69] border border-teal-200 py-0.5 px-2.5 rounded-full font-black uppercase tracking-wider shadow-sm cursor-pointer"
                     >
                       Select All
                     </button>
@@ -169,7 +170,7 @@ function RegionSelector({ regions, selectedIds, pokemonList, activeRegion, handl
                     <button
                       onClick={() => onSelectAllToggle(region, false)}
                       aria-label={`Deselect all ${region} Pokémon`}
-                      className="text-[9px] bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 text-rose-400 py-1 px-3 rounded-full font-bold shadow-sm transition-colors whitespace-nowrap cursor-pointer"
+                      className="text-[9px] bg-rose-500 text-white py-0.5 px-2.5 rounded-full font-black uppercase tracking-wider shadow-sm cursor-pointer"
                     >
                       Deselect
                     </button>

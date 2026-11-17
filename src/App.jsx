@@ -4,14 +4,17 @@ import PokemonGrid from './components/PokemonGrid';
 import FilterPanel from './components/FilterPanel';
 import SearchStringDisplay from './components/SearchStringDisplay';
 import RegionSelector from './components/RegionSelector';
+import TriagePipelineView from './components/TriagePipelineView';
 import useLocalStorage from './hooks/useLocalStorage';
 import { compressIdRanges, parseSearchString, ATTRIBUTES } from './utils/searchUtils';
+import { ensureCopyCommandRegistered } from './utils/copyCommand';
 
 const defaultFilters = {
   appraisal: [],
   ageMin: '',
   ageMax: '',
   types: [],
+  attributeLogic: 'AND',
   ...ATTRIBUTES.reduce((acc, attr) => ({ ...acc, [attr]: null }), {})
 };
 
@@ -25,17 +28,29 @@ const filterStorageOptions = {
 };
 
 function App() {
-  // Persisted state hooks
+  const [viewMode, setViewMode] = useLocalStorage('pokedex_viewMode', 'triage');
   const [selectedIds, setSelectedIds] = useLocalStorage('pokedex_selectedIds', new Set(), setStorageOptions);
   const [filters, setFilters] = useLocalStorage('pokedex_filters', defaultFilters, filterStorageOptions);
-  
-  // Local volatile states
+
+  const [customBarString, setCustomBarString] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedOnly, setSelectedOnly] = useState(false);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [activeRegion, setActiveRegion] = useState('');
 
+  useEffect(() => {
+    ensureCopyCommandRegistered();
+    const onCopiedString = (e) => {
+      if (e.detail?.text) {
+        setCustomBarString(e.detail.text);
+      }
+    };
+    window.addEventListener('pogo-copied-string', onCopiedString);
+    return () => window.removeEventListener('pogo-copied-string', onCopiedString);
+  }, []);
+
   const togglePokemon = useCallback((id) => {
+    setCustomBarString(null);
     setSelectedIds(prev => {
       const newSet = new Set(prev);
       if (newSet.has(id)) newSet.delete(id);
@@ -45,6 +60,7 @@ function App() {
   }, [setSelectedIds]);
 
   const handleRegionSelection = useCallback((ids, shouldSelect) => {
+    setCustomBarString(null);
     setSelectedIds(prev => {
       const newSet = new Set(prev);
       ids.forEach(id => {
@@ -56,10 +72,12 @@ function App() {
   }, [setSelectedIds]);
 
   const handleClearSelection = useCallback(() => {
+    setCustomBarString(null);
     setSelectedIds(new Set());
   }, [setSelectedIds]);
 
   const handleInvertSelection = useCallback(() => {
+    setCustomBarString(null);
     setSelectedIds(prev => {
       const newSet = new Set();
       pokemonData.forEach(p => {
@@ -71,61 +89,87 @@ function App() {
     });
   }, [setSelectedIds]);
 
-  // Generate Pokego search string
-  const searchString = useMemo(() => {
+  const handleSetFilters = useCallback((updater) => {
+    setCustomBarString(null);
+    setFilters(updater);
+  }, [setFilters]);
+
+  const gridSearchString = useMemo(() => {
     const parts = [];
 
-    // Pokemon IDs
     const idString = compressIdRanges(selectedIds);
     if (idString) {
       parts.push(idString);
     }
 
-    // Appraisal
     if (filters.appraisal.length > 0) {
       parts.push(filters.appraisal.join(','));
     }
 
-    // Age
     if (filters.ageMin !== '' || filters.ageMax !== '') {
       const min = filters.ageMin !== '' ? filters.ageMin : '';
       const max = filters.ageMax !== '' ? filters.ageMax : '';
       if (min !== '' && max !== '' && min === max) {
-         parts.push(`age${min}`);
+        parts.push(`age${min}`);
       } else {
-         parts.push(`age${min}-${max}`);
+        parts.push(`age${min}-${max}`);
       }
     }
 
-    // Attributes
+    const positiveAttrs = [];
+    const negativeAttrs = [];
     ATTRIBUTES.forEach(attr => {
-      if (filters[attr] === true) parts.push(attr);
-      if (filters[attr] === false) parts.push(`!${attr}`);
+      if (filters[attr] === true) positiveAttrs.push(attr);
+      if (filters[attr] === false) negativeAttrs.push(`!${attr}`);
     });
 
-    // Types
+    if (positiveAttrs.length > 0) {
+      if (filters.attributeLogic === 'OR') {
+        parts.push(positiveAttrs.join(','));
+      } else {
+        parts.push(...positiveAttrs);
+      }
+    }
+
+    if (negativeAttrs.length > 0) {
+      parts.push(...negativeAttrs);
+    }
+
     if (filters.types && filters.types.length > 0) {
-       parts.push(filters.types.join(','));
+      parts.push(filters.types.join(','));
     }
 
     return parts.join('&');
   }, [selectedIds, filters]);
 
-  // Extract unique regions
+  const activeSearchString = customBarString !== null ? customBarString : gridSearchString;
+
   const regions = useMemo(() => {
-     const uniqueRegions = new Set();
-     pokemonData.forEach(p => uniqueRegions.add(p.region));
-     return Array.from(uniqueRegions);
+    const uniqueRegions = new Set();
+    pokemonData.forEach(p => uniqueRegions.add(p.region));
+    return Array.from(uniqueRegions);
   }, []);
 
-  // Update selection/filters when user pastes/types search string directly in display input
   const handleSearchUpdate = useCallback((newString) => {
-    const { selectedIds: newIds, filters: newFilters } = parseSearchString(newString);
-    setSelectedIds(newIds);
-    setFilters(newFilters);
-  }, [setSelectedIds, setFilters]);
+    setCustomBarString(newString);
+    if (viewMode === 'grid') {
+      const { selectedIds: newIds, filters: newFilters } = parseSearchString(newString);
+      setSelectedIds(newIds);
+      setFilters(newFilters);
+    }
+  }, [viewMode, setSelectedIds, setFilters]);
 
-  // Lock document body scroll on mobile when modal is active
+  const handleLoadTriageString = useCallback((recipeString) => {
+    setCustomBarString(recipeString);
+  }, []);
+
+  const handleSelectSpeciesInGrid = useCallback((speciesIds) => {
+    setCustomBarString(null);
+    setSelectedIds(new Set(speciesIds));
+    setSelectedOnly(true);
+    setViewMode('grid');
+  }, [setSelectedIds, setViewMode]);
+
   useEffect(() => {
     if (isFilterModalOpen) {
       document.body.style.overflow = 'hidden';
@@ -138,85 +182,142 @@ function App() {
   }, [isFilterModalOpen]);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-blue-500/30">
-      
-      {/* Premium Glassmorphic Header */}
-      <header className="bg-slate-900/90 border-b border-slate-800/80 z-40 sticky top-0 backdrop-blur-md">
-          <div className="max-w-7xl mx-auto flex items-center justify-between px-4 md:px-6 py-3.5 select-none">
-            <h1 className="text-xl font-extrabold tracking-tight uppercase flex items-center gap-2 cursor-default">
-              <span className="text-2xl animate-float">🔍</span>
-              <span className="bg-gradient-to-r from-blue-400 via-indigo-400 to-indigo-500 bg-clip-text text-transparent font-black tracking-tighter">
+    <div className="min-h-[100dvh] pogo-storage-bg text-slate-800 flex flex-col font-sans selection:bg-teal-500/20 selection:text-teal-900">
+      {/* Compact Mobile-First Header */}
+      <header className="pogo-header-gradient text-white z-40 sticky top-0 safe-top-header pb-1.5">
+        <div className="mwg-header-row max-w-7xl mx-auto flex items-center justify-between gap-2 select-none">
+          {/* App Branding */}
+          <div className="flex items-center gap-2 min-w-0 shrink-0">
+            <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-white/15 p-0.5 flex items-center justify-center border border-white/35 shrink-0" aria-hidden="true">
+              <div className="pokeball-badge">
+                <div className="pokeball-badge-top" />
+                <div className="pokeball-badge-bottom" />
+                <div className="pokeball-badge-band" />
+                <div className="pokeball-badge-center" />
+              </div>
+            </div>
+            <div className="min-w-0">
+              <h1 className="text-sm sm:text-lg font-black tracking-wide uppercase text-white leading-tight whitespace-nowrap">
                 PokéSearch
-              </span>
-              <span className="text-[10px] font-extrabold bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded-lg border border-blue-500/30">
-                PRO UX v2.0
-              </span>
-            </h1>
-            
-            <div className="text-[11px] font-bold text-slate-500 hidden sm:block tracking-wide">
-              Pokémon GO Search Query Maker
+              </h1>
+              <div className="hidden md:block text-[10px] font-bold text-teal-100 tracking-wider uppercase leading-none">
+                Storage Triage & Pokédex Search Builder
+              </div>
             </div>
           </div>
-          
-          {/* Enhanced Region Navigation Selector */}
-          <RegionSelector 
-            regions={regions} 
-            selectedIds={selectedIds} 
-            pokemonList={pokemonData}
-            activeRegion={activeRegion}
-            handleRegionSelection={handleRegionSelection}
-          />
+
+          {/* Single-Line Segmented Mode Switcher */}
+          <div className="flex items-center shrink-0">
+            <div className="bg-black/25 p-0.5 rounded-full inline-flex items-center gap-0.5 border border-white/25">
+              <button
+                type="button"
+                onClick={() => setViewMode('triage')}
+                className={`mwg-adaptive-slot h-8 px-2.5 sm:px-3.5 rounded-full text-xs font-extrabold tracking-wide transition-colors cursor-pointer inline-flex items-center justify-center gap-1 whitespace-nowrap ${
+                  viewMode === 'triage'
+                    ? 'bg-white text-teal-900 shadow-xs'
+                    : 'text-white/95 hover:bg-white/10'
+                }`}
+              >
+                <span aria-hidden="true">⚡</span>
+                <span className="long">Inventory Triage</span>
+                <span className="short" aria-hidden="true">Triage</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setCustomBarString(null);
+                  setViewMode('grid');
+                }}
+                className={`mwg-adaptive-slot h-8 px-2.5 sm:px-3.5 rounded-full text-xs font-extrabold tracking-wide transition-colors cursor-pointer inline-flex items-center justify-center gap-1 whitespace-nowrap ${
+                  viewMode === 'grid'
+                    ? 'bg-white text-teal-900 shadow-xs'
+                    : 'text-white/95 hover:bg-white/10'
+                }`}
+              >
+                <span aria-hidden="true">📖</span>
+                <span className="long">Pokédex Grid ({selectedIds.size})</span>
+                <span className="short" aria-hidden="true">Dex ({selectedIds.size})</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Region Tabs (Only in Pokédex Grid Mode) */}
+        {viewMode === 'grid' && (
+          <div className="mt-1.5">
+            <RegionSelector
+              regions={regions}
+              selectedIds={selectedIds}
+              pokemonList={pokemonData}
+              activeRegion={activeRegion}
+              handleRegionSelection={handleRegionSelection}
+            />
+          </div>
+        )}
       </header>
 
-      {/* Main Container Layout */}
-      <main className="flex-1 flex flex-col lg:flex-row max-w-7xl mx-auto w-full relative">
-         
-         {/* Mobile Filter Modal Backdrop overlay */}
-         {isFilterModalOpen && (
-           <div
-             className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[50] lg:hidden transition-opacity"
-             onClick={() => setIsFilterModalOpen(false)}
-             aria-hidden="true"
-           ></div>
-         )}
+      {/* Main Content */}
+      {viewMode === 'triage' ? (
+        <main className="flex-1 w-full">
+          <TriagePipelineView
+            pokemonList={pokemonData}
+            onLoadSearchString={handleLoadTriageString}
+            onSelectSpeciesInGrid={handleSelectSpeciesInGrid}
+          />
+        </main>
+      ) : (
+        <main className="flex-1 flex flex-col lg:flex-row max-w-7xl mx-auto w-full relative">
+          {isFilterModalOpen && (
+            <div
+              className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[50] lg:hidden transition-opacity"
+              onClick={() => setIsFilterModalOpen(false)}
+              aria-hidden="true"
+            />
+          )}
 
-         {/* Collapsible/Sticky Filter Panel Drawer */}
-         <aside className={`
-           fixed inset-y-0 left-0 z-[60] w-full max-w-sm bg-slate-900 border-r border-slate-800/80 transform transition-transform duration-300 ease-in-out overflow-y-auto
-           ${isFilterModalOpen ? 'translate-x-0' : '-translate-x-full'}
-           lg:translate-x-0 lg:static lg:w-80 lg:h-[calc(100vh-160px)] lg:overflow-y-auto lg:z-20
-         `}>
-            <FilterPanel 
-              filters={filters} 
-              setFilters={setFilters} 
+          <aside
+            className={`
+              fixed inset-y-0 left-0 z-[60] w-full max-w-sm bg-white border-r border-teal-100 transform transition-transform duration-300 ease-in-out overflow-y-auto shadow-2xl
+              ${isFilterModalOpen ? 'translate-x-0' : '-translate-x-full'}
+              lg:translate-x-0 lg:static lg:w-80 lg:h-[calc(100vh-140px)] lg:overflow-y-auto lg:z-20 lg:shadow-none lg:bg-white/90 lg:backdrop-blur-md
+            `}
+          >
+            <FilterPanel
+              filters={filters}
+              setFilters={handleSetFilters}
               onClose={() => setIsFilterModalOpen(false)}
               handleInvertSelection={handleInvertSelection}
             />
-         </aside>
+          </aside>
 
-         {/* Pokémon Grid Panel */}
-         <div className="flex-1 overflow-x-hidden">
+          <div className="flex-1 overflow-x-hidden">
             <PokemonGrid
-               pokemonList={pokemonData}
-               selectedIds={selectedIds}
-               togglePokemon={togglePokemon}
-               handleRegionSelection={handleRegionSelection}
-               searchQuery={searchQuery}
-               setSearchQuery={setSearchQuery}
-               selectedOnly={selectedOnly}
-               setSelectedOnly={setSelectedOnly}
-               onRegionVisible={setActiveRegion}
+              pokemonList={pokemonData}
+              selectedIds={selectedIds}
+              togglePokemon={togglePokemon}
+              handleRegionSelection={handleRegionSelection}
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+              selectedOnly={selectedOnly}
+              setSelectedOnly={setSelectedOnly}
+              onRegionVisible={setActiveRegion}
+              onOpenFilters={() => setIsFilterModalOpen(true)}
             />
-         </div>
-      </main>
+          </div>
+        </main>
+      )}
 
-      {/* Dynamic bottom string display dashboard */}
-      <SearchStringDisplay 
-        searchString={searchString} 
+      {/* Compact Context-Aware Bottom Search Bar Dock */}
+      <SearchStringDisplay
+        viewMode={viewMode}
+        searchString={activeSearchString}
         selectedCount={selectedIds.size}
         onClearSelection={handleClearSelection}
         onSearchUpdate={handleSearchUpdate}
-        onOpenFilters={() => setIsFilterModalOpen(true)}
+        onOpenFilters={() => {
+          setViewMode('grid');
+          setIsFilterModalOpen(true);
+        }}
       />
     </div>
   );
