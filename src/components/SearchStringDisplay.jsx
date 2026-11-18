@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef, useId, useMemo } from 'react';
 import SavedSearchMenu from './SavedSearchMenu';
+import { PogoCloseButton, PogoCategoryIcon } from './ui/PogoDesignSystem';
 import { inspectAndFixPogoQuery } from '../utils/searchUtils';
 
 function SearchStringDisplay({
@@ -103,26 +104,24 @@ function SearchStringDisplay({
         onClick={(e) => {
           if (e.target === qrDialogRef.current) setShowQR(false);
         }}
-        className="bg-white border-2 border-teal-200 rounded-3xl p-5 max-w-sm w-[calc(100%-2rem)] text-center relative shadow-2xl"
+        className="pogo-summary-card p-5 max-w-sm w-[calc(100%-2rem)] text-center relative shadow-2xl text-[#123c4d]"
       >
-        <button
-          type="button"
+        <PogoCloseButton
           onClick={() => setShowQR(false)}
-          aria-label="Close QR Code dialog"
-          className="pogo-close-btn absolute top-3.5 right-3.5 w-7 h-7 rounded-full flex items-center justify-center text-white font-black text-xs cursor-pointer shadow-md"
-        >
-          ✕
-        </button>
+          ariaLabel="Close QR Code dialog"
+          size="sm"
+          className="absolute top-3.5 right-3.5"
+        />
 
-        <h3 id={qrHeadingId} className="text-sm font-black text-slate-800 mb-1 uppercase tracking-wider">
+        <h3 id={qrHeadingId} className="font-display text-sm font-extrabold text-[#0b698e] mb-1 uppercase tracking-wider">
           Scan Search String
         </h3>
-        <p className="text-xs text-slate-600 mb-4">
+        <p className="text-xs text-[#285d72] mb-4 font-medium">
           Scan from another device to copy this Pokémon GO query.
         </p>
 
         {inputValue ? (
-          <div className="bg-slate-50 p-3 rounded-2xl inline-block border border-slate-200 mb-3">
+          <div className="bg-white p-3 rounded-2xl inline-block border-2 border-white shadow-sm mb-3">
             <img
               src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(inputValue)}`}
               alt="Pokémon GO search query QR Code"
@@ -132,22 +131,22 @@ function SearchStringDisplay({
             />
           </div>
         ) : (
-          <div className="bg-slate-100 p-5 rounded-2xl mb-3 border border-slate-200 text-slate-500 text-xs font-bold">
+          <div className="bg-white/80 p-5 rounded-2xl mb-3 border border-white text-[#285d72] text-xs font-bold">
             Choose or enter a search string first.
           </div>
         )}
 
-        <div className="bg-slate-50 border border-teal-200 rounded-xl p-2.5 max-h-20 overflow-y-auto font-mono text-[10px] text-teal-800 break-all text-left font-bold">
+        <div className="bg-[#073b50] border border-[#0d7da8]/40 rounded-xl p-2.5 max-h-20 overflow-y-auto font-mono text-[10px] text-[#bfeaf6] break-all text-left font-bold">
           {inputValue || 'Empty query'}
         </div>
       </dialog>
 
-      {/* Sleek Mobile-First Bottom Dock */}
-      <div className="mwg-touch-scope bg-white/95 border-t border-teal-200 pt-2 sticky bottom-0 z-40 shadow-[0_-4px_18px_rgba(20,80,70,0.10)] backdrop-blur-md safe-bottom-dock">
+      {/* Frosted Sky-Glass Bottom Dock (Matches Screenshots 1, 2 & 3 Floating Controls) */}
+      <div className="mwg-touch-scope bg-[#d7f3fc]/92 border-t-2 border-white/85 pt-2 sticky bottom-0 z-40 shadow-[0_-6px_22px_rgba(8,82,114,0.14)] backdrop-blur-lg safe-bottom-dock">
         <div className="max-w-7xl mx-auto flex flex-col gap-1.5">
-          {/* PoGO `,` (OR) vs `&` (AND) Precedence Auto-Fixer Banner (Only shown when a precedence trap is detected) */}
+          {/* PoGO `,` (OR) vs `&` (AND) Precedence Auto-Fixer Banner */}
           {precedenceCheck.hasPrecedenceTrap && (
-            <div className="flex items-center justify-between gap-2 bg-amber-50 border border-amber-300 rounded-xl px-2.5 py-1 text-[11px]">
+            <div className="flex items-center justify-between gap-2 bg-amber-50/95 border border-amber-300 rounded-2xl px-3 py-1 text-[11px]">
               <span className="font-bold text-amber-950 truncate">
                 ⚠️ PoGO evaluates <code className="font-mono font-black">,</code> (OR) before <code className="font-mono font-black">&amp;</code> (AND).
               </span>
@@ -158,25 +157,25 @@ function SearchStringDisplay({
                   setIsTyping(false);
                   onSearchUpdate(precedenceCheck.fixedCnfQuery);
                 }}
-                className="compact-inline-chip shrink-0 px-2.5 py-0.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-[10px] uppercase tracking-wide cursor-pointer"
+                className="compact-inline-chip shrink-0 px-2.5 py-0.5 rounded-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-[10px] uppercase tracking-wide cursor-pointer"
               >
-                ✨ Fix AND/OR Precedence
+                ✨ Fix Precedence
               </button>
             </div>
           )}
 
-          {/* Secondary Strip — ONLY rendered in Pokédex Grid mode on mobile so Triage stays 1 single compact row */}
+          {/* Secondary Strip — ONLY rendered in Pokédex Grid mode so Triage stays 1 single compact row */}
           {viewMode === 'grid' && (
             <div className="flex items-center justify-between gap-2 text-xs">
               <div className="flex items-center gap-1.5 min-w-0">
-                <span className="bg-teal-50 border border-teal-200 text-teal-900 font-extrabold text-[11px] px-2.5 py-1 rounded-full">
+                <span className="pogo-counter-pill text-[11px] py-0.5 px-3">
                   {selectedCount} Selected
                 </span>
                 {selectedCount > 0 && (
                   <button
                     type="button"
                     onClick={onClearSelection}
-                    className="compact-inline-chip text-[11px] font-extrabold text-rose-700 bg-rose-50 hover:bg-rose-100 px-2.5 py-1 rounded-full border border-rose-200 cursor-pointer"
+                    className="compact-inline-chip text-[11px] font-extrabold text-rose-700 bg-white/90 hover:bg-rose-50 px-2.5 py-0.5 rounded-full border border-rose-200 cursor-pointer"
                   >
                     Clear
                   </button>
@@ -186,18 +185,24 @@ function SearchStringDisplay({
               <button
                 type="button"
                 onClick={onOpenFilters}
-                className="compact-inline-chip lg:hidden inline-flex items-center gap-1 px-3 py-1 rounded-full font-extrabold text-[11px] uppercase bg-teal-600 text-white cursor-pointer"
+                className="compact-inline-chip lg:hidden pogo-pill inline-flex items-center gap-1.5 px-3 py-1 text-[11px] uppercase cursor-pointer"
               >
-                <span aria-hidden="true">⚙️</span>
-                <span>Filters</span>
+                <PogoCategoryIcon name="funnel" className="w-3.5 h-3.5" />
+                <span>FILTER BY</span>
               </button>
             </div>
           )}
 
-          {/* Primary Single-Row Search Bar + Saved + Copy */}
+          {/* Primary Single-Row Search Bar + Saved + QR + Copy */}
           <div className="flex items-center gap-1.5 sm:gap-2">
-            {/* Bidirectional Search String Input (16px on mobile prevents iOS Safari auto-zoom on focus) */}
-            <div className="relative flex-1 min-w-0">
+            {/* Pure White Pill Search String Input (Screenshot 1 Capsule Style) */}
+            <div className="pogo-search-pill relative flex-1 min-w-0 flex items-center">
+              <span className="pl-3 pr-1.5 flex items-center pointer-events-none text-[#0b698e]" aria-hidden="true">
+                <svg className="w-4 h-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round">
+                  <circle cx="8.5" cy="8.5" r="5.2" />
+                  <path d="m12.5 12.5 4.2 4.2" />
+                </svg>
+              </span>
               <input
                 id={dockInputId}
                 type="text"
@@ -206,18 +211,18 @@ function SearchStringDisplay({
                 onKeyDown={handleKeyDown}
                 onBlur={handleBlur}
                 aria-label="Active Pokémon GO search string"
-                placeholder="Tap any card or type a PoGO query..."
-                className="w-full pl-3.5 pr-20 py-2 rounded-full bg-slate-50 border border-teal-200 text-base sm:text-xs text-slate-800 placeholder-slate-400 font-mono focus:outline-none focus:bg-white focus:border-teal-500 truncate font-bold shadow-inner"
+                placeholder="Tap Pokémon or enter a PoGO search query..."
+                className="w-full pr-20 py-2 bg-transparent text-base sm:text-xs text-[#123c4d] placeholder-[#28708c]/70 font-mono focus:outline-none truncate font-bold"
               />
               {inputValue && (
-                <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1 select-none">
+                <div className="absolute right-1.5 top-1/2 -translate-y-1/2 flex items-center gap-1 select-none">
                   <span
                     className={`text-[9px] border font-black px-1.5 py-0.5 rounded-full ${
                       isVeryHighLength
                         ? 'bg-rose-100 text-rose-700 border-rose-300'
                         : isHighLength
                           ? 'bg-amber-100 text-amber-800 border-amber-300'
-                          : 'bg-white border-teal-200 text-teal-800'
+                          : 'bg-[#e6f6fc] border-[#0d7da8]/25 text-[#0b698e]'
                     }`}
                     title={`${charLength} characters`}
                   >
@@ -231,7 +236,7 @@ function SearchStringDisplay({
                       onSearchUpdate('');
                     }}
                     aria-label="Clear search string"
-                    className="compact-inline-chip mwg-icon-hit text-slate-500 hover:text-slate-800 bg-white border border-slate-300 w-5 h-5 flex items-center justify-center rounded-full cursor-pointer text-[10px]"
+                    className="compact-inline-chip mwg-icon-hit text-[#245364] hover:text-[#073b50] bg-[#e6f6fc] border border-[#0d7da8]/30 w-5 h-5 flex items-center justify-center rounded-full cursor-pointer text-[10px] font-bold"
                   >
                     ✕
                   </button>
@@ -239,21 +244,19 @@ function SearchStringDisplay({
               )}
             </div>
 
-            {/* Saved Searches Popover Trigger */}
+            {/* Saved Searches Trigger */}
             <div className="relative shrink-0">
               <button
                 type="button"
                 onClick={() => setIsMenuOpen((v) => !v)}
                 aria-label="Saved search strings"
                 aria-expanded={isMenuOpen}
-                className={`px-3 py-2 rounded-full font-black text-xs transition-colors border cursor-pointer inline-flex items-center justify-center gap-1 ${
-                  isMenuOpen
-                    ? 'bg-amber-400 text-slate-950 border-amber-300'
-                    : 'bg-white hover:bg-slate-50 border-teal-200 text-slate-700'
+                className={`px-3 py-2 text-xs uppercase cursor-pointer inline-flex items-center justify-center gap-1 ${
+                  isMenuOpen ? 'pogo-pill-active' : 'pogo-pill'
                 }`}
               >
-                <span aria-hidden="true">⭐</span>
-                <span className="hidden sm:inline">Saved</span>
+                <span aria-hidden="true">★</span>
+                <span className="hidden sm:inline">SAVED</span>
               </button>
 
               {isMenuOpen && (
@@ -270,22 +273,22 @@ function SearchStringDisplay({
               type="button"
               onClick={() => setShowQR(true)}
               aria-label="Show QR code for mobile scan"
-              className="hidden sm:inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-full font-black text-xs border bg-white hover:bg-slate-50 border-teal-200 text-slate-700 cursor-pointer shrink-0"
+              className="hidden sm:inline-flex items-center justify-center gap-1.5 px-3.5 py-2 text-xs uppercase pogo-pill cursor-pointer shrink-0"
             >
               <span aria-hidden="true">📱</span>
               <span>QR</span>
             </button>
 
-            {/* Primary Accessible Copy Button (mwg: copy-button) */}
+            {/* Primary Accessible Copy Button (Cerulean Active Pill Style) */}
             <span className="mwg-copy">
               <button
                 type="button"
                 {...{ command: '--copy', commandfor: dockInputId }}
-                className="mwg-copy-btn px-4 sm:px-5 py-2 rounded-full font-black text-xs uppercase tracking-wider bg-gradient-to-r from-teal-600 to-emerald-500 hover:from-teal-500 hover:to-emerald-400 text-white shadow-sm border border-teal-600"
+                className="mwg-copy-btn pogo-pill-active px-4 sm:px-5 py-2 text-xs uppercase"
               >
                 <span className="icon-copy" aria-hidden="true">📋</span>
                 <span className="icon-check" aria-hidden="true">✓</span>
-                <span>Copy</span>
+                <span>COPY</span>
               </button>
               <span className="mwg-copy-tip" role="status" />
             </span>

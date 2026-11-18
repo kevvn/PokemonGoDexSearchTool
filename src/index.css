@@ -1,3 +1,5 @@
+@import './styles/pogoDesignSystem.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -17,7 +19,6 @@
 
 :root {
   --target-size: 24px;
-  --tab-accent: #0f766e;
 }
 
 @media (pointer: coarse) {
@@ -28,20 +29,19 @@
 
 @layer base {
   body {
-    font-family: 'Outfit', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    background-color: #e4f4ee;
-    color: #1e293b;
+    font-family: 'Plus Jakarta Sans', 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--pogo-canvas-gradient);
+    background-attachment: fixed;
+    color: var(--pogo-ink-strong);
   }
 
-  p, li {
-    overflow-wrap: break-word;
-  }
-
-  h1, h2, h3 {
+  h1, h2, h3, h4 {
+    font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif;
     text-wrap: balance;
   }
 
   p, li {
+    overflow-wrap: break-word;
     text-wrap: pretty;
   }
 
@@ -79,23 +79,20 @@
   inset: -8px;
 }
 
-/* Safe-area inset helpers for notched / home-indicator phones (mwg: form-factor-adaptation) */
+/* Safe-area inset helpers for notched / home-indicator phones */
 .safe-top-header {
-  padding-top: max(0.45rem, env(safe-area-inset-top, 0px));
+  padding-top: max(0.5rem, env(safe-area-inset-top, 0px));
   padding-left: max(0.75rem, env(safe-area-inset-left, 0px));
   padding-right: max(0.75rem, env(safe-area-inset-right, 0px));
 }
 
 .safe-bottom-dock {
-  padding-bottom: max(0.55rem, env(safe-area-inset-bottom, 0px));
+  padding-bottom: max(0.6rem, env(safe-area-inset-bottom, 0px));
   padding-left: max(0.75rem, env(safe-area-inset-left, 0px));
   padding-right: max(0.75rem, env(safe-area-inset-right, 0px));
 }
 
-/* Container-query adaptive short/long label (mwg: single-line-overflow)
-   IMPORTANT: `container-type: inline-size` MUST live on the full-width `.mwg-header-row` wrapper,
-   NEVER on an intrinsic-width `<button>`, otherwise CSS size containment collapses the button's
-   intrinsic inline content width to 0px! */
+/* Container-query adaptive short/long label (mwg: single-line-overflow) */
 .mwg-header-row {
   container-type: inline-size;
   width: 100%;
@@ -110,7 +107,7 @@
   user-select: none;
 }
 
-@container (inline-size < 32rem) {
+@container (inline-size < 34rem) {
   .mwg-adaptive-slot .long {
     position: absolute;
     inline-size: 1px;
@@ -133,7 +130,7 @@
 .mwg-card-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 0.65rem;
+  gap: 0.7rem;
 }
 
 @container cards (inline-size > 40rem) {
@@ -149,10 +146,12 @@
   }
 }
 
-/* Single-row horizontally scrolling Tablist with animated edge fades (mwg: tabs) */
+/* Single-row horizontally scrolling Pokémon GO Pill Tablist with animated edge fades (mwg: tabs) */
 .mwg-tablist {
   display: flex;
   flex-wrap: nowrap;
+  gap: 0.45rem;
+  padding-block: 0.35rem;
   overflow-x: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -202,40 +201,42 @@
   }
 }
 
+/* Pokémon GO Pill Tabs (Screenshots 2 & 3: POKÉMON cerulean pill vs frosted white SHINY / LUCKY pills) */
 .mwg-tablist [role="tab"] {
   flex: none;
   position: relative;
   scroll-snap-align: start;
   white-space: nowrap;
-  padding-inline: 0.75rem;
-  padding-block: 0.5rem;
-  font-size: 0.78rem;
-  font-weight: 800;
-  color: #475569;
-  background: transparent;
-  border: none;
+  padding-inline: 0.95rem;
+  padding-block: 0.42rem;
+  font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--pogo-ink-primary);
+  background: rgba(255, 255, 255, 0.80);
+  border: 2px solid rgba(255, 255, 255, 0.92);
+  border-radius: 9999px;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  outline-offset: -2px;
+  box-shadow: 0 2px 8px rgba(8, 88, 120, 0.10);
+  outline-offset: 2px;
 }
 
-.mwg-tablist [role="tab"]:hover {
-  color: #0f766e;
+.mwg-tablist [role="tab"]:hover:not([aria-selected="true"]) {
+  background: rgba(255, 255, 255, 0.96);
+  color: var(--pogo-cerulean-700);
 }
 
-/* Selected tab styled strictly from aria-selected with a border underline — zero dimension change (mwg: tabs) */
+/* Selected tab styled strictly from aria-selected with zero dimension change (mwg: tabs) */
 .mwg-tablist [role="tab"][aria-selected="true"] {
-  color: var(--tab-accent);
-}
-
-.mwg-tablist [role="tab"][aria-selected="true"]::after {
-  content: "";
-  position: absolute;
-  inset: auto 0.35rem 0;
-  border-block-end: 3px solid var(--tab-accent);
-  border-radius: 999px;
+  background: linear-gradient(180deg, #1189b8 0%, #0b749e 100%);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 4px 12px rgba(9, 108, 146, 0.28);
 }
 
 /* Copy Button with Accessible Live Region Status Bubble (mwg: copy-button) */
@@ -259,9 +260,9 @@
 }
 
 .mwg-copy-btn[data-copied] {
-  background-color: #059669 !important;
+  background: linear-gradient(180deg, #10b981 0%, #059669 100%) !important;
   color: #ffffff !important;
-  border-color: #059669 !important;
+  border-color: #ffffff !important;
 }
 
 .mwg-copy-btn[data-copied] .icon-copy {
@@ -282,17 +283,18 @@
   position: absolute;
   inset-block-end: calc(100% + 6px);
   inset-inline-end: 0;
-  padding: 0.2rem 0.5rem;
-  border-radius: 0.5rem;
+  padding: 0.22rem 0.55rem;
+  border-radius: 9999px;
   font-size: 0.68rem;
   font-weight: 800;
   white-space: nowrap;
-  background: #0f172a;
-  color: #f8fafc;
+  background: var(--pogo-cerulean-900);
+  color: #ffffff;
+  border: 1.5px solid rgba(255, 255, 255, 0.7);
   pointer-events: none;
   opacity: 0;
   z-index: 50;
-  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.22);
+  box-shadow: 0 4px 12px rgba(7, 59, 80, 0.26);
   transition: opacity 0.16s ease, transform 0.16s ease;
   transform: translateY(3px);
 }
@@ -314,109 +316,43 @@
   image-rendering: pixelated;
 }
 
-/* Custom scrollbars */
+/* Custom Sky-Cerulean Scrollbars */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 7px;
+  height: 7px;
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(220, 240, 235, 0.6);
+  background: rgba(215, 244, 253, 0.55);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(0, 180, 155, 0.4);
+  background: rgba(13, 125, 168, 0.36);
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 180, 155, 0.7);
+  background: rgba(13, 125, 168, 0.62);
 }
 
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
 
-/* Authentic Pokémon GO Storage & Pokédex Background */
-.pogo-storage-bg {
-  background: linear-gradient(180deg, #3db8a2 0%, #60ceba 100px, #caeee4 340px, #e8f7f2 680px, #f4fbf8 100%);
-  min-height: 100dvh;
-}
-
-.pogo-header-gradient {
-  background: linear-gradient(180deg, #1b7a69 0%, #299b87 60%, #35b09b 100%);
-  border-bottom: 2px solid rgba(255, 255, 255, 0.22);
-  box-shadow: 0 3px 12px rgba(10, 60, 50, 0.14);
-}
-
-.pogo-storage-counter {
-  background: rgba(255, 255, 255, 0.95);
-  border: 1.5px solid #299b87;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-}
-
-/* Pokémon GO Storage Slot Cards */
-.pogo-card {
-  background: #ffffff;
-  border-radius: 1.5rem;
-  border: 1.5px solid #d1ede4;
-  box-shadow: 0 4px 14px rgba(25, 80, 70, 0.08);
-  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.pogo-card:hover {
-  transform: translateY(-3px) scale(1.02);
-  border-color: #00d2b4;
-  box-shadow: 0 8px 24px rgba(0, 210, 180, 0.22), 0 2px 8px rgba(0, 0, 0, 0.06);
-}
-
-.pogo-card-selected {
-  background: linear-gradient(145deg, #ffffff 0%, #e6faf5 100%);
-  border: 2.5px solid #00c7ab;
-  box-shadow: 0 0 20px rgba(0, 210, 180, 0.35), 0 6px 18px rgba(0, 0, 0, 0.08);
-  transform: scale(1.02);
-}
-
-/* Authentic Pokémon Circular Pedestal Stage Platform */
-.pogo-pedestal {
-  position: absolute;
-  bottom: 2px;
-  width: 78px;
-  height: 24px;
-  border-radius: 50%;
-  background: radial-gradient(ellipse at 50% 50%, rgba(200, 245, 235, 0.9) 0%, rgba(160, 230, 215, 0.6) 65%, rgba(90, 200, 180, 0.8) 100%);
-  border: 1.5px solid rgba(0, 180, 155, 0.4);
-  box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.8), 0 3px 6px rgba(0, 60, 50, 0.1);
-}
-
-/* Signature Pokémon GO Close Button (Circular Rose/Pink with X) */
-.pogo-close-btn {
-  background: linear-gradient(135deg, #ff4d79 0%, #e6194b 100%);
-  box-shadow: 0 4px 12px rgba(230, 25, 75, 0.4), inset 0 1px 2px rgba(255, 255, 255, 0.6);
-  border: 2.5px solid #ffffff;
-  color: #ffffff;
-  transition: all 0.2s ease;
-}
-
-.pogo-close-btn:hover {
-  background: linear-gradient(135deg, #ff668c 0%, #ff2d5d 100%);
-  transform: scale(1.08) rotate(90deg);
-  box-shadow: 0 6px 16px rgba(230, 25, 75, 0.5);
-}
-
-/* Small Selection Pokéball Badge */
+/* Selection Pokéball / Check Badge */
 .pokeball-badge {
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  border: 2px solid #112d35;
+  border: 2px solid #0b4f6c;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 0 8px rgba(0, 210, 180, 0.6);
+  box-shadow: 0 2px 6px rgba(9, 79, 108, 0.35);
 }
 
 .pokeball-badge-top {
@@ -443,7 +379,7 @@
   left: 0;
   right: 0;
   height: 2px;
-  background: #112d35;
+  background: #0b4f6c;
   z-index: 2;
 }
 
@@ -455,35 +391,15 @@
   width: 6px;
   height: 6px;
   background: #ffffff;
-  border: 1.5px solid #112d35;
+  border: 1.5px solid #0b4f6c;
   border-radius: 50%;
   z-index: 3;
 }
 
-/* Authentic Pokémon GO Type Colors & Gradients */
-.bg-type-normal { background: linear-gradient(135deg, #a8a878, #8a8a59); }
-.bg-type-fire { background: linear-gradient(135deg, #f08030, #dd6610); }
-.bg-type-water { background: linear-gradient(135deg, #6890f0, #386ceb); }
-.bg-type-grass { background: linear-gradient(135deg, #78c850, #5ca935); }
-.bg-type-electric { background: linear-gradient(135deg, #f8d030, #e0b808); }
-.bg-type-ice { background: linear-gradient(135deg, #98d8d8, #69c6c6); }
-.bg-type-fighting { background: linear-gradient(135deg, #c03028, #9b2019); }
-.bg-type-poison { background: linear-gradient(135deg, #a040a0, #802680); }
-.bg-type-ground { background: linear-gradient(135deg, #e0c068, #c8a43c); }
-.bg-type-flying { background: linear-gradient(135deg, #a890f0, #8664eb); }
-.bg-type-psychic { background: linear-gradient(135deg, #f85888, #e82e66); }
-.bg-type-bug { background: linear-gradient(135deg, #a8b820, #8d9a1b); }
-.bg-type-rock { background: linear-gradient(135deg, #b8a038, #938024); }
-.bg-type-ghost { background: linear-gradient(135deg, #705898, #553e7d); }
-.bg-type-dragon { background: linear-gradient(135deg, #7038f8, #4c0ee3); }
-.bg-type-steel { background: linear-gradient(135deg, #b8b8d0, #9797ba); }
-.bg-type-dark { background: linear-gradient(135deg, #705848, #513e32); }
-.bg-type-fairy { background: linear-gradient(135deg, #ee99ac, #e36a84); }
-
-/* Animation Classes */
+/* Subtle Floating Animation */
 @keyframes float {
   0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-4px); }
+  50% { transform: translateY(-3px); }
 }
 
 .animate-float {
@@ -511,7 +427,7 @@
   inline-size: 1.1em;
   block-size: 1.1em;
   flex-shrink: 0;
-  background-color: currentColor;
+  background-color: var(--pogo-cerulean-700);
   mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='currentColor'%3E%3Cpath fill-rule='evenodd' d='M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z' clip-rule='evenodd'/%3E%3C/svg%3E") no-repeat center / contain;
   rotate: -90deg;
 }
@@ -554,7 +470,7 @@
   display: none;
 }
 
-/* Modern Web Guidance Native <dialog> Scroll Containment & Backdrop */
+/* Native <dialog> Scroll Containment & Sky-Slate Backdrop */
 dialog:modal {
   overscroll-behavior: contain;
 }
@@ -562,6 +478,6 @@ dialog:modal {
 dialog::backdrop {
   overflow: hidden;
   overscroll-behavior: contain;
-  background: rgba(15, 23, 42, 0.58);
-  backdrop-filter: blur(4px);
+  background: rgba(8, 52, 74, 0.45);
+  backdrop-filter: blur(6px);
 }

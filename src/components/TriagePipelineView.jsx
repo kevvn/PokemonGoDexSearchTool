@@ -23,6 +23,7 @@ import {
   computeMetaIdSets,
 } from '../utils/metaSyncService';
 import { compressIdRanges, compileDnfToPogoCnf } from '../utils/searchUtils';
+import { PogoCloseButton, PogoSummaryCard, PogoSearchInput } from './ui/PogoDesignSystem';
 
 const GLOBAL_REGIONAL_NEGATION = GLOBAL_REGIONAL_ROTOM_UNOWN_RANGES
   .split(',')
@@ -31,20 +32,20 @@ const GLOBAL_REGIONAL_NEGATION = GLOBAL_REGIONAL_ROTOM_UNOWN_RANGES
   .join('&');
 
 /**
- * Compact Accessible Copy Chip using modern-web-guidance `copy-button` (`command="--copy"` + `role="status"`).
+ * Compact Accessible Copy Chip using Pokémon GO Pill Design Language + mwg `copy-button`.
  */
-function CopyChip({ label, text, ariaLabel, variant = 'dark' }) {
+function CopyChip({ label, text, ariaLabel, variant = 'teal' }) {
   const targetId = useId();
 
   const styles = {
-    purple: 'bg-purple-600 hover:bg-purple-700 text-white border-purple-700',
-    indigo: 'bg-indigo-600 hover:bg-indigo-700 text-white border-indigo-700',
-    teal: 'bg-teal-600 hover:bg-teal-700 text-white border-teal-700',
-    amber: 'bg-amber-500 hover:bg-amber-600 text-slate-950 border-amber-600',
-    emerald: 'bg-emerald-600 hover:bg-emerald-700 text-white border-emerald-700',
-    rose: 'bg-rose-600 hover:bg-rose-700 text-white border-rose-700',
-    dark: 'bg-slate-800 hover:bg-slate-900 text-white border-slate-900',
-  }[variant] || 'bg-slate-800 hover:bg-slate-900 text-white border-slate-900';
+    purple: 'bg-[#7c52b5] hover:bg-[#6941a1] text-white border-white/80',
+    indigo: 'bg-[#3b6fd4] hover:bg-[#2d5ec0] text-white border-white/80',
+    teal: 'bg-[#0d7da8] hover:bg-[#0b698e] text-white border-white/85',
+    amber: 'bg-amber-400 hover:bg-amber-500 text-[#123c4d] border-white/90',
+    emerald: 'bg-[#2b9e66] hover:bg-[#228655] text-white border-white/80',
+    rose: 'bg-rose-600 hover:bg-rose-700 text-white border-white/80',
+    dark: 'bg-[#094f6c] hover:bg-[#073b50] text-white border-white/80',
+  }[variant] || 'bg-[#0d7da8] hover:bg-[#0b698e] text-white border-white/85';
 
   return (
     <span className="mwg-copy">
@@ -55,7 +56,7 @@ function CopyChip({ label, text, ariaLabel, variant = 'dark' }) {
         type="button"
         {...{ command: '--copy', commandfor: targetId }}
         aria-label={ariaLabel || `Copy ${label}`}
-        className={`mwg-copy-btn compact-inline-chip min-h-[34px] px-2.5 py-1 rounded-xl text-[11px] font-extrabold border transition-colors shadow-2xs ${styles}`}
+        className={`mwg-copy-btn compact-inline-chip min-h-[34px] px-3 py-1 rounded-full text-[11px] font-extrabold border shadow-2xs ${styles}`}
       >
         <span className="icon-copy" aria-hidden="true">{label}</span>
         <span className="icon-check" aria-hidden="true">✓ {label}</span>
@@ -66,7 +67,7 @@ function CopyChip({ label, text, ariaLabel, variant = 'dark' }) {
 }
 
 /**
- * Compact Mobile-First Search Recipe Card (~96–115px tall so 4+ fit above the fold on mobile).
+ * Frosted Ice-Glass Search Recipe Card consuming the Pokémon GO Pokédex Design System.
  */
 function SearchRecipeCard({
   badge,
@@ -83,52 +84,52 @@ function SearchRecipeCard({
   const inputId = useId();
 
   const accentStyles = {
-    teal: 'border-teal-200/90 bg-white',
-    amber: 'border-amber-300/90 bg-amber-50/35',
-    purple: 'border-purple-300/90 bg-purple-50/35',
-    indigo: 'border-indigo-300/90 bg-indigo-50/35',
-    emerald: 'border-emerald-300/90 bg-emerald-50/35',
-    rose: 'border-rose-300/90 bg-rose-50/35',
-  }[accent] || 'border-teal-200/90 bg-white';
+    teal: 'pogo-glass-card',
+    amber: 'pogo-glass-card ring-1 ring-amber-300/70',
+    purple: 'pogo-glass-card ring-1 ring-[#ab6ac8]/45',
+    indigo: 'pogo-glass-card ring-1 ring-[#5090d6]/45',
+    emerald: 'pogo-glass-card ring-1 ring-[#63bc5a]/50',
+    rose: 'pogo-glass-card ring-1 ring-rose-300/75',
+  }[accent] || 'pogo-glass-card';
 
   const badgeStyles = {
-    teal: 'bg-teal-600 text-white',
-    amber: 'bg-amber-500 text-slate-950',
-    purple: 'bg-purple-600 text-white',
-    indigo: 'bg-indigo-600 text-white',
-    emerald: 'bg-emerald-600 text-white',
+    teal: 'bg-[#0d7da8] text-white',
+    amber: 'bg-amber-400 text-[#123c4d]',
+    purple: 'bg-[#8d52b5] text-white',
+    indigo: 'bg-[#3b6fd4] text-white',
+    emerald: 'bg-[#2b9e66] text-white',
     rose: 'bg-rose-600 text-white',
-  }[accent] || 'bg-teal-600 text-white';
+  }[accent] || 'bg-[#0d7da8] text-white';
 
   return (
-    <div className={`rounded-2xl border p-3 shadow-2xs space-y-2 ${accentStyles}`}>
+    <div className={`p-3.5 space-y-2 ${accentStyles}`}>
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0 flex-1 space-y-0.5">
           <div className="flex flex-wrap items-center gap-1.5">
             {badge && (
-              <span className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wide ${badgeStyles}`}>
+              <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider ${badgeStyles}`}>
                 {badge}
               </span>
             )}
             {tagSuggestion && (
-              <span className="px-1.5 py-0.5 rounded bg-slate-900 text-teal-300 font-mono text-[10px] font-bold">
+              <span className="px-2 py-0.5 rounded-full bg-[#dff4fb] text-[#0b698e] border border-[#0d7da8]/25 font-mono text-[10px] font-bold">
                 #{tagSuggestion}
               </span>
             )}
           </div>
-          <h4 className="text-[13px] font-black text-slate-900 leading-snug">{title}</h4>
+          <h4 className="font-display text-[13px] font-extrabold text-[#123c4d] leading-snug">{title}</h4>
           {subtitle && (
-            <p className="text-[11px] text-slate-600 font-medium leading-snug">{subtitle}</p>
+            <p className="text-[11px] text-[#285d72] font-medium leading-snug">{subtitle}</p>
           )}
         </div>
 
-        <div className="flex items-center gap-1 shrink-0">
+        <div className="flex items-center gap-1.5 shrink-0">
           {speciesIds.length > 0 && onSelectSpeciesInGrid && (
             <button
               type="button"
               onClick={() => onSelectSpeciesInGrid(speciesIds)}
               aria-label={`View ${speciesIds.length} species in Pokédex Grid`}
-              className="compact-inline-chip min-h-[34px] px-2 py-1 rounded-xl text-[11px] font-extrabold bg-slate-100 hover:bg-teal-100 text-slate-700 border border-slate-300 cursor-pointer"
+              className="compact-inline-chip pogo-pill min-h-[34px] px-2.5 py-1 text-[11px] cursor-pointer"
               title="Open species in Pokédex Grid"
             >
               🔍 {speciesIds.length}
@@ -139,11 +140,11 @@ function SearchRecipeCard({
               type="button"
               {...{ command: '--copy', commandfor: inputId }}
               aria-label={`Copy search string for ${title}`}
-              className="mwg-copy-btn compact-inline-chip min-h-[34px] px-3 py-1 rounded-xl text-[11px] font-black uppercase tracking-wide bg-slate-900 hover:bg-teal-700 text-white border border-slate-900 shadow-2xs"
+              className="mwg-copy-btn compact-inline-chip pogo-pill-active min-h-[34px] px-3.5 py-1 text-[11px] uppercase"
             >
               <span className="icon-copy" aria-hidden="true">📋</span>
               <span className="icon-check" aria-hidden="true">✓</span>
-              <span>Copy</span>
+              <span>COPY</span>
             </button>
             <span className="mwg-copy-tip" role="status" />
           </span>
@@ -162,14 +163,14 @@ function SearchRecipeCard({
           if (onLoadToBar) onLoadToBar(searchString);
         }}
         aria-label={`Search string for ${title}`}
-        className="w-full font-mono text-[11px] font-bold bg-slate-900 text-teal-300 px-2.5 py-1.5 rounded-xl border border-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-400 truncate cursor-pointer"
+        className="w-full font-mono text-[11px] font-bold bg-[#073b50] text-[#c6effa] px-3 py-1.5 rounded-full border border-[#0d7da8]/45 focus:outline-none focus:ring-2 focus:ring-[#3bb4e0] truncate cursor-pointer"
       />
     </div>
   );
 }
 
 /**
- * Compact Major Event Card featuring Sprites + Poké Daxi / LuckyBunz 1-Tap Search Strings.
+ * Frosted Ice-Glass Major Event Card featuring Pokédex Tile Sprites + 1-Tap Pill Chips.
  */
 function MajorEventCard({
   ev,
@@ -185,8 +186,8 @@ function MajorEventCard({
 
   return (
     <div
-      className={`rounded-2xl border p-3 bg-white shadow-2xs space-y-2 transition-opacity ${
-        ev.attended ? 'border-teal-300/90' : 'border-slate-200 opacity-75'
+      className={`pogo-glass-card p-3.5 space-y-2.5 transition-opacity ${
+        ev.attended ? '' : 'opacity-75'
       }`}
     >
       {/* Top Meta Row */}
@@ -194,40 +195,40 @@ function MajorEventCard({
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-1.5">
             <span
-              className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wide ${
+              className={`px-2.5 py-0.5 rounded-full text-[9px] font-extrabold uppercase tracking-wider ${
                 ev.scope === 'in-person'
-                  ? 'bg-purple-600 text-white'
+                  ? 'bg-[#8d52b5] text-white'
                   : ev.scope === 'global'
-                    ? 'bg-indigo-600 text-white'
-                    : 'bg-amber-500 text-slate-950'
+                    ? 'bg-[#0d7da8] text-white'
+                    : 'bg-amber-400 text-[#123c4d]'
               }`}
             >
               {ev.scope === 'raid-max-day' ? 'Raid / Max' : ev.scope}
             </span>
-            <span className="px-1.5 py-0.5 rounded bg-slate-900 text-teal-300 font-mono text-[10px] font-bold">
+            <span className="px-2 py-0.5 rounded-full bg-[#073b50] text-[#bfeaf6] font-mono text-[10px] font-bold">
               {built.ageCalc.ageToken}
             </span>
-            <span className="text-[10px] font-bold text-slate-500">
+            <span className="text-[10px] font-bold text-[#285d72]">
               {ev.start}{ev.end !== ev.start ? ` → ${ev.end}` : ''}
             </span>
           </div>
 
           <div className="flex flex-wrap items-center gap-1.5 mt-0.5">
-            <h4 className="text-[13px] font-black text-slate-900 leading-snug">{ev.name}</h4>
-            <span className="px-1.5 py-0.5 rounded bg-teal-50 text-teal-800 border border-teal-200 font-mono text-[10px] font-bold">
+            <h4 className="font-display text-[13px] font-extrabold text-[#123c4d] leading-snug">{ev.name}</h4>
+            <span className="px-2 py-0.5 rounded-full bg-[#dff4fb] text-[#0b698e] border border-[#0d7da8]/25 font-mono text-[10px] font-bold">
               #{ev.tag}
             </span>
           </div>
-          <p className="text-[11px] text-slate-500 font-semibold">{ev.location}</p>
+          <p className="text-[11px] text-[#285d72] font-semibold">{ev.location}</p>
         </div>
 
         <div className="flex items-center gap-1.5 shrink-0">
-          <label className="compact-inline-chip inline-flex items-center gap-1 text-[10px] font-extrabold text-slate-700 bg-slate-50 px-2 py-1 rounded-lg border border-slate-200 cursor-pointer">
+          <label className="compact-inline-chip inline-flex items-center gap-1 text-[10px] font-extrabold text-[#1b4d60] bg-white/90 px-2.5 py-1 rounded-full border border-white shadow-2xs cursor-pointer">
             <input
               type="checkbox"
               checked={ev.attended}
               onChange={() => onToggleAttended(ev.id)}
-              className="w-3.5 h-3.5 accent-teal-600 rounded"
+              className="w-3.5 h-3.5 rounded"
             />
             <span>Played</span>
           </label>
@@ -235,7 +236,7 @@ function MajorEventCard({
             type="button"
             onClick={() => onEdit(ev)}
             aria-label={`Edit ${ev.name}`}
-            className="compact-inline-chip mwg-icon-hit w-7 h-7 rounded-lg bg-slate-100 hover:bg-teal-50 text-slate-600 flex items-center justify-center text-xs cursor-pointer"
+            className="compact-inline-chip mwg-icon-hit pogo-circle-btn w-7 h-7 text-xs"
           >
             ✏️
           </button>
@@ -244,7 +245,7 @@ function MajorEventCard({
               type="button"
               onClick={() => onDelete(ev.id)}
               aria-label={`Delete ${ev.name}`}
-              className="compact-inline-chip mwg-icon-hit w-7 h-7 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 flex items-center justify-center text-xs cursor-pointer"
+              className="compact-inline-chip mwg-icon-hit w-7 h-7 rounded-full bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 flex items-center justify-center text-xs cursor-pointer"
             >
               🗑️
             </button>
@@ -252,23 +253,23 @@ function MajorEventCard({
         </div>
       </div>
 
-      {/* Special Pokémon Sprite Strip */}
+      {/* Special Pokémon Frosted Pokédex Tile Strip */}
       {spriteIds.length > 0 && (
-        <div className="bg-slate-50/90 rounded-xl p-1.5 border border-slate-200/80 flex items-center justify-between gap-2">
-          <div className="flex items-center gap-1 overflow-x-auto no-scrollbar">
+        <div className="bg-[#dff4fb]/75 rounded-2xl p-1.5 border border-white flex items-center justify-between gap-2">
+          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
             {spriteIds.map((id) => (
               <img
                 key={id}
                 src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`}
-                alt={`Pokédex #${id}`}
+                alt={`Pokédex #${String(id).padStart(4, '0')}`}
                 loading="lazy"
-                width="30"
-                height="30"
-                className="w-7 h-7 object-contain bg-white rounded-lg border border-slate-200 shrink-0"
+                width="32"
+                height="32"
+                className="w-8 h-8 object-contain bg-white/85 rounded-xl border border-white shrink-0"
               />
             ))}
             {built.allSpecialIds.length > spriteIds.length && (
-              <span className="text-[10px] font-black text-slate-500 px-1">
+              <span className="text-[10px] font-extrabold text-[#0b698e] px-1">
                 +{built.allSpecialIds.length - spriteIds.length}
               </span>
             )}
@@ -277,9 +278,9 @@ function MajorEventCard({
             <button
               type="button"
               onClick={() => onSelectSpeciesInGrid(built.allSpecialIds)}
-              className="compact-inline-chip text-[10px] font-extrabold text-teal-800 bg-teal-50 hover:bg-teal-100 border border-teal-200 px-2 py-1 rounded-lg shrink-0 cursor-pointer"
+              className="compact-inline-chip pogo-pill text-[10px] px-2.5 py-1 shrink-0 cursor-pointer"
             >
-              🔍 Grid ({built.allSpecialIds.length})
+              🔍 DEX ({built.allSpecialIds.length})
             </button>
           )}
         </div>
@@ -338,44 +339,44 @@ function MajorEventCard({
 
       {/* Consolidated Species Roster & Raw String Drawer */}
       <details className="text-[11px] pt-0.5">
-        <summary className="text-[10px] font-bold text-slate-500 hover:text-teal-700 cursor-pointer select-none">
-          📋 Species roster & raw strings
+        <summary className="text-[10px] font-bold text-[#285d72] hover:text-[#0b698e] cursor-pointer select-none">
+          📋 Species roster &amp; raw strings
         </summary>
         <div className="mt-1.5 space-y-1.5">
           {(ev.raidSummary || ev.specialSummary || ev.featuredSpecies) && (
-            <div className="bg-slate-50 rounded-xl p-2 border border-slate-200 text-[11px] leading-snug space-y-0.5">
+            <div className="bg-white/85 rounded-xl p-2 border border-white text-[11px] leading-snug space-y-0.5">
               {ev.raidSummary && (
-                <div className="text-slate-800">
-                  <span className="font-black text-teal-800">⚔️ Raids/Megas: </span>
+                <div className="text-[#123c4d]">
+                  <span className="font-extrabold text-[#0b698e]">⚔️ Raids/Megas: </span>
                   <span className="font-medium">{ev.raidSummary}</span>
                 </div>
               )}
               {ev.specialSummary && (
-                <div className="text-slate-800">
-                  <span className="font-black text-indigo-800">🌍 Special/Regionals: </span>
+                <div className="text-[#123c4d]">
+                  <span className="font-extrabold text-[#3b6fd4]">🌍 Special/Regionals: </span>
                   <span className="font-medium">{ev.specialSummary}</span>
                 </div>
               )}
               {!ev.raidSummary && !ev.specialSummary && ev.featuredSpecies && (
-                <div className="text-slate-700 font-medium">{ev.featuredSpecies}</div>
+                <div className="text-[#1b4d60] font-medium">{ev.featuredSpecies}</div>
               )}
             </div>
           )}
 
-          <div className="space-y-1 bg-slate-900 text-teal-300 p-2.5 rounded-xl font-mono text-[10px]">
+          <div className="space-y-1 bg-[#073b50] text-[#bfeaf6] p-2.5 rounded-xl font-mono text-[10px]">
             <div
               onClick={() => onLoadToBar?.(built.raidAndMegaString)}
               className="truncate cursor-pointer hover:text-white"
               title="Tap to load into bottom bar"
             >
-              <span className="text-slate-400">Raids: </span>{built.raidAndMegaString}
+              <span className="text-[#88d7f0]">Raids: </span>{built.raidAndMegaString}
             </div>
             {built.regionalAndRareTradeString && (
               <div
                 onClick={() => onLoadToBar?.(built.regionalAndRareTradeString)}
                 className="truncate cursor-pointer hover:text-white"
               >
-                <span className="text-slate-400">Special: </span>{built.regionalAndRareTradeString}
+                <span className="text-[#88d7f0]">Special: </span>{built.regionalAndRareTradeString}
               </div>
             )}
             {built.backgroundKeepString && (
@@ -383,7 +384,7 @@ function MajorEventCard({
                 onClick={() => onLoadToBar?.(built.backgroundKeepString)}
                 className="truncate cursor-pointer hover:text-white"
               >
-                <span className="text-slate-400">BG: </span>{built.backgroundKeepString}
+                <span className="text-[#88d7f0]">BG: </span>{built.backgroundKeepString}
               </div>
             )}
             <div
@@ -1097,13 +1098,13 @@ function TriagePipelineView({
 
   return (
     <div className="max-w-7xl mx-auto w-full pb-24">
-      {/* Sticky Single-Row Tablist + Compact Quick Controls */}
-      <div className="sticky top-[44px] sm:top-[48px] z-30 bg-white/95 backdrop-blur-md border-b border-teal-200/90 shadow-2xs">
+      {/* Sticky Single-Row Pokémon GO Pill Tablist + Compact Quick Controls */}
+      <div className="sticky top-[48px] sm:top-[52px] z-30 bg-[#bfeaf6]/88 backdrop-blur-md border-b border-white/65">
         <div className="max-w-7xl mx-auto px-2 sm:px-4">
-          {/* Single-Row Horizontally Scrolling Tablist (mwg: tabs) */}
+          {/* Single-Row Horizontally Scrolling Pill Tablist (mwg: tabs) */}
           <div
             ref={tablistRef}
-            className="mwg-tablist border-b border-slate-100"
+            className="mwg-tablist"
             role="tablist"
             aria-label="Inventory organization tools"
             {...{ focusgroup: 'tablist nomemory' }}
@@ -1133,23 +1134,21 @@ function TriagePipelineView({
             })}
           </div>
 
-          {/* Slim 36px Toolbar: !# Untagged Toggle + Active Summary + Options Modal Trigger */}
+          {/* Slim Toolbar: !# Untagged Pill + Active Summary + Options Pill Trigger */}
           <div className="flex items-center justify-between gap-2 py-1.5 px-1 text-xs">
-            <div className="flex items-center gap-1.5 min-w-0">
+            <div className="flex items-center gap-2 min-w-0">
               <button
                 type="button"
                 onClick={() => setUntaggedOnly((v) => !v)}
                 aria-pressed={untaggedOnly}
-                className={`compact-inline-chip min-h-[30px] px-2.5 py-0.5 rounded-full text-[11px] font-black border transition-colors cursor-pointer inline-flex items-center gap-1 ${
-                  untaggedOnly
-                    ? 'bg-teal-600 text-white border-teal-700'
-                    : 'bg-slate-100 text-slate-600 border-slate-300'
+                className={`compact-inline-chip min-h-[30px] px-3 py-0.5 text-[11px] uppercase cursor-pointer inline-flex items-center gap-1 ${
+                  untaggedOnly ? 'pogo-pill-active' : 'pogo-pill'
                 }`}
               >
-                <span>{untaggedOnly ? '✓ !# Untagged' : '!# Off'}</span>
+                <span>{untaggedOnly ? '✓ !# UNTAGGED' : '!# OFF'}</span>
               </button>
 
-              <span className="text-[11px] font-bold text-slate-500 truncate">
+              <span className="text-[11px] font-bold text-[#1b4d60] truncate">
                 {bufferLabel} • Caps {cdShinyKeepCap}/{globalBgKeepCap}/{costumeKeepCap}
               </span>
             </div>
@@ -1157,10 +1156,10 @@ function TriagePipelineView({
             <button
               type="button"
               onClick={() => optionsDialogRef.current?.showModal()}
-              className="compact-inline-chip min-h-[30px] px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-slate-100 hover:bg-teal-50 text-slate-700 border border-slate-300 cursor-pointer shrink-0 inline-flex items-center gap-1"
+              className="compact-inline-chip pogo-pill min-h-[30px] px-3 py-0.5 text-[11px] uppercase cursor-pointer shrink-0 inline-flex items-center gap-1"
             >
               <span aria-hidden="true">⚙️</span>
-              <span>Options</span>
+              <span>OPTIONS</span>
             </button>
           </div>
         </div>
@@ -1179,18 +1178,51 @@ function TriagePipelineView({
           aria-labelledby={`${tabBaseId}-tab-pipeline`}
           hidden={activeSubTab !== 'pipeline' ? 'until-found' : undefined}
         >
-          <div className="pt-3 space-y-2.5 mwg-accordion mwg-card-container">
+          <div className="pt-3.5 space-y-3 mwg-accordion mwg-card-container">
+            {/* Screenshot 2 Frosted Pokédex Summary Card for Inventory Triage */}
+            <PogoSummaryCard
+              title="STORAGE TRIAGE"
+              pillText={untaggedOnly ? '!# UNTAGGED' : 'ALL STORAGE'}
+              stats={[
+                {
+                  label: 'CD SHINY',
+                  value: `≤${cdShinyKeepCap}`,
+                  onClick: () => optionsDialogRef.current?.showModal(),
+                },
+                {
+                  label: 'GLOBAL BG',
+                  value: `≤${globalBgKeepCap}`,
+                  onClick: () => optionsDialogRef.current?.showModal(),
+                },
+                {
+                  label: 'COSTUME',
+                  value: `≤${costumeKeepCap}`,
+                  onClick: () => optionsDialogRef.current?.showModal(),
+                },
+                {
+                  label: 'META SAFE',
+                  value: metaSets.allProtectedMetaIds.length,
+                  onClick: () => setActiveSubTab('meta-sync'),
+                },
+                {
+                  label: 'NON-META',
+                  value: metaSets.strictNonMetaIds.length,
+                  onClick: () => setActiveSubTab('meta-sync'),
+                },
+              ]}
+            />
+
             {/* Phase 1: Trophies */}
-            <details open className="rounded-2xl border border-amber-300/80 bg-white/95 overflow-hidden shadow-2xs">
-              <summary className="px-3.5 py-2.5 bg-amber-50/70 text-xs font-black text-slate-900 select-none">
+            <details open className="pogo-summary-card overflow-hidden">
+              <summary className="px-4 py-3 text-xs sm:text-sm font-display font-extrabold text-[#123c4d] select-none">
                 <span className="flex-1 flex items-center justify-between gap-2">
-                  <span>1. Hard Trophies & 0% Nundos</span>
-                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-200/80 text-amber-950">
+                  <span>1. Hard Trophies &amp; 0% Nundos</span>
+                  <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-amber-400 text-[#123c4d]">
                     #Trophy
                   </span>
                 </span>
               </summary>
-              <div className="p-2.5 border-t border-amber-100 mwg-card-grid">
+              <div className="p-3 border-t border-[#0d7da8]/12 mwg-card-grid">
                 <SearchRecipeCard
                   badge="1A • Crown Jewels (CNF)"
                   title="4*, Gigantamax, Shiny Shadows, Shiny Legendaries & Shiny Location BGs"
@@ -1213,16 +1245,16 @@ function TriagePipelineView({
             </details>
 
             {/* Phase 2: High-Demand Tradeables */}
-            <details className="rounded-2xl border border-purple-300/80 bg-white/95 overflow-hidden shadow-2xs">
-              <summary className="px-3.5 py-2.5 bg-purple-50/70 text-xs font-black text-slate-900 select-none">
+            <details className="pogo-summary-card overflow-hidden">
+              <summary className="px-4 py-3 text-xs sm:text-sm font-display font-extrabold text-[#123c4d] select-none">
                 <span className="flex-1 flex items-center justify-between gap-2">
                   <span>2. High-Demand Tradeables (BGs, Regionals, Rotom, Shinies)</span>
-                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-purple-200/80 text-purple-950">
+                  <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-[#8d52b5] text-white">
                     #TradeRare
                   </span>
                 </span>
               </summary>
-              <div className="p-2.5 border-t border-purple-100 mwg-card-grid">
+              <div className="p-3 border-t border-[#0d7da8]/12 mwg-card-grid">
                 <SearchRecipeCard
                   badge={activeLocBgRecipe.badge}
                   title="In-Person Venue Location Backgrounds"
@@ -1238,7 +1270,7 @@ function TriagePipelineView({
                     aria-label="Scope Location Backgrounds by event date window"
                     value={selectedLocBgScopeId}
                     onChange={(e) => setSelectedLocBgScopeId(e.target.value)}
-                    className="w-full bg-white border border-purple-200 rounded-xl px-2.5 py-1 text-[11px] font-bold text-slate-800"
+                    className="w-full pogo-search-pill px-3 py-1.5 text-[11px] font-bold text-[#123c4d]"
                   >
                     <option value="ALL_ANY_DATE">All Venue Location Backgrounds (Any Date)</option>
                     {allLocationBgEvents.map((ev) => (
@@ -1284,23 +1316,23 @@ function TriagePipelineView({
             </details>
 
             {/* Phase 3: Capped Trade Stock vs Excess Purge */}
-            <details className="rounded-2xl border border-indigo-300/80 bg-white/95 overflow-hidden shadow-2xs">
-              <summary className="px-3.5 py-2.5 bg-indigo-50/70 text-xs font-black text-slate-900 select-none">
+            <details className="pogo-summary-card overflow-hidden">
+              <summary className="px-4 py-3 text-xs sm:text-sm font-display font-extrabold text-[#123c4d] select-none">
                 <span className="flex-1 flex items-center justify-between gap-2">
                   <span>3. Capped Trade Stock vs. Excess Clutter</span>
-                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-indigo-200/80 text-indigo-950">
+                  <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-[#3b6fd4] text-white">
                     count-{cdShinyKeepCap}
                   </span>
                 </span>
               </summary>
-              <div className="p-2.5 border-t border-indigo-100 space-y-2.5">
-                <div className="flex items-center gap-2 bg-indigo-50/60 px-2.5 py-1.5 rounded-xl border border-indigo-200">
-                  <span className="text-[11px] font-extrabold text-indigo-950 shrink-0">Global BG Window:</span>
+              <div className="p-3 border-t border-[#0d7da8]/12 space-y-2.5">
+                <div className="flex items-center gap-2 bg-white/75 px-3 py-1.5 rounded-full border border-white">
+                  <span className="text-[11px] font-extrabold text-[#123c4d] shrink-0">Global BG Window:</span>
                   <select
                     aria-label="Scope Global Special Backgrounds by event window"
                     value={selectedGlobalBgScopeId}
                     onChange={(e) => setSelectedGlobalBgScopeId(e.target.value)}
-                    className="flex-1 min-w-0 bg-white border border-indigo-200 rounded-lg px-2 py-1 text-[11px] font-bold text-slate-800"
+                    className="flex-1 min-w-0 bg-transparent text-[11px] font-bold text-[#0b698e] focus:outline-none"
                   >
                     <option value="ALL_ANY_DATE">All Global Special Backgrounds (Any Date)</option>
                     {allGlobalBgEvents.map((ev) => (
@@ -1375,16 +1407,16 @@ function TriagePipelineView({
             </details>
 
             {/* Phase 4: Mirror Rerolls */}
-            <details className="rounded-2xl border border-teal-300/80 bg-white/95 overflow-hidden shadow-2xs">
-              <summary className="px-3.5 py-2.5 bg-teal-50/70 text-xs font-black text-slate-900 select-none">
+            <details className="pogo-summary-card overflow-hidden">
+              <summary className="px-4 py-3 text-xs sm:text-sm font-display font-extrabold text-[#123c4d] select-none">
                 <span className="flex-1 flex items-center justify-between gap-2">
-                  <span>4. Mirror & Special Trade Rerolls</span>
-                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-teal-200/80 text-teal-950">
+                  <span>4. Mirror &amp; Special Trade Rerolls</span>
+                  <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-[#0d7da8] text-white">
                     #TradeMirror
                   </span>
                 </span>
               </summary>
-              <div className="p-2.5 border-t border-teal-100 mwg-card-grid">
+              <div className="p-3 border-t border-[#0d7da8]/12 mwg-card-grid">
                 <SearchRecipeCard
                   badge="4A • Pseudo & 10km Eggs"
                   title="Low-IV Rare Spawns for Mirror / Distance XL Trades"
@@ -1409,16 +1441,16 @@ function TriagePipelineView({
             </details>
 
             {/* Phase 5: PvP & PvE Meta */}
-            <details className="rounded-2xl border border-emerald-300/80 bg-white/95 overflow-hidden shadow-2xs">
-              <summary className="px-3.5 py-2.5 bg-emerald-50/70 text-xs font-black text-slate-900 select-none">
+            <details className="pogo-summary-card overflow-hidden">
+              <summary className="px-4 py-3 text-xs sm:text-sm font-display font-extrabold text-[#123c4d] select-none">
                 <span className="flex-1 flex items-center justify-between gap-2">
-                  <span>5. PvPoke Top 100 (GL/UL/ML) & DialgaDex Raiders</span>
-                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-200/80 text-emerald-950">
+                  <span>5. PvPoke Top 100 (GL/UL/ML) &amp; DialgaDex Raiders</span>
+                  <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-[#2b9e66] text-white">
                     #PvP / #PvE
                   </span>
                 </span>
               </summary>
-              <div className="p-2.5 border-t border-emerald-100 mwg-card-grid">
+              <div className="p-3 border-t border-[#0d7da8]/12 mwg-card-grid">
                 <SearchRecipeCard
                   badge="5A • GL & UL Bulk"
                   title={`Top 100 GL/UL Low-Attack IVs (${metaSets.glUlFamilyIds.length} IDs)`}
@@ -1467,16 +1499,16 @@ function TriagePipelineView({
             </details>
 
             {/* Phase 6: Safe Mass Transfer */}
-            <details className="rounded-2xl border border-rose-300 bg-white/95 overflow-hidden shadow-2xs">
-              <summary className="px-3.5 py-2.5 bg-rose-50/80 text-xs font-black text-rose-950 select-none">
+            <details className="pogo-summary-card overflow-hidden">
+              <summary className="px-4 py-3 text-xs sm:text-sm font-display font-extrabold text-[#123c4d] select-none">
                 <span className="flex-1 flex items-center justify-between gap-2">
                   <span>6. Safe Mass Transfer (Zero Meta / Regional Conflict)</span>
-                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-rose-600 text-white">
+                  <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-rose-600 text-white">
                     #Transfer
                   </span>
                 </span>
               </summary>
-              <div className="p-2.5 border-t border-rose-100 mwg-card-grid">
+              <div className="p-3 border-t border-[#0d7da8]/12 mwg-card-grid">
                 <SearchRecipeCard
                   badge={`6A • 0*–3* Non-Meta (${metaSets.strictNonMetaIds.length} IDs)`}
                   title="All 0*, 1*, 2*, 3* Strictly Non-Meta Species"
@@ -1524,18 +1556,18 @@ function TriagePipelineView({
             </details>
 
             {/* Phase 7: Interactive AND (&) / OR (,) Rule Combiner (PoGO CNF Compiler) */}
-            <details className="rounded-2xl border border-teal-300 bg-white/95 overflow-hidden shadow-2xs">
-              <summary className="px-3.5 py-2.5 bg-teal-50/80 text-xs font-black text-teal-950 select-none">
+            <details className="pogo-summary-card overflow-hidden">
+              <summary className="px-4 py-3 text-xs sm:text-sm font-display font-extrabold text-[#123c4d] select-none">
                 <span className="flex-1 flex items-center justify-between gap-2">
                   <span>🔗 AND (&amp;) / OR (,) Rule Combiner (PoGO CNF Compiler)</span>
-                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-teal-600 text-white">
+                  <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-[#0d7da8] text-white">
                     (X,Y)&amp;(X,Z)
                   </span>
                 </span>
               </summary>
-              <div className="p-3 border-t border-teal-100 space-y-2.5 text-xs">
-                <p className="text-[11px] text-slate-600 leading-snug">
-                  In Pokémon GO, <code className="font-mono font-bold text-slate-900">,</code> (OR) has <strong>higher precedence</strong> than <code className="font-mono font-bold text-slate-900">&amp;</code> (AND). Writing <code className="font-mono text-rose-700">A,B&amp;C</code> is parsed as <code className="font-mono text-rose-700">(A OR B) AND C</code>. This compiler distributes <code className="font-mono font-bold">OR</code> over <code className="font-mono font-bold">AND</code> (<code className="font-mono font-bold text-teal-800">A,B &amp; A,C</code>) so every branch works properly.
+              <div className="p-3.5 border-t border-[#0d7da8]/12 space-y-2.5 text-xs">
+                <p className="text-[11px] text-[#285d72] leading-snug">
+                  In Pokémon GO, <code className="font-mono font-bold text-[#123c4d]">,</code> (OR) has <strong>higher precedence</strong> than <code className="font-mono font-bold text-[#123c4d]">&amp;</code> (AND). Writing <code className="font-mono text-rose-700">A,B&amp;C</code> is parsed as <code className="font-mono text-rose-700">(A OR B) AND C</code>. This compiler distributes <code className="font-mono font-bold">OR</code> over <code className="font-mono font-bold">AND</code> (<code className="font-mono font-bold text-[#0b698e]">A,B &amp; A,C</code>) so every branch works properly.
                 </p>
 
                 {/* Quick Presets */}
@@ -1553,7 +1585,7 @@ function TriagePipelineView({
                         'shiny&locationbackground',
                       ])
                     }
-                    className="compact-inline-chip min-h-[28px] px-2.5 py-0.5 rounded-lg text-[10px] font-black bg-amber-50 hover:bg-amber-100 text-amber-950 border border-amber-300 cursor-pointer"
+                    className="compact-inline-chip pogo-pill min-h-[28px] px-3 py-0.5 text-[10px] cursor-pointer"
                   >
                     Preset: Crown Jewels
                   </button>
@@ -1566,7 +1598,7 @@ function TriagePipelineView({
                         'locationbackground&legendary',
                       ])
                     }
-                    className="compact-inline-chip min-h-[28px] px-2.5 py-0.5 rounded-lg text-[10px] font-black bg-purple-50 hover:bg-purple-100 text-purple-950 border border-purple-300 cursor-pointer"
+                    className="compact-inline-chip pogo-pill min-h-[28px] px-3 py-0.5 text-[10px] cursor-pointer"
                   >
                     Preset: Trophy Legendaries
                   </button>
@@ -1578,20 +1610,20 @@ function TriagePipelineView({
                         '0-1attack&3-4defense&3-4hp&cp-2500',
                       ])
                     }
-                    className="compact-inline-chip min-h-[28px] px-2.5 py-0.5 rounded-lg text-[10px] font-black bg-emerald-50 hover:bg-emerald-100 text-emerald-950 border border-emerald-300 cursor-pointer"
+                    className="compact-inline-chip pogo-pill min-h-[28px] px-3 py-0.5 text-[10px] cursor-pointer"
                   >
                     Preset: Shadow 3*-4* OR PvP Bulk
                   </button>
                 </div>
 
-                {/* Active OR Branches (each branch can contain & conditions) */}
-                <div className="flex flex-wrap items-center gap-1.5 bg-slate-50 p-2 rounded-xl border border-slate-200">
+                {/* Active OR Branches */}
+                <div className="flex flex-wrap items-center gap-1.5 bg-white/80 p-2.5 rounded-2xl border border-white">
                   {cnfBranches.map((br, idx) => (
                     <React.Fragment key={`${br}-${idx}`}>
                       {idx > 0 && (
-                        <span className="text-[10px] font-black text-teal-700 px-0.5">OR</span>
+                        <span className="text-[10px] font-black text-[#0b698e] px-0.5">OR</span>
                       )}
-                      <span className="inline-flex items-center gap-1 bg-white border border-teal-300 rounded-lg px-2 py-0.5 font-mono text-[11px] font-bold text-slate-900">
+                      <span className="inline-flex items-center gap-1 bg-[#dff4fb] border border-[#0d7da8]/30 rounded-full px-2.5 py-0.5 font-mono text-[11px] font-bold text-[#123c4d]">
                         <span>({br})</span>
                         <button
                           type="button"
@@ -1607,7 +1639,7 @@ function TriagePipelineView({
                 </div>
 
                 {/* Add New AND-Branch Input */}
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-2">
                   <input
                     type="text"
                     value={newBranchInput}
@@ -1621,7 +1653,7 @@ function TriagePipelineView({
                     }}
                     placeholder="Add branch (e.g. shiny&costume or 4*)"
                     aria-label="Add OR branch with AND conditions"
-                    className="flex-1 min-w-0 px-3 py-1.5 rounded-xl border border-slate-300 text-base sm:text-xs font-mono font-bold text-slate-800 bg-slate-50 focus:outline-none focus:bg-white focus:border-teal-500"
+                    className="flex-1 min-w-0 px-4 py-2 pogo-search-pill text-base sm:text-xs font-mono font-bold text-[#123c4d] focus:outline-none"
                   />
                   <button
                     type="button"
@@ -1631,7 +1663,7 @@ function TriagePipelineView({
                         setNewBranchInput('');
                       }
                     }}
-                    className="compact-inline-chip min-h-[34px] px-3 py-1.5 rounded-xl text-xs font-black bg-teal-600 hover:bg-teal-700 text-white cursor-pointer shrink-0"
+                    className="compact-inline-chip pogo-pill-active min-h-[36px] px-4 py-1.5 text-xs uppercase cursor-pointer shrink-0"
                   >
                     + OR Branch
                   </button>
@@ -1661,53 +1693,49 @@ function TriagePipelineView({
           aria-labelledby={`${tabBaseId}-tab-events-db`}
           hidden={activeSubTab !== 'events-db' ? 'until-found' : undefined}
         >
-          <div className="pt-3 space-y-3 mwg-card-container">
-            {/* Compact Search + Action Row */}
-            <div className="bg-white rounded-2xl border border-teal-200/90 p-2.5 shadow-2xs space-y-2">
-              <div className="flex items-center gap-1.5">
-                <input
-                  type="search"
-                  placeholder="Search event, Rotom, regional, Mega, city..."
+          <div className="pt-3.5 space-y-3 mwg-card-container">
+            {/* Frosted Search + Action Row */}
+            <div className="pogo-summary-card p-3.5 space-y-2.5">
+              <div className="flex items-center gap-2">
+                <PogoSearchInput
                   value={eventDbSearch}
                   onChange={(e) => setEventDbSearch(e.target.value)}
-                  aria-label="Search major events and special Pokémon"
-                  className="flex-1 min-w-0 px-3 py-1.5 rounded-xl border border-slate-300 text-base sm:text-xs font-bold text-slate-800 bg-slate-50 focus:outline-none focus:bg-white focus:border-teal-500"
+                  onClear={() => setEventDbSearch('')}
+                  placeholder="Search event, Rotom, regional, Mega, city..."
+                  ariaLabel="Search major events and special Pokémon"
+                  className="flex-1 min-w-0"
                 />
                 <button
                   type="button"
                   onClick={openAddEventModal}
-                  className="compact-inline-chip min-h-[36px] px-3 py-1.5 rounded-xl text-xs font-black bg-teal-600 hover:bg-teal-700 text-white cursor-pointer shrink-0"
+                  className="compact-inline-chip pogo-pill-active min-h-[40px] px-4 py-1.5 text-xs uppercase cursor-pointer shrink-0"
                 >
-                  + Event
+                  + EVENT
                 </button>
               </div>
 
-              {/* Single-Line Scrollable Series & Year Filter Chips */}
+              {/* Single-Line Scrollable Series & Year Filter Pills */}
               <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
                 {['ALL', 2026, 2025, 2024, 2023].map((yr) => (
                   <button
                     key={String(yr)}
                     type="button"
                     onClick={() => setEventYearFilter(String(yr))}
-                    className={`compact-inline-chip min-h-[28px] px-2.5 py-0.5 rounded-full text-[11px] font-black shrink-0 border cursor-pointer ${
-                      eventYearFilter === String(yr)
-                        ? 'bg-slate-900 text-white border-slate-900'
-                        : 'bg-slate-100 text-slate-700 border-slate-200'
+                    className={`compact-inline-chip min-h-[28px] px-3 py-0.5 text-[11px] uppercase shrink-0 cursor-pointer ${
+                      eventYearFilter === String(yr) ? 'pogo-pill-active' : 'pogo-pill'
                     }`}
                   >
                     {yr === 'ALL' ? 'All Years' : yr}
                   </button>
                 ))}
-                <span className="text-slate-300 select-none" aria-hidden="true">|</span>
+                <span className="text-[#0d7da8]/40 select-none" aria-hidden="true">|</span>
                 {['ALL', 'GO Tour', 'GO Fest', 'Wild Area', 'City & Special', 'Raid & Max'].map((series) => (
                   <button
                     key={series}
                     type="button"
                     onClick={() => setEventSeriesFilter(series)}
-                    className={`compact-inline-chip min-h-[28px] px-2.5 py-0.5 rounded-full text-[11px] font-black shrink-0 border cursor-pointer ${
-                      eventSeriesFilter === series
-                        ? 'bg-teal-600 text-white border-teal-700'
-                        : 'bg-white text-slate-700 border-slate-200'
+                    className={`compact-inline-chip min-h-[28px] px-3 py-0.5 text-[11px] uppercase shrink-0 cursor-pointer ${
+                      eventSeriesFilter === series ? 'pogo-pill-active' : 'pogo-pill'
                     }`}
                   >
                     {series === 'ALL' ? 'All Series' : series}
@@ -1716,7 +1744,7 @@ function TriagePipelineView({
               </div>
 
               {dbStatusBanner && (
-                <div className="px-2.5 py-1.5 rounded-xl bg-emerald-50 border border-emerald-300 text-[11px] font-bold text-emerald-950">
+                <div className="px-3 py-1.5 rounded-2xl bg-emerald-50 border border-emerald-300 text-[11px] font-bold text-emerald-950">
                   {dbStatusBanner}
                 </div>
               )}
@@ -1747,15 +1775,15 @@ function TriagePipelineView({
             </div>
 
             {/* Collapsible Custom Date Calculator, Trips & JSON Backup */}
-            <div className="mwg-accordion space-y-2 pt-1">
-              <details className="rounded-2xl border border-teal-200 bg-white overflow-hidden shadow-2xs">
-                <summary className="px-3.5 py-2.5 text-xs font-black text-slate-800 select-none">
-                  <span>🧮 Custom Date Range → ageX-Y Calculator & JSON Backup</span>
+            <div className="mwg-accordion space-y-2.5 pt-1">
+              <details className="pogo-summary-card overflow-hidden">
+                <summary className="px-4 py-3 text-xs sm:text-sm font-display font-extrabold text-[#123c4d] select-none">
+                  <span>🧮 Custom Date Range → ageX-Y Calculator &amp; JSON Backup</span>
                 </summary>
-                <div className="p-3 border-t border-slate-100 space-y-3">
+                <div className="p-3.5 border-t border-[#0d7da8]/12 space-y-3">
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                    <div className="bg-slate-50 px-2.5 py-1.5 rounded-xl border border-slate-200">
-                      <label htmlFor="custom-ev-lbl" className="text-[10px] font-black uppercase text-slate-500">
+                    <div className="bg-white/85 px-3 py-2 rounded-2xl border border-white">
+                      <label htmlFor="custom-ev-lbl" className="text-[10px] font-extrabold uppercase text-[#0b698e]">
                         Tag Label
                       </label>
                       <input
@@ -1763,11 +1791,11 @@ function TriagePipelineView({
                         type="text"
                         value={customEventName}
                         onChange={(e) => setCustomEventName(e.target.value)}
-                        className="w-full text-base sm:text-xs font-bold text-slate-900 bg-transparent focus:outline-none"
+                        className="w-full text-base sm:text-xs font-bold text-[#123c4d] bg-transparent focus:outline-none"
                       />
                     </div>
-                    <div className="bg-slate-50 px-2.5 py-1.5 rounded-xl border border-slate-200">
-                      <label htmlFor="custom-ev-start" className="text-[10px] font-black uppercase text-slate-500">
+                    <div className="bg-white/85 px-3 py-2 rounded-2xl border border-white">
+                      <label htmlFor="custom-ev-start" className="text-[10px] font-extrabold uppercase text-[#0b698e]">
                         Start Date
                       </label>
                       <input
@@ -1775,11 +1803,11 @@ function TriagePipelineView({
                         type="date"
                         value={customStartDate}
                         onChange={(e) => setCustomStartDate(e.target.value)}
-                        className="w-full text-base sm:text-xs font-bold text-slate-900 bg-transparent focus:outline-none"
+                        className="w-full text-base sm:text-xs font-bold text-[#123c4d] bg-transparent focus:outline-none"
                       />
                     </div>
-                    <div className="bg-slate-50 px-2.5 py-1.5 rounded-xl border border-slate-200">
-                      <label htmlFor="custom-ev-end" className="text-[10px] font-black uppercase text-slate-500">
+                    <div className="bg-white/85 px-3 py-2 rounded-2xl border border-white">
+                      <label htmlFor="custom-ev-end" className="text-[10px] font-extrabold uppercase text-[#0b698e]">
                         End Date
                       </label>
                       <input
@@ -1787,27 +1815,27 @@ function TriagePipelineView({
                         type="date"
                         value={customEndDate}
                         onChange={(e) => setCustomEndDate(e.target.value)}
-                        className="w-full text-base sm:text-xs font-bold text-slate-900 bg-transparent focus:outline-none"
+                        className="w-full text-base sm:text-xs font-bold text-[#123c4d] bg-transparent focus:outline-none"
                       />
                     </div>
                   </div>
 
                   <div className="flex flex-wrap gap-3 text-xs">
-                    <label className="inline-flex items-center gap-1.5 font-bold text-slate-700 cursor-pointer">
+                    <label className="inline-flex items-center gap-1.5 font-bold text-[#1b4d60] cursor-pointer">
                       <input
                         type="checkbox"
                         checked={customExcludeRemote}
                         onChange={(e) => setCustomExcludeRemote(e.target.checked)}
-                        className="w-4 h-4 accent-teal-600 rounded"
+                        className="w-4 h-4 rounded"
                       />
                       <span>!remoteraid</span>
                     </label>
-                    <label className="inline-flex items-center gap-1.5 font-bold text-slate-700 cursor-pointer">
+                    <label className="inline-flex items-center gap-1.5 font-bold text-[#1b4d60] cursor-pointer">
                       <input
                         type="checkbox"
                         checked={customRequireLocationBg}
                         onChange={(e) => setCustomRequireLocationBg(e.target.checked)}
-                        className="w-4 h-4 accent-teal-600 rounded"
+                        className="w-4 h-4 rounded"
                       />
                       <span>locationbackground</span>
                     </label>
@@ -1822,18 +1850,18 @@ function TriagePipelineView({
                     onLoadToBar={onLoadSearchString}
                   />
 
-                  <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-slate-100">
+                  <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-[#0d7da8]/12">
                     <button
                       type="button"
                       onClick={handleExportEventsJson}
-                      className="compact-inline-chip min-h-[32px] px-3 py-1 rounded-xl text-[11px] font-black bg-slate-100 hover:bg-teal-50 text-slate-800 border border-slate-300 cursor-pointer"
+                      className="compact-inline-chip pogo-pill min-h-[32px] px-3 py-1 text-[11px] cursor-pointer"
                     >
                       ⬇️ Export Archive JSON
                     </button>
                     <button
                       type="button"
                       onClick={() => fileImportRef.current?.click()}
-                      className="compact-inline-chip min-h-[32px] px-3 py-1 rounded-xl text-[11px] font-black bg-slate-100 hover:bg-teal-50 text-slate-800 border border-slate-300 cursor-pointer"
+                      className="compact-inline-chip pogo-pill min-h-[32px] px-3 py-1 text-[11px] cursor-pointer"
                     >
                       ⬆️ Import JSON
                     </button>
@@ -1847,7 +1875,7 @@ function TriagePipelineView({
                     <button
                       type="button"
                       onClick={handleResetEventsDb}
-                      className="compact-inline-chip min-h-[32px] px-3 py-1 rounded-xl text-[11px] font-black bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 cursor-pointer"
+                      className="compact-inline-chip min-h-[32px] px-3 py-1 rounded-full text-[11px] font-extrabold bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 cursor-pointer"
                     >
                       Reset Defaults
                     </button>
@@ -1855,11 +1883,11 @@ function TriagePipelineView({
                 </div>
               </details>
 
-              <details className="rounded-2xl border border-teal-200 bg-white overflow-hidden shadow-2xs">
-                <summary className="px-3.5 py-2.5 text-xs font-black text-slate-800 select-none">
+              <details className="pogo-summary-card overflow-hidden">
+                <summary className="px-4 py-3 text-xs sm:text-sm font-display font-extrabold text-[#123c4d] select-none">
                   <span>✈️ Personal Travel Trips ({TRAVEL_TRIPS.length})</span>
                 </summary>
-                <div className="p-2.5 border-t border-slate-100 mwg-card-grid mwg-card-grid-3">
+                <div className="p-3 border-t border-[#0d7da8]/12 mwg-card-grid mwg-card-grid-3">
                   {TRAVEL_TRIPS.map((trip) => {
                     const calc = calculateAgeSearchString(trip.start, trip.end, referenceDate, {
                       bufferMode,
@@ -1896,28 +1924,26 @@ function TriagePipelineView({
           aria-labelledby={`${tabBaseId}-tab-year-slicer`}
           hidden={activeSubTab !== 'year-slicer' ? 'until-found' : undefined}
         >
-          <div className="pt-3 space-y-3 mwg-card-container">
-            <div className="bg-white rounded-2xl border border-teal-200/90 p-3 shadow-2xs space-y-2.5">
+          <div className="pt-3.5 space-y-3 mwg-card-container">
+            <div className="pogo-summary-card p-4 space-y-3">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div>
-                  <h3 className="text-sm font-black text-slate-900">
-                    Yearly & Monthly Storage Slicer
+                  <h3 className="font-display text-sm sm:text-base font-extrabold uppercase tracking-wider text-[#0c6c91]">
+                    Yearly &amp; Monthly Storage Slicer
                   </h3>
-                  <p className="text-[11px] text-slate-600">
+                  <p className="text-[11px] text-[#285d72] font-medium">
                     Separates played event windows from everyday catches using merged <code className="font-mono font-bold">!ageX-Y</code> ranges.
                   </p>
                 </div>
 
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-1.5">
                   {[2026, 2025, 2024, 2023].map((yr) => (
                     <button
                       key={yr}
                       type="button"
                       onClick={() => setSlicerYear(yr)}
-                      className={`compact-inline-chip min-h-[32px] px-2.5 py-1 rounded-xl text-xs font-black border cursor-pointer ${
-                        slicerYear === yr
-                          ? 'bg-slate-900 text-white border-slate-900'
-                          : 'bg-slate-100 text-slate-700 border-slate-200'
+                      className={`compact-inline-chip min-h-[32px] px-3 py-1 text-xs cursor-pointer ${
+                        slicerYear === yr ? 'pogo-pill-active' : 'pogo-pill'
                       }`}
                     >
                       {yr}
@@ -1927,21 +1953,21 @@ function TriagePipelineView({
               </div>
 
               <div className="flex flex-wrap items-center gap-3 text-xs">
-                <label className="inline-flex items-center gap-1.5 font-bold text-slate-700 cursor-pointer">
+                <label className="inline-flex items-center gap-1.5 font-bold text-[#1b4d60] cursor-pointer">
                   <input
                     type="checkbox"
                     checked={includeTripsInSlicer}
                     onChange={(e) => setIncludeTripsInSlicer(e.target.checked)}
-                    className="w-4 h-4 accent-teal-600 rounded"
+                    className="w-4 h-4 rounded"
                   />
                   <span>Protect Trips</span>
                 </label>
-                <label className="inline-flex items-center gap-1.5 font-bold text-slate-700 cursor-pointer">
+                <label className="inline-flex items-center gap-1.5 font-bold text-[#1b4d60] cursor-pointer">
                   <input
                     type="checkbox"
                     checked={includeCdsInSlicer}
                     onChange={(e) => setIncludeCdsInSlicer(e.target.checked)}
-                    className="w-4 h-4 accent-teal-600 rounded"
+                    className="w-4 h-4 rounded"
                   />
                   <span>Protect Comm Days</span>
                 </label>
@@ -1997,31 +2023,31 @@ function TriagePipelineView({
               {yearSlicerPlan.monthlySlices.map((ms) => (
                 <div
                   key={ms.monthNum}
-                  className={`rounded-2xl border p-3 bg-white shadow-2xs space-y-2 ${
-                    ms.isUpcoming ? 'border-slate-200 opacity-55' : 'border-teal-200/80'
+                  className={`pogo-glass-card p-3.5 space-y-2 ${
+                    ms.isUpcoming ? 'opacity-60' : ''
                   }`}
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-xs font-black text-slate-900">
+                    <span className="font-display text-xs font-extrabold uppercase tracking-wider text-[#123c4d]">
                       {ms.monthName} {slicerYear}
                     </span>
-                    <span className="px-1.5 py-0.5 rounded bg-slate-900 text-teal-300 font-mono text-[10px] font-bold">
+                    <span className="px-2 py-0.5 rounded-full bg-[#073b50] text-[#bfeaf6] font-mono text-[10px] font-bold">
                       {ms.isUpcoming ? 'Upcoming' : ms.ageToken}
                     </span>
                   </div>
 
-                  <div className="text-[10px] text-slate-600 space-y-0.5">
+                  <div className="text-[10px] text-[#285d72] space-y-0.5">
                     {ms.eventsInMonth.length === 0 && ms.cdsInMonth.length === 0 && ms.tripsInMonth.length === 0 ? (
-                      <span className="italic text-slate-400">No major events logged</span>
+                      <span className="italic text-[#396d82]">No major events logged</span>
                     ) : (
                       <>
                         {ms.eventsInMonth.slice(0, 3).map((e) => (
-                          <div key={e.id} className="truncate font-semibold text-slate-700">
+                          <div key={e.id} className="truncate font-semibold text-[#123c4d]">
                             • {e.name}
                           </div>
                         ))}
                         {ms.cdsInMonth.map((c) => (
-                          <div key={c.id} className="truncate font-semibold text-indigo-700">
+                          <div key={c.id} className="truncate font-semibold text-[#0b698e]">
                             • ✨ {c.species} CD
                           </div>
                         ))}
@@ -2062,7 +2088,7 @@ function TriagePipelineView({
           aria-labelledby={`${tabBaseId}-tab-community-days`}
           hidden={activeSubTab !== 'community-days' ? 'until-found' : undefined}
         >
-          <div className="pt-3 space-y-3 mwg-card-container">
+          <div className="pt-3.5 space-y-3 mwg-card-container">
             <div className="mwg-card-grid">
               <SearchRecipeCard
                 badge={`Keep 1–${cdShinyKeepCap}`}
@@ -2092,28 +2118,28 @@ function TriagePipelineView({
               ref={accordionRef}
               id="cd-year-accordion"
               aria-label="Community Day species by year and month"
-              className="mwg-accordion bg-white rounded-2xl border border-teal-200/90 p-3 shadow-2xs space-y-2.5"
+              className="mwg-accordion pogo-summary-card p-3.5 space-y-3"
             >
-              <div className="flex flex-wrap items-center gap-1.5">
-                <input
-                  type="search"
-                  placeholder="Filter CD species, move, or month..."
+              <div className="flex flex-wrap items-center gap-2">
+                <PogoSearchInput
                   value={cdSearchFilter}
                   onChange={(e) => setCdSearchFilter(e.target.value)}
-                  aria-label="Filter Community Day species"
-                  className="flex-1 min-w-[160px] px-3 py-1.5 rounded-xl border border-slate-300 text-base sm:text-xs font-bold text-slate-800 bg-slate-50 focus:outline-none focus:border-teal-500"
+                  onClear={() => setCdSearchFilter('')}
+                  placeholder="Filter CD species, move, or month..."
+                  ariaLabel="Filter Community Day species"
+                  className="flex-1 min-w-[180px]"
                 />
                 <button
                   type="button"
                   onClick={() => setSelectedCdEventIds(new Set(COMMUNITY_DAY_EVENTS.map((ev) => ev.id)))}
-                  className="compact-inline-chip min-h-[34px] px-2.5 py-1 rounded-xl text-[11px] font-black bg-teal-50 text-teal-800 border border-teal-300 cursor-pointer"
+                  className="compact-inline-chip pogo-pill min-h-[34px] px-3 py-1 text-[11px] uppercase cursor-pointer"
                 >
                   All
                 </button>
                 <button
                   type="button"
                   onClick={() => setSelectedCdEventIds(new Set())}
-                  className="compact-inline-chip min-h-[34px] px-2.5 py-1 rounded-xl text-[11px] font-black bg-slate-100 text-slate-700 border border-slate-300 cursor-pointer"
+                  className="compact-inline-chip pogo-pill min-h-[34px] px-3 py-1 text-[11px] uppercase cursor-pointer"
                 >
                   None
                 </button>
@@ -2122,7 +2148,7 @@ function TriagePipelineView({
                   type="button"
                   {...{ commandfor: 'cd-year-accordion', command: '--toggle-all' }}
                   aria-expanded={allYearsExpanded ? 'true' : 'false'}
-                  className="compact-inline-chip min-h-[34px] px-2.5 py-1 rounded-xl text-[11px] font-black bg-slate-900 text-white cursor-pointer"
+                  className="compact-inline-chip pogo-pill-active min-h-[34px] px-3.5 py-1 text-[11px] uppercase cursor-pointer"
                 >
                   <span className="expand-text">Expand All</span>
                   <span className="collapse-text">Collapse All</span>
@@ -2150,23 +2176,23 @@ function TriagePipelineView({
                     <details
                       key={year}
                       open={year === 2026 || Boolean(cdSearchFilter.trim())}
-                      className="rounded-xl border border-slate-200 bg-slate-50/60 overflow-hidden"
+                      className="rounded-2xl border border-white bg-white/75 overflow-hidden shadow-2xs"
                     >
-                      <summary className="px-3 py-2 bg-white text-xs font-black text-slate-900 select-none">
+                      <summary className="px-3.5 py-2.5 bg-white/90 text-xs font-display font-extrabold text-[#123c4d] select-none">
                         <span className="flex-1 flex items-center justify-between gap-2">
                           <span>{year} Community Days</span>
-                          <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-teal-100 text-teal-900">
+                          <span className="pogo-counter-pill text-[10px] py-0.5 px-2.5">
                             {selectedInYear}/{filtered.length}
                           </span>
                         </span>
                       </summary>
 
-                      <div className="p-2.5 border-t border-slate-200 space-y-2">
+                      <div className="p-2.5 border-t border-[#0d7da8]/12 space-y-2">
                         <div className="flex items-center justify-end gap-1.5">
                           <button
                             type="button"
                             onClick={() => toggleCdYear(filtered, !allYearSelected)}
-                            className="compact-inline-chip min-h-[28px] px-2.5 py-0.5 rounded-lg text-[10px] font-black bg-white text-teal-800 border border-teal-300 cursor-pointer"
+                            className="compact-inline-chip pogo-pill min-h-[28px] px-3 py-0.5 text-[10px] uppercase cursor-pointer"
                           >
                             {allYearSelected ? `Deselect ${year}` : `Select ${year}`}
                           </button>
@@ -2178,15 +2204,15 @@ function TriagePipelineView({
                             return (
                               <label
                                 key={ev.id}
-                                className={`flex items-center gap-2.5 p-2 rounded-xl border cursor-pointer select-none ${
-                                  isChecked ? 'bg-white border-teal-400' : 'bg-slate-100/70 border-slate-200 opacity-65'
+                                className={`pogo-dex-tile flex items-center gap-2.5 p-2 cursor-pointer select-none ${
+                                  isChecked ? 'pogo-dex-tile-selected' : 'opacity-70'
                                 }`}
                               >
                                 <input
                                   type="checkbox"
                                   checked={isChecked}
                                   onChange={() => toggleCdEvent(ev.id)}
-                                  className="w-4 h-4 accent-teal-600 rounded shrink-0"
+                                  className="w-4 h-4 rounded shrink-0"
                                 />
                                 <img
                                   src={ev.sprite}
@@ -2198,17 +2224,17 @@ function TriagePipelineView({
                                 />
                                 <div className="min-w-0 flex-1">
                                   <div className="flex items-center gap-1">
-                                    <span className="text-[9px] font-black uppercase px-1.5 py-0.5 rounded bg-slate-900 text-white">
+                                    <span className="text-[9px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-[#0d7da8] text-white">
                                       {ev.month.slice(0, 3)}
                                     </span>
                                     {ev.isClassic && (
-                                      <span className="text-[9px] font-black uppercase px-1.5 py-0.5 rounded bg-amber-200 text-amber-950">
+                                      <span className="text-[9px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-amber-300 text-[#123c4d]">
                                         Classic
                                       </span>
                                     )}
                                   </div>
-                                  <div className="text-xs font-black text-slate-900 truncate">{ev.species}</div>
-                                  <div className="text-[10px] text-indigo-700 font-bold truncate">
+                                  <div className="text-xs font-extrabold text-[#123c4d] truncate">{ev.species}</div>
+                                  <div className="text-[10px] text-[#0b698e] font-bold truncate">
                                     {ev.exclusiveMove}
                                   </div>
                                 </div>
@@ -2236,14 +2262,14 @@ function TriagePipelineView({
           aria-labelledby={`${tabBaseId}-tab-meta-sync`}
           hidden={activeSubTab !== 'meta-sync' ? 'until-found' : undefined}
         >
-          <div className="pt-3 space-y-3">
-            <div className="bg-white rounded-2xl border border-teal-200/90 p-3 shadow-2xs space-y-2.5">
+          <div className="pt-3.5 space-y-3">
+            <div className="pogo-summary-card p-3.5 space-y-3">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div>
-                  <h3 className="text-sm font-black text-slate-900">
-                    PvPoke Top 100 & DialgaDex Raiders
+                  <h3 className="font-display text-sm sm:text-base font-extrabold uppercase tracking-wider text-[#0c6c91]">
+                    PvPoke Top 100 &amp; DialgaDex Raiders
                   </h3>
-                  <p className="text-[11px] text-slate-600">
+                  <p className="text-[11px] text-[#285d72] font-medium">
                     {metaSets.allProtectedMetaIds.length} protected meta/regional IDs • {metaSets.strictNonMetaIds.length} strict non-meta IDs.
                   </p>
                 </div>
@@ -2251,7 +2277,7 @@ function TriagePipelineView({
                   type="button"
                   disabled={isSyncingMeta}
                   onClick={handleSyncMeta}
-                  className="compact-inline-chip min-h-[34px] px-3 py-1.5 rounded-xl text-[11px] font-black bg-teal-600 hover:bg-teal-700 disabled:opacity-50 text-white cursor-pointer"
+                  className="compact-inline-chip pogo-pill-active min-h-[34px] px-4 py-1.5 text-[11px] uppercase disabled:opacity-50 cursor-pointer"
                 >
                   {isSyncingMeta ? '⏳ Syncing...' : '🔄 Sync Live'}
                 </button>
@@ -2259,7 +2285,7 @@ function TriagePipelineView({
 
               {syncMessage && (
                 <div
-                  className={`p-2 rounded-xl text-[11px] font-bold border ${
+                  className={`p-2.5 rounded-2xl text-[11px] font-bold border ${
                     syncMessage.type === 'success'
                       ? 'bg-emerald-50 border-emerald-300 text-emerald-900'
                       : 'bg-amber-50 border-amber-300 text-amber-900'
@@ -2269,7 +2295,7 @@ function TriagePipelineView({
                 </div>
               )}
 
-              <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+              <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
                 {[
                   { id: 'great_league', label: '🔵 Great (1500)' },
                   { id: 'ultra_league', label: '🟡 Ultra (2500)' },
@@ -2280,10 +2306,8 @@ function TriagePipelineView({
                     key={t.id}
                     type="button"
                     onClick={() => setActiveMetaLeagueTab(t.id)}
-                    className={`compact-inline-chip min-h-[30px] px-2.5 py-1 rounded-xl text-[11px] font-black shrink-0 border cursor-pointer ${
-                      activeMetaLeagueTab === t.id
-                        ? 'bg-slate-900 text-white border-slate-900'
-                        : 'bg-slate-100 text-slate-700 border-slate-200'
+                    className={`compact-inline-chip min-h-[30px] px-3 py-1 text-[11px] uppercase shrink-0 cursor-pointer ${
+                      activeMetaLeagueTab === t.id ? 'pogo-pill-active' : 'pogo-pill'
                     }`}
                   >
                     {t.label}
@@ -2291,18 +2315,17 @@ function TriagePipelineView({
                 ))}
               </div>
 
-              <input
-                type="search"
-                placeholder="Search species, type, or move..."
+              <PogoSearchInput
                 value={metaSearchFilter}
                 onChange={(e) => setMetaSearchFilter(e.target.value)}
-                aria-label="Filter ranked meta Pokémon"
-                className="w-full px-3 py-1.5 rounded-xl border border-slate-300 text-base sm:text-xs font-bold text-slate-800 bg-slate-50 focus:outline-none focus:border-teal-500"
+                onClear={() => setMetaSearchFilter('')}
+                placeholder="Search species, type, or move..."
+                ariaLabel="Filter ranked meta Pokémon"
               />
             </div>
 
             {/* Mobile-Friendly Ranked Species List */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
               {(activeMetaLeagueTab === 'pve'
                 ? metaCache.pve.entries
                 : metaCache.pvp[activeMetaLeagueTab]?.entries || []
@@ -2329,25 +2352,27 @@ function TriagePipelineView({
                   return (
                     <div
                       key={`${displayName}-${idx}`}
-                      className="bg-white rounded-2xl border border-slate-200 p-2.5 flex items-center justify-between gap-2 shadow-2xs"
+                      className="pogo-glass-card p-2.5 flex items-center justify-between gap-2"
                     >
                       <div className="flex items-center gap-2.5 min-w-0">
                         <img
                           src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${item.dexId}.png`}
                           alt={displayName}
                           loading="lazy"
-                          width="36"
-                          height="36"
-                          className="w-9 h-9 object-contain bg-slate-50 rounded-xl border border-slate-200 shrink-0"
+                          width="40"
+                          height="40"
+                          className="w-10 h-10 object-contain pogo-dex-tile p-0.5 shrink-0"
                         />
                         <div className="min-w-0">
                           <div className="flex items-center gap-1.5">
-                            <span className="font-mono text-[11px] font-black text-teal-700">
+                            <span className="font-mono text-[11px] font-black text-[#0b698e]">
                               {item.rank ? `#${item.rank}` : item.tier}
                             </span>
-                            <span className="text-xs font-black text-slate-900 truncate">{displayName}</span>
+                            <span className="font-display text-xs font-extrabold text-[#123c4d] truncate">
+                              {displayName}
+                            </span>
                           </div>
-                          <div className="text-[10px] font-semibold text-slate-600 truncate">
+                          <div className="text-[10px] font-semibold text-[#285d72] truncate">
                             {item.fastMove}
                             {item.chargedMoves?.length > 0 ? ` + ${item.chargedMoves.join(' / ')}` : ''}
                           </div>
@@ -2355,7 +2380,7 @@ function TriagePipelineView({
                       </div>
 
                       <CopyChip
-                        label="Copy"
+                        label="COPY"
                         text={quickString}
                         ariaLabel={`Copy search string for ${displayName}`}
                         variant="teal"
@@ -2375,40 +2400,34 @@ function TriagePipelineView({
         ref={optionsDialogRef}
         aria-labelledby={optionsHeadingId}
         {...{ closedby: 'any' }}
-        className="rounded-3xl border-2 border-teal-200 p-0 max-w-md w-[calc(100%-1.5rem)] bg-white text-slate-900 shadow-2xl"
+        className="pogo-summary-card p-0 max-w-md w-[calc(100%-1.5rem)] text-[#123c4d] shadow-2xl"
       >
-        <div className="p-4 border-b border-teal-100 flex items-center justify-between bg-[#edf7f4]">
-          <h2 id={optionsHeadingId} className="text-sm font-black text-slate-900 uppercase tracking-wide">
-            ⚙️ Triage & Age Options
+        <div className="p-4 border-b border-[#0d7da8]/15 flex items-center justify-between bg-[#d5f2fc]/70 rounded-t-[1.25rem]">
+          <h2 id={optionsHeadingId} className="font-display text-sm font-extrabold text-[#0b698e] uppercase tracking-wider">
+            ⚙️ Triage &amp; Age Options
           </h2>
           <form method="dialog">
-            <button
-              value="close"
-              aria-label="Close options dialog"
-              className="pogo-close-btn w-7 h-7 rounded-full flex items-center justify-center text-white font-black text-xs cursor-pointer"
-            >
-              ✕
-            </button>
+            <PogoCloseButton type="submit" value="close" ariaLabel="Close options dialog" size="sm" />
           </form>
         </div>
 
         <div className="p-4 space-y-3 text-xs">
-          <label className="flex items-center justify-between gap-2 bg-slate-50 p-3 rounded-2xl border border-slate-200 cursor-pointer">
+          <label className="flex items-center justify-between gap-2 bg-white/85 p-3 rounded-2xl border border-white cursor-pointer">
             <div>
-              <div className="font-black text-slate-900">Prepend !# (Untagged Only)</div>
-              <div className="text-[11px] text-slate-500">Hides Pokémon you already tagged</div>
+              <div className="font-extrabold text-[#123c4d]">Prepend !# (Untagged Only)</div>
+              <div className="text-[11px] text-[#285d72]">Hides Pokémon you already tagged</div>
             </div>
             <input
               type="checkbox"
               checked={untaggedOnly}
               onChange={(e) => setUntaggedOnly(e.target.checked)}
-              className="w-4 h-4 accent-teal-600 rounded"
+              className="w-4 h-4 rounded"
             />
           </label>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-            <div className="bg-slate-50 p-2.5 rounded-2xl border border-slate-200">
-              <label htmlFor="opt-ref-date" className="text-[10px] font-black uppercase text-slate-500 block">
+            <div className="bg-white/85 p-2.5 rounded-2xl border border-white">
+              <label htmlFor="opt-ref-date" className="text-[10px] font-extrabold uppercase text-[#0b698e] block">
                 Reference Date (Today)
               </label>
               <input
@@ -2416,19 +2435,19 @@ function TriagePipelineView({
                 type="date"
                 value={referenceDate}
                 onChange={(e) => setReferenceDate(e.target.value || getTodayPlainDateString())}
-                className="w-full text-base sm:text-xs font-black text-slate-900 bg-transparent focus:outline-none mt-0.5"
+                className="w-full text-base sm:text-xs font-extrabold text-[#123c4d] bg-transparent focus:outline-none mt-0.5"
               />
             </div>
 
-            <div className="bg-slate-50 p-2.5 rounded-2xl border border-slate-200">
-              <label htmlFor="opt-age-buffer" className="text-[10px] font-black uppercase text-slate-500 block">
+            <div className="bg-white/85 p-2.5 rounded-2xl border border-white">
+              <label htmlFor="opt-age-buffer" className="text-[10px] font-extrabold uppercase text-[#0b698e] block">
                 24h Age Precision
               </label>
               <select
                 id="opt-age-buffer"
                 value={bufferMode}
                 onChange={(e) => setBufferMode(e.target.value)}
-                className="w-full text-base sm:text-xs font-black text-slate-900 bg-transparent focus:outline-none mt-0.5"
+                className="w-full text-base sm:text-xs font-extrabold text-[#123c4d] bg-transparent focus:outline-none mt-0.5"
               >
                 <option value="exact">Exact Calendar Day</option>
                 <option value="evening-safe">-1d Evening Catch Safe</option>
@@ -2438,19 +2457,19 @@ function TriagePipelineView({
           </div>
 
           <div className="space-y-2 pt-1">
-            <div className="text-[10px] font-black uppercase tracking-wider text-slate-500">
+            <div className="text-[10px] font-extrabold uppercase tracking-wider text-[#0b698e]">
               Trade Stockpile Keep Caps
             </div>
             <div className="grid grid-cols-3 gap-2">
-              <div className="bg-slate-50 p-2.5 rounded-2xl border border-slate-200 text-center space-y-1">
-                <label htmlFor="cap-cd" className="text-[10px] font-extrabold text-slate-600 block">
+              <div className="bg-white/85 p-2.5 rounded-2xl border border-white text-center space-y-1">
+                <label htmlFor="cap-cd" className="text-[10px] font-extrabold text-[#1b4d60] block">
                   CD Shinies
                 </label>
                 <select
                   id="cap-cd"
                   value={cdShinyKeepCap}
                   onChange={(e) => setCdShinyKeepCap(Number(e.target.value))}
-                  className="bg-white border border-slate-300 rounded-lg px-2 py-1 text-xs font-black"
+                  className="bg-[#eef9fd] border border-[#0d7da8]/30 rounded-full px-2.5 py-1 text-xs font-extrabold text-[#123c4d]"
                 >
                   {[1, 2, 3, 4].map((n) => (
                     <option key={n} value={n}>1–{n}</option>
@@ -2458,15 +2477,15 @@ function TriagePipelineView({
                 </select>
               </div>
 
-              <div className="bg-slate-50 p-2.5 rounded-2xl border border-slate-200 text-center space-y-1">
-                <label htmlFor="cap-bg" className="text-[10px] font-extrabold text-slate-600 block">
+              <div className="bg-white/85 p-2.5 rounded-2xl border border-white text-center space-y-1">
+                <label htmlFor="cap-bg" className="text-[10px] font-extrabold text-[#1b4d60] block">
                   Global BGs
                 </label>
                 <select
                   id="cap-bg"
                   value={globalBgKeepCap}
                   onChange={(e) => setGlobalBgKeepCap(Number(e.target.value))}
-                  className="bg-white border border-slate-300 rounded-lg px-2 py-1 text-xs font-black"
+                  className="bg-[#eef9fd] border border-[#0d7da8]/30 rounded-full px-2.5 py-1 text-xs font-extrabold text-[#123c4d]"
                 >
                   {[1, 2, 3].map((n) => (
                     <option key={n} value={n}>1–{n}</option>
@@ -2474,15 +2493,15 @@ function TriagePipelineView({
                 </select>
               </div>
 
-              <div className="bg-slate-50 p-2.5 rounded-2xl border border-slate-200 text-center space-y-1">
-                <label htmlFor="cap-costume" className="text-[10px] font-extrabold text-slate-600 block">
+              <div className="bg-white/85 p-2.5 rounded-2xl border border-white text-center space-y-1">
+                <label htmlFor="cap-costume" className="text-[10px] font-extrabold text-[#1b4d60] block">
                   Costumes
                 </label>
                 <select
                   id="cap-costume"
                   value={costumeKeepCap}
                   onChange={(e) => setCostumeKeepCap(Number(e.target.value))}
-                  className="bg-white border border-slate-300 rounded-lg px-2 py-1 text-xs font-black"
+                  className="bg-[#eef9fd] border border-[#0d7da8]/30 rounded-full px-2.5 py-1 text-xs font-extrabold text-[#123c4d]"
                 >
                   {[1, 2, 3].map((n) => (
                     <option key={n} value={n}>1–{n}</option>
@@ -2495,7 +2514,7 @@ function TriagePipelineView({
           <form method="dialog" className="pt-2">
             <button
               value="done"
-              className="w-full py-2.5 rounded-2xl font-black bg-teal-600 hover:bg-teal-700 text-white cursor-pointer"
+              className="w-full py-2.5 pogo-pill-active text-xs uppercase cursor-pointer"
             >
               Done
             </button>
@@ -2511,27 +2530,21 @@ function TriagePipelineView({
         id={dialogId}
         aria-labelledby={dialogHeadingId}
         {...{ closedby: 'any' }}
-        className="rounded-3xl border-2 border-teal-200 p-0 max-w-lg w-[calc(100%-1.5rem)] bg-white text-slate-900 shadow-2xl"
+        className="pogo-summary-card p-0 max-w-lg w-[calc(100%-1.5rem)] text-[#123c4d] shadow-2xl"
       >
-        <div className="p-4 border-b border-teal-100 flex items-center justify-between bg-[#edf7f4]">
-          <h2 id={dialogHeadingId} className="text-sm font-black text-slate-900 uppercase tracking-wide">
+        <div className="p-4 border-b border-[#0d7da8]/15 flex items-center justify-between bg-[#d5f2fc]/70 rounded-t-[1.25rem]">
+          <h2 id={dialogHeadingId} className="font-display text-sm font-extrabold text-[#0b698e] uppercase tracking-wider">
             {isEditingExisting ? '✏️ Edit Event' : '➕ Add Event'}
           </h2>
           <form method="dialog">
-            <button
-              value="cancel"
-              aria-label="Close event dialog"
-              className="pogo-close-btn w-7 h-7 rounded-full flex items-center justify-center text-white font-black text-xs cursor-pointer"
-            >
-              ✕
-            </button>
+            <PogoCloseButton type="submit" value="cancel" ariaLabel="Close event dialog" size="sm" />
           </form>
         </div>
 
         <form onSubmit={handleSaveEventModal} className="p-4 space-y-3 text-xs">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
             <div className="sm:col-span-2 space-y-1">
-              <label htmlFor="ev-name" className="font-black text-slate-700 uppercase text-[10px]">
+              <label htmlFor="ev-name" className="font-extrabold text-[#1b4d60] uppercase text-[10px]">
                 Event Name
               </label>
               <input
@@ -2541,12 +2554,12 @@ function TriagePipelineView({
                 value={eventForm.name}
                 onChange={(e) => setEventForm((f) => ({ ...f, name: e.target.value }))}
                 placeholder="Pokémon GO Fest: Global"
-                className="w-full px-3 py-2 rounded-xl border border-slate-300 text-base sm:text-xs font-bold"
+                className="w-full px-3.5 py-2 pogo-search-pill text-base sm:text-xs font-bold focus:outline-none"
               />
             </div>
 
             <div className="space-y-1">
-              <label htmlFor="ev-tag" className="font-black text-slate-700 uppercase text-[10px]">
+              <label htmlFor="ev-tag" className="font-extrabold text-[#1b4d60] uppercase text-[10px]">
                 Tag (≤12c)
               </label>
               <input
@@ -2557,14 +2570,14 @@ function TriagePipelineView({
                 value={eventForm.tag}
                 onChange={(e) => setEventForm((f) => ({ ...f, tag: e.target.value }))}
                 placeholder="GOFest"
-                className="w-full px-3 py-2 rounded-xl border border-slate-300 text-base sm:text-xs font-mono font-bold"
+                className="w-full px-3.5 py-2 pogo-search-pill text-base sm:text-xs font-mono font-bold focus:outline-none"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-2.5">
             <div className="space-y-1">
-              <label htmlFor="ev-start" className="font-black text-slate-700 uppercase text-[10px]">
+              <label htmlFor="ev-start" className="font-extrabold text-[#1b4d60] uppercase text-[10px]">
                 Start Date
               </label>
               <input
@@ -2573,11 +2586,11 @@ function TriagePipelineView({
                 required
                 value={eventForm.start}
                 onChange={(e) => setEventForm((f) => ({ ...f, start: e.target.value }))}
-                className="w-full px-3 py-2 rounded-xl border border-slate-300 text-base sm:text-xs font-bold"
+                className="w-full px-3.5 py-2 pogo-search-pill text-base sm:text-xs font-bold focus:outline-none"
               />
             </div>
             <div className="space-y-1">
-              <label htmlFor="ev-end" className="font-black text-slate-700 uppercase text-[10px]">
+              <label htmlFor="ev-end" className="font-extrabold text-[#1b4d60] uppercase text-[10px]">
                 End Date
               </label>
               <input
@@ -2586,21 +2599,21 @@ function TriagePipelineView({
                 required
                 value={eventForm.end === 'PRESENT' ? getTodayPlainDateString() : eventForm.end}
                 onChange={(e) => setEventForm((f) => ({ ...f, end: e.target.value }))}
-                className="w-full px-3 py-2 rounded-xl border border-slate-300 text-base sm:text-xs font-bold"
+                className="w-full px-3.5 py-2 pogo-search-pill text-base sm:text-xs font-bold focus:outline-none"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
             <div className="space-y-1">
-              <label htmlFor="ev-scope" className="font-black text-slate-700 uppercase text-[10px]">
+              <label htmlFor="ev-scope" className="font-extrabold text-[#1b4d60] uppercase text-[10px]">
                 Scope
               </label>
               <select
                 id="ev-scope"
                 value={eventForm.scope}
                 onChange={(e) => setEventForm((f) => ({ ...f, scope: e.target.value }))}
-                className="w-full px-2.5 py-2 rounded-xl border border-slate-300 text-base sm:text-xs font-bold bg-white"
+                className="w-full px-3 py-2 pogo-search-pill text-base sm:text-xs font-bold bg-white focus:outline-none"
               >
                 <option value="global">Global</option>
                 <option value="in-person">In-Person</option>
@@ -2609,14 +2622,14 @@ function TriagePipelineView({
             </div>
 
             <div className="space-y-1">
-              <label htmlFor="ev-bg" className="font-black text-slate-700 uppercase text-[10px]">
+              <label htmlFor="ev-bg" className="font-extrabold text-[#1b4d60] uppercase text-[10px]">
                 Background
               </label>
               <select
                 id="ev-bg"
                 value={eventForm.backgroundType}
                 onChange={(e) => setEventForm((f) => ({ ...f, backgroundType: e.target.value }))}
-                className="w-full px-2.5 py-2 rounded-xl border border-slate-300 text-base sm:text-xs font-bold bg-white"
+                className="w-full px-3 py-2 pogo-search-pill text-base sm:text-xs font-bold bg-white focus:outline-none"
               >
                 <option value="locationbackground">locationbackground</option>
                 <option value="specialbackground">specialbackground</option>
@@ -2625,14 +2638,14 @@ function TriagePipelineView({
             </div>
 
             <div className="space-y-1">
-              <label htmlFor="ev-series" className="font-black text-slate-700 uppercase text-[10px]">
+              <label htmlFor="ev-series" className="font-extrabold text-[#1b4d60] uppercase text-[10px]">
                 Series
               </label>
               <select
                 id="ev-series"
                 value={eventForm.series}
                 onChange={(e) => setEventForm((f) => ({ ...f, series: e.target.value }))}
-                className="w-full px-2.5 py-2 rounded-xl border border-slate-300 text-base sm:text-xs font-bold bg-white"
+                className="w-full px-3 py-2 pogo-search-pill text-base sm:text-xs font-bold bg-white focus:outline-none"
               >
                 <option value="GO Tour">GO Tour</option>
                 <option value="GO Fest">GO Fest</option>
@@ -2645,7 +2658,7 @@ function TriagePipelineView({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
             <div className="space-y-1">
-              <label htmlFor="ev-raid-ids" className="font-black text-slate-700 uppercase text-[10px]">
+              <label htmlFor="ev-raid-ids" className="font-extrabold text-[#1b4d60] uppercase text-[10px]">
                 Raid / Mega Dex IDs
               </label>
               <input
@@ -2654,11 +2667,11 @@ function TriagePipelineView({
                 value={eventForm.raidMegaIdsText}
                 onChange={(e) => setEventForm((f) => ({ ...f, raidMegaIdsText: e.target.value }))}
                 placeholder="e.g. 150, 384, 483, 484"
-                className="w-full px-3 py-2 rounded-xl border border-slate-300 text-base sm:text-xs font-mono font-bold"
+                className="w-full px-3.5 py-2 pogo-search-pill text-base sm:text-xs font-mono font-bold focus:outline-none"
               />
             </div>
             <div className="space-y-1">
-              <label htmlFor="ev-reg-ids" className="font-black text-slate-700 uppercase text-[10px]">
+              <label htmlFor="ev-reg-ids" className="font-extrabold text-[#1b4d60] uppercase text-[10px]">
                 Regional / Rotom / Unown IDs
               </label>
               <input
@@ -2667,14 +2680,14 @@ function TriagePipelineView({
                 value={eventForm.regionalRareIdsText}
                 onChange={(e) => setEventForm((f) => ({ ...f, regionalRareIdsText: e.target.value }))}
                 placeholder="e.g. 479, 201, 701, 764"
-                className="w-full px-3 py-2 rounded-xl border border-slate-300 text-base sm:text-xs font-mono font-bold"
+                className="w-full px-3.5 py-2 pogo-search-pill text-base sm:text-xs font-mono font-bold focus:outline-none"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
             <div className="space-y-1">
-              <label htmlFor="ev-loc" className="font-black text-slate-700 uppercase text-[10px]">
+              <label htmlFor="ev-loc" className="font-extrabold text-[#1b4d60] uppercase text-[10px]">
                 Location
               </label>
               <input
@@ -2683,11 +2696,11 @@ function TriagePipelineView({
                 value={eventForm.location}
                 onChange={(e) => setEventForm((f) => ({ ...f, location: e.target.value }))}
                 placeholder="Worldwide or City"
-                className="w-full px-3 py-2 rounded-xl border border-slate-300 text-base sm:text-xs font-bold"
+                className="w-full px-3.5 py-2 pogo-search-pill text-base sm:text-xs font-bold focus:outline-none"
               />
             </div>
             <div className="space-y-1">
-              <label htmlFor="ev-raid-sum" className="font-black text-slate-700 uppercase text-[10px]">
+              <label htmlFor="ev-raid-sum" className="font-extrabold text-[#1b4d60] uppercase text-[10px]">
                 Raid / Special Notes
               </label>
               <input
@@ -2696,43 +2709,43 @@ function TriagePipelineView({
                 value={eventForm.raidSummary}
                 onChange={(e) => setEventForm((f) => ({ ...f, raidSummary: e.target.value }))}
                 placeholder="Mega Mewtwo, Wash Rotom, Comfey..."
-                className="w-full px-3 py-2 rounded-xl border border-slate-300 text-base sm:text-xs font-bold"
+                className="w-full px-3.5 py-2 pogo-search-pill text-base sm:text-xs font-bold focus:outline-none"
               />
             </div>
           </div>
 
           <div className="flex flex-wrap gap-4 pt-1">
-            <label className="inline-flex items-center gap-1.5 font-bold text-slate-800 cursor-pointer">
+            <label className="inline-flex items-center gap-1.5 font-bold text-[#123c4d] cursor-pointer">
               <input
                 type="checkbox"
                 checked={eventForm.attended}
                 onChange={(e) => setEventForm((f) => ({ ...f, attended: e.target.checked }))}
-                className="w-4 h-4 accent-teal-600 rounded"
+                className="w-4 h-4 rounded"
               />
               <span>Played</span>
             </label>
-            <label className="inline-flex items-center gap-1.5 font-bold text-slate-800 cursor-pointer">
+            <label className="inline-flex items-center gap-1.5 font-bold text-[#123c4d] cursor-pointer">
               <input
                 type="checkbox"
                 checked={eventForm.hasMighty}
                 onChange={(e) => setEventForm((f) => ({ ...f, hasMighty: e.target.checked }))}
-                className="w-4 h-4 accent-teal-600 rounded"
+                className="w-4 h-4 rounded"
               />
               <span>Has Mighty Spawns</span>
             </label>
           </div>
 
-          <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-200">
+          <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#0d7da8]/15">
             <button
               type="button"
               onClick={() => eventDialogRef.current?.close('cancel')}
-              className="px-4 py-2 rounded-xl font-black bg-slate-100 hover:bg-slate-200 text-slate-700 cursor-pointer"
+              className="pogo-pill px-4 py-2 text-xs uppercase cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-4 py-2 rounded-xl font-black bg-teal-600 hover:bg-teal-700 text-white cursor-pointer"
+              className="pogo-pill-active px-4 py-2 text-xs uppercase cursor-pointer"
             >
               Save Event
             </button>
