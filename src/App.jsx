@@ -5,6 +5,7 @@ import FilterPanel from './components/FilterPanel';
 import SearchStringDisplay from './components/SearchStringDisplay';
 import RegionSelector from './components/RegionSelector';
 import TriagePipelineView from './components/TriagePipelineView';
+import { PogoCategoryIcon } from './components/ui/PogoDesignSystem';
 import useLocalStorage from './hooks/useLocalStorage';
 import { compressIdRanges, parseSearchString, ATTRIBUTES } from './utils/searchUtils';
 import { ensureCopyCommandRegistered } from './utils/copyCommand';
@@ -182,69 +183,65 @@ function App() {
   }, [isFilterModalOpen]);
 
   return (
-    <div className="min-h-[100dvh] pogo-storage-bg text-slate-800 flex flex-col font-sans selection:bg-teal-500/20 selection:text-teal-900">
-      {/* Compact Mobile-First Header */}
-      <header className="pogo-header-gradient text-white z-40 sticky top-0 safe-top-header pb-1.5">
+    <div className="min-h-[100dvh] pogo-pokedex-canvas flex flex-col font-sans">
+      {/* Pokémon GO Pokédex Sky-Cyan Header (Matches Screenshots 1 & 3) */}
+      <header className="pogo-pokedex-header z-40 sticky top-0 safe-top-header pb-2">
         <div className="mwg-header-row max-w-7xl mx-auto flex items-center justify-between gap-2 select-none">
-          {/* App Branding */}
-          <div className="flex items-center gap-2 min-w-0 shrink-0">
-            <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-white/15 p-0.5 flex items-center justify-center border border-white/35 shrink-0" aria-hidden="true">
-              <div className="pokeball-badge">
-                <div className="pokeball-badge-top" />
-                <div className="pokeball-badge-bottom" />
-                <div className="pokeball-badge-band" />
-                <div className="pokeball-badge-center" />
-              </div>
-            </div>
+          {/* Left: POKÉDEX Title + Caught/Selected Counter */}
+          <div className="flex items-center gap-2.5 min-w-0 shrink-0">
+            <span
+              className="w-8 h-8 rounded-full bg-[#0d7da8] text-white flex items-center justify-center shadow-sm border-2 border-white/85 shrink-0"
+              aria-hidden="true"
+            >
+              <PogoCategoryIcon name="pokedex" className="w-[18px] h-[18px]" />
+            </span>
             <div className="min-w-0">
-              <h1 className="text-sm sm:text-lg font-black tracking-wide uppercase text-white leading-tight whitespace-nowrap">
-                PokéSearch
-              </h1>
-              <div className="hidden md:block text-[10px] font-bold text-teal-100 tracking-wider uppercase leading-none">
-                Storage Triage & Pokédex Search Builder
+              <div className="flex items-baseline gap-2.5">
+                <h1 className="font-display text-base sm:text-lg font-extrabold tracking-wider uppercase text-[#0b698e] leading-tight whitespace-nowrap">
+                  POKÉDEX
+                </h1>
+                <span className="hidden sm:inline-block text-xs font-bold text-[#0c749c] tracking-wide whitespace-nowrap">
+                  Selected: {selectedIds.size} / {pokemonData.length}
+                </span>
+              </div>
+              <div className="hidden md:block text-[10px] font-bold text-[#285d72] tracking-wider uppercase leading-none mt-0.5">
+                Pokémon GO Search String &amp; Storage Triage
               </div>
             </div>
           </div>
 
-          {/* Single-Line Segmented Mode Switcher */}
-          <div className="flex items-center shrink-0">
-            <div className="bg-black/25 p-0.5 rounded-full inline-flex items-center gap-0.5 border border-white/25">
-              <button
-                type="button"
-                onClick={() => setViewMode('triage')}
-                className={`mwg-adaptive-slot h-8 px-2.5 sm:px-3.5 rounded-full text-xs font-extrabold tracking-wide transition-colors cursor-pointer inline-flex items-center justify-center gap-1 whitespace-nowrap ${
-                  viewMode === 'triage'
-                    ? 'bg-white text-teal-900 shadow-xs'
-                    : 'text-white/95 hover:bg-white/10'
-                }`}
-              >
-                <span aria-hidden="true">⚡</span>
-                <span className="long">Inventory Triage</span>
-                <span className="short" aria-hidden="true">Triage</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setCustomBarString(null);
-                  setViewMode('grid');
-                }}
-                className={`mwg-adaptive-slot h-8 px-2.5 sm:px-3.5 rounded-full text-xs font-extrabold tracking-wide transition-colors cursor-pointer inline-flex items-center justify-center gap-1 whitespace-nowrap ${
-                  viewMode === 'grid'
-                    ? 'bg-white text-teal-900 shadow-xs'
-                    : 'text-white/95 hover:bg-white/10'
-                }`}
-              >
-                <span aria-hidden="true">📖</span>
-                <span className="long">Pokédex Grid ({selectedIds.size})</span>
-                <span className="short" aria-hidden="true">Dex ({selectedIds.size})</span>
-              </button>
-            </div>
+          {/* Right: Pokémon GO Pill Mode Switcher (Matches Screenshot 2 & 3 Pill Bar) */}
+          <div className="flex items-center gap-1.5 shrink-0">
+            <button
+              type="button"
+              onClick={() => setViewMode('triage')}
+              className={`mwg-adaptive-slot h-8 sm:h-9 px-3 sm:px-4 text-[11px] sm:text-xs uppercase inline-flex items-center justify-center gap-1.5 cursor-pointer ${
+                viewMode === 'triage' ? 'pogo-pill-active' : 'pogo-pill'
+              }`}
+            >
+              <span aria-hidden="true">⚡</span>
+              <span className="long">TRIAGE</span>
+              <span className="short" aria-hidden="true">TRIAGE</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setCustomBarString(null);
+                setViewMode('grid');
+              }}
+              className={`mwg-adaptive-slot h-8 sm:h-9 px-3 sm:px-4 text-[11px] sm:text-xs uppercase inline-flex items-center justify-center gap-1.5 cursor-pointer ${
+                viewMode === 'grid' ? 'pogo-pill-active' : 'pogo-pill'
+              }`}
+            >
+              <span className="long">POKÉMON ({selectedIds.size})</span>
+              <span className="short" aria-hidden="true">DEX ({selectedIds.size})</span>
+            </button>
           </div>
         </div>
 
-        {/* Region Tabs (Only in Pokédex Grid Mode) */}
+        {/* Region Pill Selector (Only in Pokédex Grid Mode) */}
         {viewMode === 'grid' && (
-          <div className="mt-1.5">
+          <div className="mt-2">
             <RegionSelector
               regions={regions}
               selectedIds={selectedIds}
@@ -269,28 +266,31 @@ function App() {
         <main className="flex-1 flex flex-col lg:flex-row max-w-7xl mx-auto w-full relative">
           {isFilterModalOpen && (
             <div
-              className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[50] lg:hidden transition-opacity"
+              className="fixed inset-0 bg-[#08344a]/45 backdrop-blur-xs z-[50] lg:hidden transition-opacity"
               onClick={() => setIsFilterModalOpen(false)}
               aria-hidden="true"
             />
           )}
 
           <aside
+            aria-label="Pokédex Filter By Controls"
             className={`
-              fixed inset-y-0 left-0 z-[60] w-full max-w-sm bg-white border-r border-teal-100 transform transition-transform duration-300 ease-in-out overflow-y-auto shadow-2xl
+              fixed inset-y-0 left-0 z-[60] w-full max-w-sm transform transition-transform duration-300 ease-in-out overflow-y-auto shadow-2xl
               ${isFilterModalOpen ? 'translate-x-0' : '-translate-x-full'}
-              lg:translate-x-0 lg:static lg:w-80 lg:h-[calc(100vh-140px)] lg:overflow-y-auto lg:z-20 lg:shadow-none lg:bg-white/90 lg:backdrop-blur-md
+              lg:translate-x-0 lg:static lg:w-[340px] lg:h-[calc(100dvh-132px)] lg:sticky lg:top-[116px] lg:overflow-y-auto lg:z-20 lg:shadow-none lg:py-4 lg:pl-4
             `}
           >
             <FilterPanel
               filters={filters}
               setFilters={handleSetFilters}
+              pokemonList={pokemonData}
+              selectedCount={selectedIds.size}
               onClose={() => setIsFilterModalOpen(false)}
               handleInvertSelection={handleInvertSelection}
             />
           </aside>
 
-          <div className="flex-1 overflow-x-hidden">
+          <div className="flex-1 min-w-0 overflow-x-hidden">
             <PokemonGrid
               pokemonList={pokemonData}
               selectedIds={selectedIds}
@@ -300,6 +300,8 @@ function App() {
               setSearchQuery={setSearchQuery}
               selectedOnly={selectedOnly}
               setSelectedOnly={setSelectedOnly}
+              filters={filters}
+              setFilters={handleSetFilters}
               onRegionVisible={setActiveRegion}
               onOpenFilters={() => setIsFilterModalOpen(true)}
             />
@@ -307,7 +309,7 @@ function App() {
         </main>
       )}
 
-      {/* Compact Context-Aware Bottom Search Bar Dock */}
+      {/* Frosted Sky-Glass Bottom Search Bar Dock */}
       <SearchStringDisplay
         viewMode={viewMode}
         searchString={activeSearchString}

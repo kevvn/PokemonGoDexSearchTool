@@ -13,7 +13,8 @@ export default defineConfig({
         name: 'Pokemon Search Manager',
         short_name: 'PokeSearch',
         description: 'Manage Pokemon Go Search Strings Offline',
-        theme_color: '#ffffff',
+        theme_color: '#bfeaf6',
+        background_color: '#bfeaf6',
         icons: [
           {
             src: 'pwa-192x192.png',

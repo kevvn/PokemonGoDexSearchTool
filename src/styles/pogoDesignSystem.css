@@ -1,0 +1,479 @@
+/* ============================================================================
+   POKÉMON GO POKÉDEX DESIGN SYSTEM (Foundational Tokens & Primitives)
+   Inspired by the modern Pokémon GO Pokédex Sky-Cyan & Frosted Ice UI
+   ============================================================================ */
+
+:root {
+  color-scheme: light;
+
+  /* Tier 1: Literal Sky & Cerulean Palette */
+  --pogo-sky-50: #f2fbfe;
+  --pogo-sky-100: #dff6fc;
+  --pogo-sky-200: #bfeaf6;
+  --pogo-sky-300: #90dcf2;
+  --pogo-sky-400: #6dc7eb;
+
+  --pogo-cerulean-400: #3bb4e0;
+  --pogo-cerulean-500: #1492c2;
+  --pogo-cerulean-600: #0d7da8;
+  --pogo-cerulean-700: #0b698e;
+  --pogo-cerulean-800: #094f6c;
+  --pogo-cerulean-900: #073b50;
+
+  /* Tier 2: Semantic Typography & Ink (WCAG AA >= 4.5:1 against ice/white) */
+  --pogo-ink-strong: #123c4d;
+  --pogo-ink-primary: #1b4d60;
+  --pogo-ink-secondary: #285d72;
+  --pogo-ink-muted: #396d82;
+
+  /* Tier 3: Surfaces, Borders & Elevation */
+  --pogo-canvas-gradient: linear-gradient(
+    180deg,
+    #c6effa 0%,
+    #a8e5f6 22%,
+    #88d7f0 60%,
+    #6ec8ec 100%
+  );
+  --pogo-glass-surface: rgba(242, 252, 255, 0.88);
+  --pogo-glass-surface-strong: rgba(248, 253, 255, 0.94);
+  --pogo-glass-subtle: rgba(226, 247, 254, 0.72);
+  --pogo-frosted-border: rgba(255, 255, 255, 0.88);
+  --pogo-ui-border: rgba(13, 125, 168, 0.34);
+  --pogo-ring-ink: #34687a;
+
+  /* Brand Accent & Tab Accent */
+  --brand-color: var(--pogo-cerulean-700);
+  --tab-accent: var(--pogo-cerulean-600);
+
+  /* Official Pokémon GO Circular Type Medallion Palette */
+  --pogo-type-normal: #929aa2;
+  --pogo-type-fighting: #d94256;
+  --pogo-type-flying: #8fa9de;
+  --pogo-type-poison: #ab6ac8;
+  --pogo-type-ground: #d97845;
+  --pogo-type-rock: #c5b78c;
+  --pogo-type-bug: #91c12f;
+  --pogo-type-ghost: #5269ad;
+  --pogo-type-steel: #5a8ea2;
+  --pogo-type-fire: #ff9d55;
+  --pogo-type-water: #5090d6;
+  --pogo-type-grass: #63bc5a;
+  --pogo-type-electric: #f4d23c;
+  --pogo-type-psychic: #fa7179;
+  --pogo-type-ice: #73cec0;
+  --pogo-type-dragon: #0b6dc3;
+  --pogo-type-dark: #5a5465;
+  --pogo-type-fairy: #ec8fe6;
+
+  /* Special Category Medallion Colors */
+  --pogo-medallion-neutral: #86898c;
+  --pogo-medallion-legendary: #5b5668;
+  --pogo-medallion-mythical: #ea8ce2;
+  --pogo-medallion-shiny: #e6a817;
+  --pogo-medallion-lucky: #eb8c1e;
+  --pogo-medallion-shadow: #6e48a3;
+}
+
+/* Brand-Consistent Native Form Controls (mwg: brand-consistent-forms) */
+body {
+  accent-color: var(--brand-color);
+}
+
+/* Progressive enhancement fallback when accent-color is unsupported (mwg: brand-consistent-forms) */
+@supports not (accent-color: var(--brand-color)) {
+  input[type="checkbox"],
+  input[type="radio"] {
+    -webkit-appearance: none;
+    appearance: none;
+    inline-size: 1rem;
+    block-size: 1rem;
+    border: 2px solid var(--pogo-cerulean-700);
+    border-radius: 0.25rem;
+    background: #ffffff;
+    display: inline-grid;
+    place-content: center;
+    vertical-align: middle;
+  }
+  input[type="radio"] {
+    border-radius: 50%;
+  }
+  input[type="checkbox"]:checked,
+  input[type="radio"]:checked {
+    background-color: var(--pogo-cerulean-700);
+    border-color: var(--pogo-cerulean-700);
+  }
+  input[type="checkbox"]:checked::before {
+    content: "✓";
+    color: #ffffff;
+    font-size: 0.72rem;
+    font-weight: 800;
+    line-height: 1;
+  }
+}
+
+/* Natural Interaction Feedback & Accessible Focus Rings (mwg: natural-interactions & color) */
+:where(button, [role="button"], [role="tab"], summary) {
+  transition:
+    box-shadow 150ms ease-out,
+    scale 140ms ease-out,
+    background-color 150ms ease-out,
+    border-color 150ms ease-out,
+    color 150ms ease-out;
+}
+
+:where(button:not(:disabled)):active {
+  scale: 0.97;
+}
+
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--pogo-cerulean-800);
+  outline-offset: 2px;
+}
+
+/* ============================================================================
+   1. POKÉDEX SKY-CYAN CANVAS & STICKY FROSTED HEADER
+   ============================================================================ */
+
+.pogo-pokedex-canvas {
+  background: var(--pogo-canvas-gradient);
+  background-attachment: fixed;
+  min-height: 100dvh;
+  color: var(--pogo-ink-strong);
+}
+
+.pogo-pokedex-header {
+  background: linear-gradient(
+    180deg,
+    rgba(196, 239, 250, 0.92) 0%,
+    rgba(182, 234, 248, 0.84) 100%
+  );
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-block-end: 1.5px solid rgba(255, 255, 255, 0.65);
+}
+
+/* ============================================================================
+   2. FROSTED ICE-WHITE CARDS & SUMMARY PANELS (Screenshot 2: UNOVA 156/156)
+   ============================================================================ */
+
+.pogo-summary-card {
+  background: var(--pogo-glass-surface);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-radius: 1.35rem;
+  border: 2px solid var(--pogo-frosted-border);
+  box-shadow:
+    0 6px 20px rgba(9, 88, 120, 0.09),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.pogo-glass-card {
+  background: var(--pogo-glass-surface-strong);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 1.25rem;
+  border: 1.5px solid var(--pogo-frosted-border);
+  box-shadow: 0 4px 14px rgba(9, 88, 120, 0.08);
+}
+
+.pogo-counter-pill {
+  background: var(--pogo-cerulean-600);
+  color: #ffffff;
+  border-radius: 9999px;
+  padding-inline: 1rem;
+  padding-block: 0.2rem;
+  font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.28), 0 2px 6px rgba(9, 88, 120, 0.18);
+}
+
+/* ============================================================================
+   3. POKÉDEX FROSTED ICE-GLASS TILES (Screenshot 2: 0494, 0495, 0496...)
+      Zero layout-shifting property changes on selection (mwg: card)
+   ============================================================================ */
+
+.pogo-dex-tile {
+  position: relative;
+  border-radius: 0.95rem;
+  background: linear-gradient(
+    180deg,
+    rgba(225, 248, 255, 0.68) 0%,
+    rgba(198, 238, 252, 0.54) 100%
+  );
+  border: 2px solid rgba(255, 255, 255, 0.84);
+  box-shadow:
+    0 2px 8px rgba(8, 88, 120, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.78);
+  transition:
+    transform 160ms ease-out,
+    box-shadow 160ms ease-out,
+    border-color 160ms ease-out,
+    background 160ms ease-out;
+}
+
+.pogo-dex-tile:hover {
+  background: linear-gradient(
+    180deg,
+    rgba(244, 253, 255, 0.9) 0%,
+    rgba(218, 246, 255, 0.78) 100%
+  );
+  border-color: #ffffff;
+  box-shadow:
+    0 6px 16px rgba(11, 105, 142, 0.15),
+    inset 0 1px 0 #ffffff;
+}
+
+/* Selected state keeps identical 2px border width & padding so neighbors never jump */
+.pogo-dex-tile-selected {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.96) 0%,
+    rgba(218, 245, 255, 0.92) 100%
+  );
+  border-color: var(--pogo-cerulean-600);
+  box-shadow:
+    0 0 0 2px rgba(255, 255, 255, 0.92),
+    0 6px 18px rgba(13, 125, 168, 0.28);
+}
+
+/* Card hover actions also appear on focus-within and touch devices (mwg: natural-interactions) */
+.pogo-dex-tile .pogo-tile-actions {
+  opacity: 0;
+  transition: opacity 150ms ease-out;
+}
+
+.pogo-dex-tile:hover .pogo-tile-actions,
+.pogo-dex-tile:focus-within .pogo-tile-actions {
+  opacity: 1;
+}
+
+@media (hover: none) {
+  .pogo-dex-tile .pogo-tile-actions {
+    opacity: 0.92;
+  }
+}
+
+/* ============================================================================
+   4. REGIONAL DIAGONAL TECH-GRID BANNER CARDS (Screenshot 3: KANTO, JOHTO...)
+   ============================================================================ */
+
+.pogo-region-banner {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1.35rem;
+  background: linear-gradient(90deg, #ecf9fd 0%, #dff4fb 52%, #1396c8 52.1%, #0d77b6 100%);
+  border: 3px solid rgba(255, 255, 255, 0.92);
+  box-shadow:
+    0 6px 18px rgba(8, 86, 118, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95);
+}
+
+/* Angled cyan geometric slash + subtle pixel square grid on the right half */
+.pogo-region-banner-stage {
+  position: relative;
+  isolation: isolate;
+}
+
+.pogo-region-banner-stage::before {
+  content: "";
+  position: absolute;
+  inset: -12px -12px -12px -28px;
+  z-index: -1;
+  background:
+    /* Subtle digital square grid overlay */
+    repeating-linear-gradient(
+      0deg,
+      rgba(255, 255, 255, 0.09) 0px,
+      rgba(255, 255, 255, 0.09) 1px,
+      transparent 1px,
+      transparent 10px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.09) 0px,
+      rgba(255, 255, 255, 0.09) 1px,
+      transparent 1px,
+      transparent 10px
+    ),
+    /* Diagonal multi-band Pokémon GO slash */
+    linear-gradient(
+      125deg,
+      transparent 0%,
+      transparent 18%,
+      #1cb5e0 18.2%,
+      #1cb5e0 22%,
+      #eefaff 22.2%,
+      #eefaff 24.5%,
+      #159fd1 24.7%,
+      #0e80ba 58%,
+      #0b68a8 100%
+    );
+}
+
+/* ============================================================================
+   5. FLOATING PILL TABS & CAPSULE SEARCH (Screenshots 1, 2, 3)
+   ============================================================================ */
+
+.pogo-pill {
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: var(--pogo-ink-primary);
+  border: 2px solid rgba(255, 255, 255, 0.94);
+  border-radius: 9999px;
+  font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  box-shadow: 0 3px 10px rgba(8, 88, 120, 0.12);
+}
+
+.pogo-pill:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.96);
+  color: var(--pogo-cerulean-700);
+  box-shadow: 0 4px 14px rgba(8, 88, 120, 0.18);
+}
+
+.pogo-pill-active {
+  background: linear-gradient(180deg, #1189b8 0%, #0b749e 100%);
+  color: #ffffff;
+  border: 2px solid rgba(255, 255, 255, 0.92);
+  border-radius: 9999px;
+  font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  box-shadow: 0 4px 14px rgba(9, 108, 146, 0.30);
+}
+
+.pogo-pill-active:hover:not(:disabled) {
+  background: linear-gradient(180deg, #1596c7 0%, #0d7da8 100%);
+  color: #ffffff;
+}
+
+.pogo-search-pill {
+  background: #ffffff;
+  border-radius: 9999px;
+  border: 1.5px solid rgba(13, 125, 168, 0.22);
+  box-shadow: 0 3px 12px rgba(8, 88, 120, 0.10);
+  color: var(--pogo-ink-strong);
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.pogo-search-pill:focus-within {
+  border-color: var(--pogo-cerulean-600);
+  box-shadow: 0 0 0 3px rgba(13, 125, 168, 0.18), 0 4px 14px rgba(8, 88, 120, 0.12);
+}
+
+/* ============================================================================
+   6. SIGNATURE CIRCULAR WHITE RINGED CLOSE / FAB BUTTONS (Screenshots 1, 2, 3)
+      Replaces the old rose/pink close button with the authentic PoGO white
+      double-ring circular button featuring a thin dark-teal inner ring & X
+   ============================================================================ */
+
+.pogo-circle-btn,
+.pogo-close-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background: linear-gradient(180deg, #ffffff 0%, #eef9fd 100%);
+  color: #245364;
+  border: 1.5px solid var(--pogo-ring-ink);
+  box-shadow:
+    0 0 0 3.5px rgba(255, 255, 255, 0.55),
+    0 4px 12px rgba(9, 76, 104, 0.20);
+  cursor: pointer;
+}
+
+.pogo-circle-btn:hover:not(:disabled),
+.pogo-close-btn:hover:not(:disabled) {
+  background: #ffffff;
+  color: var(--pogo-cerulean-800);
+  border-color: var(--pogo-cerulean-700);
+  box-shadow:
+    0 0 0 4px rgba(255, 255, 255, 0.78),
+    0 6px 16px rgba(9, 76, 104, 0.26);
+}
+
+/* ============================================================================
+   7. CIRCULAR FILTER MEDALLIONS & OFFICIAL TYPE PALETTE (Screenshot 1)
+   ============================================================================ */
+
+.pogo-medallion-circle {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  border: 2.5px solid rgba(255, 255, 255, 0.65);
+  color: #ffffff;
+  box-shadow: 0 3px 10px rgba(10, 74, 100, 0.15);
+  transition: transform 150ms ease-out, box-shadow 150ms ease-out, border-color 150ms ease-out;
+}
+
+.pogo-medallion-btn:hover:not(:disabled) .pogo-medallion-circle {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 6px 14px rgba(10, 74, 100, 0.22);
+}
+
+.pogo-medallion-btn[aria-pressed="true"] .pogo-medallion-circle,
+.pogo-medallion-btn[data-state="include"] .pogo-medallion-circle {
+  border-color: #ffffff;
+  box-shadow:
+    0 0 0 3px var(--pogo-cerulean-600),
+    0 6px 16px rgba(9, 105, 142, 0.32);
+}
+
+.pogo-medallion-btn[data-state="exclude"] .pogo-medallion-circle {
+  border-color: #ffffff;
+  box-shadow:
+    0 0 0 3px #e11d48,
+    0 6px 16px rgba(225, 29, 72, 0.30);
+}
+
+/* Authentic Pokémon GO Circular Type Colors */
+.bg-type-normal { background-color: var(--pogo-type-normal); }
+.bg-type-fighting { background-color: var(--pogo-type-fighting); }
+.bg-type-flying { background-color: var(--pogo-type-flying); }
+.bg-type-poison { background-color: var(--pogo-type-poison); }
+.bg-type-ground { background-color: var(--pogo-type-ground); }
+.bg-type-rock { background-color: var(--pogo-type-rock); }
+.bg-type-bug { background-color: var(--pogo-type-bug); }
+.bg-type-ghost { background-color: var(--pogo-type-ghost); }
+.bg-type-steel { background-color: var(--pogo-type-steel); }
+.bg-type-fire { background-color: var(--pogo-type-fire); }
+.bg-type-water { background-color: var(--pogo-type-water); }
+.bg-type-grass { background-color: var(--pogo-type-grass); }
+.bg-type-electric { background-color: var(--pogo-type-electric); color: #1b3a4b; }
+.bg-type-psychic { background-color: var(--pogo-type-psychic); }
+.bg-type-ice { background-color: var(--pogo-type-ice); color: #123c4d; }
+.bg-type-dragon { background-color: var(--pogo-type-dragon); }
+.bg-type-dark { background-color: var(--pogo-type-dark); }
+.bg-type-fairy { background-color: var(--pogo-type-fairy); }
+
+/* Forced Colors Mode Support (mwg: color) */
+@media (forced-colors: active) {
+  .pogo-dex-tile,
+  .pogo-summary-card,
+  .pogo-glass-card,
+  .pogo-region-banner,
+  .pogo-pill,
+  .pogo-search-pill,
+  .pogo-circle-btn,
+  .pogo-close-btn {
+    border: 1px solid CanvasText;
+  }
+
+  .pogo-dex-tile-selected,
+  .pogo-pill-active,
+  .pogo-medallion-btn[aria-pressed="true"] .pogo-medallion-circle {
+    outline: 3px solid Highlight;
+    outline-offset: 2px;
+  }
+
+  :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+    outline: 2px solid CanvasText;
+  }
+}

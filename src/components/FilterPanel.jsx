@@ -1,56 +1,109 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { ATTRIBUTES, TYPES } from '../utils/searchUtils';
+import {
+  PogoTypeIcon,
+  PogoCategoryIcon,
+  PogoMedallionBadge,
+  PogoCloseButton,
+} from './ui/PogoDesignSystem';
+
+const SPECIAL_MEDALLIONS = [
+  { attr: 'legendary', label: 'Legendary', icon: 'legendary', bg: '#5b5668' },
+  { attr: 'mythical', label: 'Mythical', icon: 'mythical', bg: '#ea8ce2' },
+  { attr: 'shiny', label: 'Shiny', icon: 'shiny', bg: '#e5a91a' },
+  { attr: 'lucky', label: 'Lucky', icon: 'lucky', bg: '#eb8c1e' },
+  { attr: 'shadow', label: 'Shadow', icon: 'shadow', bg: '#6e48a3' },
+  { attr: 'traded', label: 'Traded', icon: 'caught', bg: '#86898c' },
+  { attr: 'costume', label: 'Costume', icon: 'seen', bg: '#86898c' },
+  { attr: 'favorite', label: 'Favorite', icon: 'favorite', bg: '#d99b16' },
+];
 
 const ATTRIBUTE_CATEGORIES = [
   {
     name: 'Status & Rarities',
-    icon: '✨',
-    items: ['shiny', 'lucky', 'legendary', 'mythical', 'ultra beasts', 'shadow', 'purified', 'favorite']
+    items: ['shiny', 'lucky', 'legendary', 'mythical', 'ultra beasts', 'shadow', 'purified', 'favorite'],
   },
   {
     name: 'Forms & Battle',
-    icon: '⚡',
-    items: ['mega', 'megaevolve', 'dynamax', 'gigantamax', 'evolve', 'costume']
+    items: ['mega', 'megaevolve', 'dynamax', 'gigantamax', 'evolve', 'costume'],
   },
   {
-    name: 'Origin & Encounters',
-    icon: '📍',
-    items: ['traded', 'hatched', 'raid', 'remoteraid', 'research', 'defender', 'background', 'locationbackground', 'specialbackground', 'profilebackground', 'locationcard']
+    name: 'Origin & BGs',
+    items: [
+      'traded',
+      'hatched',
+      'raid',
+      'remoteraid',
+      'research',
+      'defender',
+      'background',
+      'locationbackground',
+      'specialbackground',
+      'profilebackground',
+      'locationcard',
+    ],
   },
   {
-    name: 'Size & Buddy Levels',
-    icon: '📏',
-    items: ['xxs', 'xxl', 'buddy0', 'buddy1', 'buddy2', 'buddy3', 'buddy4', 'buddy5']
+    name: 'Size & Buddy',
+    items: ['xxs', 'xxl', 'buddy0', 'buddy1', 'buddy2', 'buddy3', 'buddy4', 'buddy5'],
   },
   {
-    name: 'Regional Forms',
-    icon: '🗺️',
-    items: ['alola', 'galar', 'hisui', 'paldea']
-  }
+    name: 'Regional',
+    items: ['alola', 'galar', 'hisui', 'paldea'],
+  },
 ];
 
-function FilterPanel({ filters, setFilters, onClose, handleInvertSelection }) {
+function FilterPanel({
+  filters,
+  setFilters,
+  pokemonList = [],
+  selectedCount = 0,
+  onClose,
+  handleInvertSelection,
+}) {
   const [activeTab, setActiveTab] = useState('Status & Rarities');
 
+  // Compute real species count per Pokémon Type (matches Screenshot 1 counts under each type circle)
+  const typeCounts = useMemo(() => {
+    const counts = {};
+    TYPES.forEach((t) => {
+      counts[t] = 0;
+    });
+    pokemonList.forEach((p) => {
+      p.types.forEach((t) => {
+        if (counts[t] !== undefined) counts[t] += 1;
+      });
+    });
+    return counts;
+  }, [pokemonList]);
+
   const toggleAppraisal = (star) => {
-    setFilters(prev => ({
+    setFilters((prev) => ({
       ...prev,
       appraisal: prev.appraisal.includes(star)
-        ? prev.appraisal.filter(s => s !== star)
-        : [...prev.appraisal, star]
+        ? prev.appraisal.filter((s) => s !== star)
+        : [...prev.appraisal, star],
     }));
   };
 
   const setAttribute = (attr, value) => {
-    setFilters(prev => ({ ...prev, [attr]: value }));
+    setFilters((prev) => ({ ...prev, [attr]: value }));
+  };
+
+  const cycleMedallionAttribute = (attr) => {
+    setFilters((prev) => {
+      const cur = prev[attr];
+      const next = cur === null ? true : cur === true ? false : null;
+      return { ...prev, [attr]: next };
+    });
   };
 
   const toggleType = (type) => {
-    setFilters(prev => ({
+    setFilters((prev) => ({
       ...prev,
       types: prev.types.includes(type)
-        ? prev.types.filter(t => t !== type)
-        : [...prev.types, type]
+        ? prev.types.filter((t) => t !== type)
+        : [...prev.types, type],
     }));
   };
 
@@ -61,19 +114,19 @@ function FilterPanel({ filters, setFilters, onClose, handleInvertSelection }) {
       ageMax: '',
       types: [],
       attributeLogic: 'AND',
-      ...ATTRIBUTES.reduce((acc, attr) => ({ ...acc, [attr]: null }), {})
+      ...ATTRIBUTES.reduce((acc, attr) => ({ ...acc, [attr]: null }), {}),
     });
   };
 
   const applyPreset = (presetName) => {
     resetFilters();
-    
+
     switch (presetName) {
       case 'perfect':
-        setFilters(prev => ({ ...prev, appraisal: ['4*'] }));
+        setFilters((prev) => ({ ...prev, appraisal: ['4*'] }));
         break;
       case 'trash':
-        setFilters(prev => ({
+        setFilters((prev) => ({
           ...prev,
           appraisal: ['0*', '1*', '2*'],
           shiny: false,
@@ -82,35 +135,35 @@ function FilterPanel({ filters, setFilters, onClose, handleInvertSelection }) {
           lucky: false,
           costume: false,
           favorite: false,
-          background: false
+          background: false,
         }));
         break;
       case 'pvp':
-        setFilters(prev => ({
+        setFilters((prev) => ({
           ...prev,
           evolve: true,
           legendary: false,
-          mythical: false
+          mythical: false,
         }));
         break;
       case 'legendary':
-        setFilters(prev => ({
+        setFilters((prev) => ({
           ...prev,
-          legendary: true
+          legendary: true,
         }));
         break;
       case 'trade':
-        setFilters(prev => ({
+        setFilters((prev) => ({
           ...prev,
           traded: false,
           mythical: false,
-          favorite: false
+          favorite: false,
         }));
         break;
       case 'dynamax':
-        setFilters(prev => ({
+        setFilters((prev) => ({
           ...prev,
-          dynamax: true
+          dynamax: true,
         }));
         break;
       default:
@@ -120,257 +173,346 @@ function FilterPanel({ filters, setFilters, onClose, handleInvertSelection }) {
 
   const applyAgePreset = (days) => {
     if (days === 'today') {
-      setFilters(prev => ({ ...prev, ageMin: '0', ageMax: '0' }));
+      setFilters((prev) => ({ ...prev, ageMin: '0', ageMax: '0' }));
     } else if (days === 'yesterday') {
-      setFilters(prev => ({ ...prev, ageMin: '1', ageMax: '1' }));
+      setFilters((prev) => ({ ...prev, ageMin: '1', ageMax: '1' }));
     } else if (days === 'week') {
-      setFilters(prev => ({ ...prev, ageMin: '0', ageMax: '7' }));
+      setFilters((prev) => ({ ...prev, ageMin: '0', ageMax: '7' }));
     } else if (days === 'month') {
-      setFilters(prev => ({ ...prev, ageMin: '0', ageMax: '30' }));
+      setFilters((prev) => ({ ...prev, ageMin: '0', ageMax: '30' }));
     }
   };
 
   return (
-    <div className="bg-white border-b lg:border-b-0 lg:border-r border-teal-200 shadow-2xl relative h-full flex flex-col text-slate-800">
-      
-      {/* Pokémon GO Modal Header */}
-      <div className="flex items-center justify-between p-4 bg-[#edf7f4] border-b border-teal-200 shrink-0">
-        <div className="flex items-center gap-2.5 select-none">
-          <div className="w-8 h-8 rounded-full bg-teal-600 flex items-center justify-center text-white font-bold text-sm shadow-md">
-            ⚙️
-          </div>
+    <div className="pogo-pokedex-canvas lg:rounded-3xl lg:border-2 lg:border-white/85 lg:shadow-pogo-glass relative h-full flex flex-col text-[#123c4d]">
+      {/* Screenshot 1 Top Header: FILTER BY: + Reset + Circular Close */}
+      <div className="flex items-center justify-between px-4 py-3.5 border-b border-white/60 bg-[#c4effa]/90 backdrop-blur-md shrink-0 lg:rounded-t-3xl">
+        <div className="flex items-center gap-2 select-none">
+          <PogoCategoryIcon name="funnel" className="w-4 h-4 text-[#1b4d60]" />
           <div>
-            <h3 className="font-black text-sm text-slate-900 tracking-wider uppercase">
-              Search Filters
+            <h3 className="font-display font-extrabold text-xs sm:text-sm text-[#1b4d60] tracking-wider uppercase leading-none">
+              FILTER BY:
             </h3>
-            <span className="text-[10px] text-[#1b7a69] font-black tracking-wide">
-              Pokémon GO Query Settings
+            <span className="text-[10px] text-[#285d72] font-semibold">
+              Selected: {selectedCount}
             </span>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
           <button
+            type="button"
             onClick={resetFilters}
             aria-label="Reset all search filters"
-            className="text-xs font-black text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 px-3 py-1.5 rounded-full border border-rose-200 transition-colors cursor-pointer"
+            className="compact-inline-chip text-[11px] font-extrabold uppercase tracking-wider text-[#0b698e] bg-white/85 hover:bg-white px-3 py-1 rounded-full border border-white shadow-2xs cursor-pointer"
           >
             Reset
           </button>
-          
-          <button 
+
+          <PogoCloseButton
             onClick={onClose}
-            aria-label="Close filters sheet"
-            className="pogo-close-btn w-8 h-8 rounded-full flex items-center justify-center text-white font-black text-xs cursor-pointer shadow-md"
-          >
-            ✕
-          </button>
+            ariaLabel="Close filters sheet"
+            size="sm"
+            className="lg:hidden"
+          />
         </div>
       </div>
 
-      <div className="p-5 md:p-6 space-y-6 overflow-y-auto flex-1">
-        
-        {/* Quick Invert Selection Action */}
-        <div className="space-y-2">
-          <h4 className="font-black text-slate-600 text-[10px] tracking-widest uppercase border-b border-teal-100 pb-1 flex items-center gap-1.5">
-            <span>🔄</span> Quick Selection Action
-          </h4>
-          <div className="pt-1 select-none">
-            <button
-              onClick={handleInvertSelection}
-              aria-label="Invert current Pokémon selection"
-              className="w-full py-2.5 px-4 rounded-full text-center text-xs font-black uppercase tracking-wider bg-teal-50 hover:bg-teal-100 border border-teal-300 text-teal-800 hover:text-teal-900 transition-all cursor-pointer shadow-sm"
-            >
-              Invert Selection
-            </button>
+      {/* Scrollable Pokédex Medallion & Modifier Sections */}
+      <div className="px-4 py-4 space-y-6 overflow-y-auto flex-1 pb-20 lg:pb-6">
+        {/* Screenshot 1: Special & Status Circular Medallions */}
+        <section className="space-y-2.5">
+          <div className="flex items-baseline justify-between">
+            <h4 className="font-display font-bold text-sm text-[#1b4d60]">
+              Special &amp; Status
+            </h4>
+            <span className="text-[10px] font-semibold text-[#285d72]">
+              Tap: ✓ Require • ✕ Exclude
+            </span>
           </div>
-        </div>
 
-        {/* Player Quick Presets Section */}
-        <div className="space-y-2">
-          <h4 className="font-black text-slate-600 text-[10px] tracking-widest uppercase border-b border-teal-100 pb-1 flex items-center gap-1.5">
-            <span>⚡</span> Player Quick Presets
-          </h4>
-          <div className="grid grid-cols-2 gap-2 pt-1">
-            <button
-              onClick={() => applyPreset('perfect')}
-              aria-label="Apply Perfect 100% IVs Preset"
-              className="py-2.5 px-3 rounded-2xl text-left text-[11px] font-black bg-slate-50 hover:bg-emerald-50 border border-slate-200 hover:border-emerald-300 text-slate-800 hover:text-emerald-800 transition-all cursor-pointer shadow-sm"
-            >
-              💎 4* (100% IV)
-            </button>
-            <button
-              onClick={() => applyPreset('trash')}
-              aria-label="Apply Mass Transfer Trash Preset"
-              className="py-2.5 px-3 rounded-2xl text-left text-[11px] font-black bg-slate-50 hover:bg-rose-50 border border-slate-200 hover:border-rose-300 text-slate-800 hover:text-rose-800 transition-all cursor-pointer shadow-sm"
-            >
-              🗑️ Mass Transfer
-            </button>
-            <button
-              onClick={() => applyPreset('pvp')}
-              aria-label="Apply PVP Evolves Preset"
-              className="py-2.5 px-3 rounded-2xl text-left text-[11px] font-black bg-slate-50 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-300 text-slate-800 hover:text-indigo-800 transition-all cursor-pointer shadow-sm"
-            >
-              ⚔️ PVP Evolves
-            </button>
-            <button
-              onClick={() => applyPreset('legendary')}
-              aria-label="Apply Raid Boss Legendary Flex Preset"
-              className="py-2.5 px-3 rounded-2xl text-left text-[11px] font-black bg-slate-50 hover:bg-amber-50 border border-slate-200 hover:border-amber-300 text-slate-800 hover:text-amber-800 transition-all cursor-pointer shadow-sm"
-            >
-              👑 Raid Legendaries
-            </button>
-            <button
-              onClick={() => applyPreset('trade')}
-              aria-label="Apply Trade Eligible Preset"
-              className="py-2.5 px-3 rounded-2xl text-left text-[11px] font-black bg-slate-50 hover:bg-cyan-50 border border-slate-200 hover:border-cyan-300 text-slate-800 hover:text-cyan-800 transition-all cursor-pointer shadow-sm"
-            >
-              🔄 Trade Eligible
-            </button>
-            <button
-              onClick={() => applyPreset('dynamax')}
-              aria-label="Apply Dynamax Preset"
-              className="py-2.5 px-3 rounded-2xl text-left text-[11px] font-black bg-slate-50 hover:bg-purple-50 border border-slate-200 hover:border-purple-300 text-slate-800 hover:text-purple-800 transition-all cursor-pointer shadow-sm"
-            >
-              ⚡ Dynamax Only
-            </button>
+          <div className="grid grid-cols-4 gap-2">
+            {SPECIAL_MEDALLIONS.map((item) => {
+              const val = filters[item.attr];
+              const triState = val === true ? 'include' : val === false ? 'exclude' : 'off';
+              return (
+                <PogoMedallionBadge
+                  key={item.attr}
+                  label={item.label}
+                  colorStyle={{ backgroundColor: item.bg }}
+                  triState={triState}
+                  onClick={() => cycleMedallionAttribute(item.attr)}
+                  ariaLabel={`${item.label} filter (${
+                    triState === 'include' ? 'required' : triState === 'exclude' ? 'excluded' : 'off'
+                  })`}
+                >
+                  <PogoCategoryIcon name={item.icon} className="w-6 h-6" />
+                </PogoMedallionBadge>
+              );
+            })}
           </div>
-        </div>
+        </section>
 
-        {/* Appraisal Section (Team Leader Appraisal Bar Style) */}
-        <div className="space-y-2.5">
-          <h4 className="font-black text-slate-600 text-[10px] tracking-widest uppercase border-b border-teal-100 pb-1 flex items-center gap-1.5">
-            <span>⭐</span> Appraisal IV Rating
+        {/* Screenshot 1: Pokémon Type Circular Medallions (4-Column Grid with Species Counts) */}
+        <section className="space-y-2.5">
+          <div className="flex items-baseline justify-between">
+            <h4 className="font-display font-bold text-sm text-[#1b4d60]">
+              Pokémon Type
+            </h4>
+            {filters.types.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setFilters((prev) => ({ ...prev, types: [] }))}
+                className="compact-inline-chip text-[10px] font-bold text-[#0b698e] hover:underline cursor-pointer"
+              >
+                Clear ({filters.types.length})
+              </button>
+            )}
+          </div>
+
+          <div className="grid grid-cols-4 gap-y-3 gap-x-1.5">
+            {TYPES.map((type) => {
+              const isSelected = filters.types.includes(type);
+              return (
+                <PogoMedallionBadge
+                  key={type}
+                  label={type}
+                  count={typeCounts[type] || 0}
+                  colorClass={`bg-type-${type}`}
+                  active={isSelected}
+                  onClick={() => toggleType(type)}
+                  ariaLabel={`${type} type filter (${typeCounts[type] || 0} species)`}
+                >
+                  <PogoTypeIcon type={type} className="w-6 h-6" />
+                </PogoMedallionBadge>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* Appraisal IV Rating */}
+        <section className="space-y-2">
+          <h4 className="font-display font-bold text-sm text-[#1b4d60]">
+            Appraisal Rating
           </h4>
-          <div className="grid grid-cols-5 gap-1.5 pt-1 select-none">
-            {['0*', '1*', '2*', '3*', '4*'].map(star => {
+          <div className="grid grid-cols-5 gap-1.5 select-none">
+            {['0*', '1*', '2*', '3*', '4*'].map((star) => {
               const isActive = filters.appraisal.includes(star);
               return (
                 <button
                   key={star}
+                  type="button"
                   onClick={() => toggleAppraisal(star)}
                   aria-pressed={isActive}
                   aria-label={`Appraisal rating ${star}`}
-                  className={`py-2 rounded-2xl text-xs font-black transition-all border cursor-pointer flex flex-col items-center justify-center gap-0.5 ${
-                    isActive
-                      ? 'bg-amber-400 text-slate-950 border-amber-500 shadow-[0_0_10px_rgba(251,191,36,0.6)] font-black scale-105'
-                      : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
+                  className={`py-2 rounded-2xl text-xs font-extrabold flex flex-col items-center justify-center gap-0.5 cursor-pointer ${
+                    isActive ? 'pogo-pill-active' : 'pogo-pill'
                   }`}
                 >
-                  <span className="text-[13px]">{star === '4*' ? '👑' : '★'}</span>
+                  <span className="text-[12px]" aria-hidden="true">
+                    {star === '4*' ? '★' : '☆'}
+                  </span>
                   <span>{star}</span>
                 </button>
               );
             })}
           </div>
-        </div>
+        </section>
 
-        {/* Attributes Segmented Control with Category Tabs */}
-        <div className="space-y-2.5">
-          <div className="flex items-center justify-between gap-2 border-b border-teal-100 pb-1.5">
-            <h4 className="font-black text-slate-600 text-[10px] tracking-widest uppercase flex items-center gap-1.5">
-              <span>🏷️</span> Attributes & Modifiers
+        {/* Player Quick Presets + Invert Selection */}
+        <section className="space-y-2">
+          <div className="flex items-center justify-between">
+            <h4 className="font-display font-bold text-sm text-[#1b4d60]">
+              Quick Presets
+            </h4>
+            <button
+              type="button"
+              onClick={handleInvertSelection}
+              aria-label="Invert current Pokémon selection"
+              className="compact-inline-chip px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-white/85 hover:bg-white text-[#0b698e] border border-white shadow-2xs cursor-pointer"
+            >
+              ⇄ Invert Dex
+            </button>
+          </div>
+
+          <div className="grid grid-cols-2 gap-1.5">
+            {[
+              { id: 'perfect', label: '★ 4* (100% IV)' },
+              { id: 'trash', label: '🧹 0*-2* Transfer' },
+              { id: 'pvp', label: '⚔️ PvP Evolves' },
+              { id: 'legendary', label: '👑 Legendaries' },
+              { id: 'trade', label: '🔄 Trade Eligible' },
+              { id: 'dynamax', label: '⚡ Dynamax' },
+            ].map((p) => (
+              <button
+                key={p.id}
+                type="button"
+                onClick={() => applyPreset(p.id)}
+                className="pogo-glass-card py-2 px-3 text-left text-[11px] font-extrabold text-[#123c4d] hover:bg-white cursor-pointer"
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
+        </section>
+
+        {/* Caught Date / Age */}
+        <section className="pogo-summary-card p-3.5 space-y-2.5">
+          <h4 className="font-display font-bold text-xs uppercase tracking-wider text-[#0c6c91]">
+            Caught Age (Days)
+          </h4>
+
+          <div className="grid grid-cols-4 gap-1.5 select-none">
+            {[
+              { id: 'today', label: 'Today' },
+              { id: 'yesterday', label: '1d' },
+              { id: 'week', label: '0-7d' },
+              { id: 'month', label: '0-30d' },
+            ].map((b) => (
+              <button
+                key={b.id}
+                type="button"
+                onClick={() => applyAgePreset(b.id)}
+                className="compact-inline-chip py-1.5 rounded-full text-[10px] font-extrabold uppercase bg-white hover:bg-[#e6f6fc] text-[#1b4d60] border border-[#0d7da8]/20 cursor-pointer text-center"
+              >
+                {b.label}
+              </button>
+            ))}
+          </div>
+
+          <div className="flex items-center gap-2">
+            <div className="relative flex-1">
+              <span className="absolute left-3 top-2.5 text-[9px] font-extrabold text-[#0b698e] uppercase tracking-wider">
+                MIN
+              </span>
+              <input
+                type="number"
+                placeholder="0"
+                value={filters.ageMin}
+                onChange={(e) => setFilters((prev) => ({ ...prev, ageMin: e.target.value }))}
+                aria-label="Minimum caught age in days"
+                className="w-full pl-11 pr-2 py-2 rounded-full bg-white border border-[#0d7da8]/25 text-xs text-[#123c4d] placeholder-[#396d82]/60 focus:outline-none focus:border-[#0d7da8] font-bold"
+              />
+            </div>
+            <span className="text-[#285d72] font-bold">–</span>
+            <div className="relative flex-1">
+              <span className="absolute left-3 top-2.5 text-[9px] font-extrabold text-[#0b698e] uppercase tracking-wider">
+                MAX
+              </span>
+              <input
+                type="number"
+                placeholder="Any"
+                value={filters.ageMax}
+                onChange={(e) => setFilters((prev) => ({ ...prev, ageMax: e.target.value }))}
+                aria-label="Maximum caught age in days"
+                className="w-full pl-11 pr-2 py-2 rounded-full bg-white border border-[#0d7da8]/25 text-xs text-[#123c4d] placeholder-[#396d82]/60 focus:outline-none focus:border-[#0d7da8] font-bold"
+              />
+            </div>
+          </div>
+        </section>
+
+        {/* All Advanced Modifiers (Tri-State Drawer) */}
+        <section className="pogo-summary-card p-3.5 space-y-2.5">
+          <div className="flex items-center justify-between gap-2">
+            <h4 className="font-display font-bold text-xs uppercase tracking-wider text-[#0c6c91]">
+              All Modifiers
             </h4>
 
-            {/* AND (&) vs OR (,) Combiner Toggle for Positive Attributes */}
-            <div className="inline-flex items-center rounded-full bg-slate-100 p-0.5 border border-slate-200 text-[10px] font-black select-none">
+            <div className="inline-flex items-center rounded-full bg-[#dff3fb] p-0.5 border border-[#0d7da8]/20 text-[10px] font-extrabold select-none">
               <button
                 type="button"
-                onClick={() => setFilters(prev => ({ ...prev, attributeLogic: 'AND' }))}
+                onClick={() => setFilters((prev) => ({ ...prev, attributeLogic: 'AND' }))}
                 aria-pressed={(filters.attributeLogic || 'AND') === 'AND'}
-                className={`px-2 py-0.5 rounded-full transition-colors cursor-pointer ${
+                className={`compact-inline-chip px-2 py-0.5 rounded-full cursor-pointer ${
                   (filters.attributeLogic || 'AND') === 'AND'
-                    ? 'bg-teal-600 text-white shadow-2xs'
-                    : 'text-slate-600 hover:text-slate-900'
+                    ? 'bg-[#0d7da8] text-white'
+                    : 'text-[#1b4d60]'
                 }`}
-                title="Join included attributes with & (AND — must match all)"
               >
                 &amp; AND
               </button>
               <button
                 type="button"
-                onClick={() => setFilters(prev => ({ ...prev, attributeLogic: 'OR' }))}
+                onClick={() => setFilters((prev) => ({ ...prev, attributeLogic: 'OR' }))}
                 aria-pressed={filters.attributeLogic === 'OR'}
-                className={`px-2 py-0.5 rounded-full transition-colors cursor-pointer ${
+                className={`compact-inline-chip px-2 py-0.5 rounded-full cursor-pointer ${
                   filters.attributeLogic === 'OR'
-                    ? 'bg-indigo-600 text-white shadow-2xs'
-                    : 'text-slate-600 hover:text-slate-900'
+                    ? 'bg-[#0d7da8] text-white'
+                    : 'text-[#1b4d60]'
                 }`}
-                title="Join included attributes with , (OR — match any)"
               >
                 , OR
               </button>
             </div>
           </div>
 
-          {/* Category Tabs */}
           <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1 select-none">
-            {ATTRIBUTE_CATEGORIES.map(cat => (
+            {ATTRIBUTE_CATEGORIES.map((cat) => (
               <button
                 key={cat.name}
+                type="button"
                 onClick={() => setActiveTab(cat.name)}
-                className={`px-3 py-1.5 rounded-full text-[10px] font-black uppercase whitespace-nowrap transition-all border cursor-pointer ${
-                  activeTab === cat.name
-                    ? 'bg-teal-600 text-white border-teal-700 shadow-sm'
-                    : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200'
+                className={`compact-inline-chip px-3 py-1 text-[10px] uppercase whitespace-nowrap cursor-pointer ${
+                  activeTab === cat.name ? 'pogo-pill-active' : 'pogo-pill'
                 }`}
               >
-                <span className="mr-1">{cat.icon}</span>
                 {cat.name}
               </button>
             ))}
           </div>
-          
-          <div className="grid grid-cols-1 gap-1.5 pt-1">
-            {ATTRIBUTE_CATEGORIES.find(c => c.name === activeTab)?.items.map(attr => {
+
+          <div className="grid grid-cols-1 gap-1.5">
+            {ATTRIBUTE_CATEGORIES.find((c) => c.name === activeTab)?.items.map((attr) => {
               const currentVal = filters[attr];
-              
+
               return (
-                <div key={attr} className="bg-slate-50 p-2.5 rounded-2xl border border-slate-200 flex items-center justify-between gap-3 shadow-xs">
-                  <span className="capitalize text-xs font-black text-slate-800 truncate" title={attr}>
+                <div
+                  key={attr}
+                  className="bg-white/85 px-3 py-2 rounded-2xl border border-white flex items-center justify-between gap-2 shadow-2xs"
+                >
+                  <span className="capitalize text-xs font-bold text-[#123c4d] truncate" title={attr}>
                     {attr}
                   </span>
-                  
-                  {/* Segmented Tri-State Control */}
-                  <div className="flex rounded-full overflow-hidden border border-slate-300 bg-white text-xs shrink-0 select-none shadow-xs">
+
+                  <div className="flex rounded-full overflow-hidden border border-[#0d7da8]/25 bg-[#eef9fd] text-xs shrink-0 select-none">
                     <button
+                      type="button"
                       onClick={() => setAttribute(attr, currentVal === true ? null : true)}
                       aria-label={`Require ${attr}`}
                       aria-pressed={currentVal === true}
-                      className={`px-3 py-1 font-black transition-all border-r border-slate-200 cursor-pointer ${
-                        currentVal === true 
-                          ? 'bg-emerald-500 text-white shadow-inner font-black' 
-                          : 'text-slate-400 hover:bg-slate-100 hover:text-slate-700'
+                      className={`compact-inline-chip px-2.5 py-0.5 font-black border-r border-[#0d7da8]/15 cursor-pointer ${
+                        currentVal === true
+                          ? 'bg-[#0d7da8] text-white'
+                          : 'text-[#396d82] hover:bg-white'
                       }`}
-                      title={`Require ${attr}`}
                     >
                       ✓
                     </button>
-                    
+
                     <button
+                      type="button"
                       onClick={() => setAttribute(attr, null)}
                       aria-label={`Ignore ${attr} filter`}
                       aria-pressed={currentVal === null}
-                      className={`px-3 py-1 font-bold transition-all border-r border-slate-200 cursor-pointer ${
-                        currentVal === null 
-                          ? 'bg-slate-200 text-slate-800 font-black' 
-                          : 'text-slate-400 hover:bg-slate-100 hover:text-slate-700'
+                      className={`compact-inline-chip px-2.5 py-0.5 font-bold border-r border-[#0d7da8]/15 cursor-pointer ${
+                        currentVal === null
+                          ? 'bg-white text-[#123c4d] font-black'
+                          : 'text-[#396d82] hover:bg-white'
                       }`}
-                      title={`Ignore ${attr} filter`}
                     >
                       —
                     </button>
 
                     <button
+                      type="button"
                       onClick={() => setAttribute(attr, currentVal === false ? null : false)}
                       aria-label={`Exclude ${attr}`}
                       aria-pressed={currentVal === false}
-                      className={`px-3 py-1 font-black transition-all cursor-pointer ${
-                        currentVal === false 
-                          ? 'bg-rose-500 text-white shadow-inner font-black' 
-                          : 'text-slate-400 hover:bg-slate-100 hover:text-slate-700'
+                      className={`compact-inline-chip px-2.5 py-0.5 font-black cursor-pointer ${
+                        currentVal === false
+                          ? 'bg-rose-600 text-white'
+                          : 'text-[#396d82] hover:bg-white'
                       }`}
-                      title={`Exclude ${attr}`}
                     >
                       ✕
                     </button>
@@ -379,100 +521,14 @@ function FilterPanel({ filters, setFilters, onClose, handleInvertSelection }) {
               );
             })}
           </div>
+        </section>
+      </div>
+
+      {/* Screenshot 1 Floating Bottom-Center Circular Close Button (Mobile Drawer) */}
+      <div className="lg:hidden sticky bottom-3 inset-x-0 flex justify-center pointer-events-none pb-1">
+        <div className="pointer-events-auto">
+          <PogoCloseButton onClick={onClose} ariaLabel="Done and close filters" size="lg" />
         </div>
-
-        {/* Age Filter Block */}
-        <div className="space-y-2.5">
-          <h4 className="font-black text-slate-600 text-[10px] tracking-widest uppercase border-b border-teal-100 pb-1 flex items-center gap-1.5">
-            <span>📅</span> Caught Date / Age
-          </h4>
-          
-          <div className="grid grid-cols-4 gap-1.5 pt-1 select-none">
-            <button
-              onClick={() => applyAgePreset('today')}
-              aria-label="Filter caught today"
-              className="py-1.5 rounded-full text-[10px] font-black uppercase bg-slate-100 hover:bg-teal-50 text-slate-700 hover:text-teal-900 border border-slate-200 hover:border-teal-300 cursor-pointer text-center"
-            >
-              Today
-            </button>
-            <button
-              onClick={() => applyAgePreset('yesterday')}
-              aria-label="Filter caught yesterday"
-              className="py-1.5 rounded-full text-[10px] font-black uppercase bg-slate-100 hover:bg-teal-50 text-slate-700 hover:text-teal-900 border border-slate-200 hover:border-teal-300 cursor-pointer text-center"
-            >
-              1d Ago
-            </button>
-            <button
-              onClick={() => applyAgePreset('week')}
-              aria-label="Filter caught in last 7 days"
-              className="py-1.5 rounded-full text-[10px] font-black uppercase bg-slate-100 hover:bg-teal-50 text-slate-700 hover:text-teal-900 border border-slate-200 hover:border-teal-300 cursor-pointer text-center"
-            >
-              Last 7d
-            </button>
-            <button
-              onClick={() => applyAgePreset('month')}
-              aria-label="Filter caught in last 30 days"
-              className="py-1.5 rounded-full text-[10px] font-black uppercase bg-slate-100 hover:bg-teal-50 text-slate-700 hover:text-teal-900 border border-slate-200 hover:border-teal-300 cursor-pointer text-center"
-            >
-              Last 30d
-            </button>
-          </div>
-
-          <div className="flex items-center gap-2 pt-1">
-            <div className="relative flex-1">
-              <span className="absolute left-3 top-2 text-[9px] font-black text-teal-700 uppercase tracking-widest">MIN</span>
-              <input
-                type="number"
-                placeholder="0"
-                value={filters.ageMin}
-                onChange={e => setFilters(prev => ({ ...prev, ageMin: e.target.value }))}
-                aria-label="Minimum caught age in days"
-                className="w-full pl-11 pr-2 py-2 rounded-2xl bg-white border border-slate-300 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-teal-500 font-bold"
-              />
-            </div>
-            <span className="text-slate-400 font-bold">-</span>
-            <div className="relative flex-1">
-              <span className="absolute left-3 top-2 text-[9px] font-black text-teal-700 uppercase tracking-widest">MAX</span>
-              <input
-                type="number"
-                placeholder="Any"
-                value={filters.ageMax}
-                onChange={e => setFilters(prev => ({ ...prev, ageMax: e.target.value }))}
-                aria-label="Maximum caught age in days"
-                className="w-full pl-11 pr-2 py-2 rounded-2xl bg-white border border-slate-300 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-teal-500 font-bold"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Types Filter Block */}
-        <div className="space-y-2.5 pb-4">
-          <h4 className="font-black text-slate-600 text-[10px] tracking-widest uppercase border-b border-teal-100 pb-1 flex items-center gap-1.5">
-            <span>🔥</span> Pokémon Types
-          </h4>
-          <div className="grid grid-cols-3 gap-1.5 pt-1 select-none">
-            {TYPES.map(type => {
-              const isSelected = filters.types.includes(type);
-              
-              return (
-                <button
-                  key={type}
-                  onClick={() => toggleType(type)}
-                  aria-pressed={isSelected}
-                  aria-label={`${type} type filter`}
-                  className={`py-1.5 px-2 rounded-full text-[10px] font-black text-white capitalize transition-all duration-150 hover:scale-105 shadow-sm border border-white/20 cursor-pointer text-center truncate ${
-                    isSelected
-                      ? `bg-type-${type} opacity-100 scale-105 ring-2 ring-slate-800 shadow-md`
-                      : `bg-type-${type} opacity-40 hover:opacity-75`
-                  }`}
-                >
-                  {type}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
       </div>
     </div>
   );
