@@ -25,6 +25,9 @@
   --pogo-ink-primary: #1b4d60;
   --pogo-ink-secondary: #285d72;
   --pogo-ink-muted: #396d82;
+  --pogo-accent-ink: #0b698e;
+  --pogo-tag-bg: #dff4fb;
+  --pogo-tag-border: rgba(13, 125, 168, 0.25);
 
   /* Tier 3: Surfaces, Borders & Elevation */
   --pogo-canvas-gradient: linear-gradient(
@@ -133,6 +136,9 @@ html[data-theme="dark"] {
   --pogo-ink-primary: #cdeefa;
   --pogo-ink-secondary: #9fd8ee;
   --pogo-ink-muted: #7bc0db;
+  --pogo-accent-ink: #7dd3f0;
+  --pogo-tag-bg: rgba(14, 116, 158, 0.28);
+  --pogo-tag-border: rgba(109, 199, 235, 0.35);
 
   --pogo-canvas-gradient: linear-gradient(
     180deg,
@@ -203,6 +209,9 @@ html[data-theme="dark"] {
     --pogo-ink-primary: #cdeefa;
     --pogo-ink-secondary: #9fd8ee;
     --pogo-ink-muted: #7bc0db;
+    --pogo-accent-ink: #7dd3f0;
+    --pogo-tag-bg: rgba(14, 116, 158, 0.28);
+    --pogo-tag-border: rgba(109, 199, 235, 0.35);
 
     --pogo-canvas-gradient: linear-gradient(
       180deg,
@@ -380,10 +389,16 @@ body {
   }
 
   .pogo-summary-card,
-  .pogo-glass-card {
+  .pogo-glass-card:not(.pogo-transfer-card) {
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
     background: var(--pogo-glass-surface-mobile);
+  }
+
+  .pogo-glass-card.pogo-transfer-card {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: var(--pogo-transfer-bg);
   }
 }
 

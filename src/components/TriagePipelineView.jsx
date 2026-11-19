@@ -114,34 +114,33 @@ function SearchRecipeCard({
   }[accent] || 'bg-[#0d7da8] text-white';
 
   return (
-    <div className={`p-3.5 space-y-2 transition-opacity ${accentStyles} ${isDone ? 'opacity-80' : ''}`}>
-      <div className="flex items-start justify-between gap-2">
-        <div className="min-w-0 flex-1 space-y-0.5">
-          <div className="flex flex-wrap items-center gap-1.5">
+    <div
+      className={`min-w-0 flex flex-col justify-between gap-2.5 p-3.5 transition-opacity ${accentStyles} ${
+        isDone ? 'opacity-80' : ''
+      }`}
+    >
+      <div className="space-y-2 min-w-0">
+        {/* Top Meta Row: Badge + Tag on left, Done toggle on right */}
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex flex-wrap items-center gap-1.5 min-w-0">
             {badge && (
-              <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider ${badgeStyles}`}>
+              <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-extrabold uppercase tracking-wider leading-tight ${badgeStyles}`}>
                 {badge}
               </span>
             )}
             {tagSuggestion && (
-              <span className="px-2 py-0.5 rounded-full bg-[#dff4fb] text-[#0b698e] border border-[#0d7da8]/25 font-mono text-[10px] font-bold">
+              <span className="px-2 py-0.5 rounded-full bg-[var(--pogo-tag-bg)] text-[var(--pogo-accent-ink)] border border-[var(--pogo-tag-border)] font-mono text-[11px] font-bold leading-tight">
                 #{tagSuggestion}
               </span>
             )}
           </div>
-          <h4 className="font-display text-[13px] font-extrabold text-[#123c4d] leading-snug">{title}</h4>
-          {subtitle && (
-            <p className="text-[11px] text-[#285d72] font-medium leading-snug">{subtitle}</p>
-          )}
-        </div>
 
-        <div className="flex flex-wrap items-center justify-end gap-1.5 shrink-0">
           <button
             type="button"
             onClick={() => toggleCardDone(cardKey)}
             aria-pressed={isDone}
             aria-label={isDone ? `Mark ${title} as not done` : `Mark ${title} as done`}
-            className={`compact-inline-chip min-h-[40px] sm:min-h-[34px] px-2.5 py-1 rounded-full text-[11px] font-extrabold border cursor-pointer transition-colors ${
+            className={`compact-inline-chip mwg-icon-hit shrink-0 min-h-[30px] px-2.5 py-0.5 rounded-full text-[11px] font-extrabold border cursor-pointer transition-colors ${
               isDone
                 ? 'bg-emerald-600 text-white border-white/85'
                 : 'pogo-pill'
@@ -149,26 +148,57 @@ function SearchRecipeCard({
           >
             {isDone ? '✓ Done' : '○ Done'}
           </button>
+        </div>
 
-          {speciesIds.length > 0 && onSelectSpeciesInGrid && (
-            <button
-              type="button"
-              onClick={() => onSelectSpeciesInGrid(speciesIds)}
-              aria-label={`View ${speciesIds.length} species in Pokédex Grid`}
-              className="compact-inline-chip pogo-pill min-h-[40px] sm:min-h-[34px] px-2.5 py-1 text-[11px] cursor-pointer"
-              title="Open species in Pokédex Grid"
-            >
-              🔍 {speciesIds.length}
-            </button>
+        {/* Full-Width Title & Subtitle (never squeezed by action buttons) */}
+        <div className="space-y-1 min-w-0">
+          <h4 className="font-display text-sm font-extrabold text-[var(--pogo-ink-strong)] leading-snug">
+            {title}
+          </h4>
+          {subtitle && (
+            <p className="text-xs text-[var(--pogo-ink-secondary)] font-medium leading-relaxed">
+              {subtitle}
+            </p>
           )}
+        </div>
 
-          <span className="mwg-copy">
+        {children && <div className="pt-0.5">{children}</div>}
+      </div>
+
+      {/* Bottom Stack: Expandable Query Preview + Full-Width Action Bar */}
+      <div className="space-y-2 min-w-0 pt-0.5">
+        <span id={inputId} data-copy-text={searchString} hidden>
+          {searchString}
+        </span>
+        <button
+          type="button"
+          onClick={() => {
+            setIsExpanded((v) => !v);
+            if (onLoadToBar) onLoadToBar(searchString);
+          }}
+          aria-expanded={isExpanded}
+          aria-label={`Search string preview for ${title}. Tap to ${isExpanded ? 'collapse' : 'expand'} and load into bottom bar.`}
+          className={`w-full min-w-0 flex items-center justify-between gap-2 text-left font-mono text-[11px] font-bold bg-[#073b50] text-[#c6effa] px-3 py-2 border border-[#0d7da8]/45 focus:outline-none focus:ring-2 focus:ring-[#3bb4e0] cursor-pointer select-none min-h-[38px] ${
+            isExpanded ? 'rounded-2xl items-start' : 'rounded-full'
+          }`}
+        >
+          <span className={`min-w-0 flex-1 ${isExpanded ? 'break-all whitespace-normal' : 'truncate'}`}>
+            {searchString}
+          </span>
+          <span className="shrink-0 inline-flex items-center gap-1 text-[10px] text-[#88d7f0] font-sans font-extrabold">
+            <span>{searchString.length}c</span>
+            <span aria-hidden="true">{isExpanded ? '▴' : '▾'}</span>
+          </span>
+        </button>
+
+        <div className="flex items-center gap-2">
+          <span className="mwg-copy flex-1 min-w-0">
             <button
               type="button"
               {...{ command: '--copy', commandfor: inputId }}
               onClick={() => markCardDone(cardKey)}
               aria-label={`${isTransfer ? 'Copy transfer search string' : 'Copy search string'} for ${title}`}
-              className={`mwg-copy-btn compact-inline-chip min-h-[40px] sm:min-h-[34px] px-3.5 py-1 text-[11px] font-extrabold uppercase rounded-full border shadow-2xs ${
+              className={`mwg-copy-btn w-full min-h-[42px] sm:min-h-[36px] px-4 py-1.5 text-xs font-extrabold uppercase rounded-full border shadow-2xs ${
                 isTransfer
                   ? 'bg-rose-600 hover:bg-rose-700 text-white border-white/85'
                   : 'pogo-pill-active'
@@ -180,28 +210,21 @@ function SearchRecipeCard({
             </button>
             <span className="mwg-copy-tip" role="status" />
           </span>
+
+          {speciesIds.length > 0 && onSelectSpeciesInGrid && (
+            <button
+              type="button"
+              onClick={() => onSelectSpeciesInGrid(speciesIds)}
+              aria-label={`View ${speciesIds.length} species in Pokédex Grid`}
+              className="compact-inline-chip pogo-pill shrink-0 min-h-[42px] sm:min-h-[36px] px-3 py-1.5 text-xs font-extrabold cursor-pointer inline-flex items-center gap-1"
+              title="Open species in Pokédex Grid"
+            >
+              <span aria-hidden="true">🔍</span>
+              <span>{speciesIds.length}</span>
+            </button>
+          )}
         </div>
       </div>
-
-      {children && <div>{children}</div>}
-
-      <span id={inputId} data-copy-text={searchString} hidden>
-        {searchString}
-      </span>
-      <button
-        type="button"
-        onClick={() => {
-          setIsExpanded((v) => !v);
-          if (onLoadToBar) onLoadToBar(searchString);
-        }}
-        aria-expanded={isExpanded}
-        aria-label={`Search string preview for ${title}. Tap to ${isExpanded ? 'collapse' : 'expand'} and load into bottom bar.`}
-        className={`w-full text-left font-mono text-[11px] font-bold bg-[#073b50] text-[#c6effa] px-3 py-2 border border-[#0d7da8]/45 focus:outline-none focus:ring-2 focus:ring-[#3bb4e0] cursor-pointer select-none min-h-[40px] sm:min-h-[34px] ${
-          isExpanded ? 'rounded-2xl break-all whitespace-normal' : 'rounded-full truncate'
-        }`}
-      >
-        {searchString}
-      </button>
     </div>
   );
 }
@@ -223,7 +246,7 @@ function MajorEventCard({
 
   return (
     <div
-      className={`pogo-glass-card p-3.5 space-y-2.5 transition-opacity ${
+      className={`min-w-0 pogo-glass-card p-3.5 space-y-2.5 transition-opacity ${
         ev.attended ? '' : 'opacity-75'
       }`}
     >
@@ -232,7 +255,7 @@ function MajorEventCard({
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-1.5">
             <span
-              className={`px-2.5 py-0.5 rounded-full text-[9px] font-extrabold uppercase tracking-wider ${
+              className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider ${
                 ev.scope === 'in-person'
                   ? 'bg-[#8d52b5] text-white'
                   : ev.scope === 'global'
@@ -245,22 +268,22 @@ function MajorEventCard({
             <span className="px-2 py-0.5 rounded-full bg-[#073b50] text-[#bfeaf6] font-mono text-[10px] font-bold">
               {built.ageCalc.ageToken}
             </span>
-            <span className="text-[10px] font-bold text-[#285d72]">
+            <span className="text-[11px] font-bold text-[var(--pogo-ink-secondary)]">
               {ev.start}{ev.end !== ev.start ? ` → ${ev.end}` : ''}
             </span>
           </div>
 
-          <div className="flex flex-wrap items-center gap-1.5 mt-0.5">
-            <h4 className="font-display text-[13px] font-extrabold text-[#123c4d] leading-snug">{ev.name}</h4>
-            <span className="px-2 py-0.5 rounded-full bg-[#dff4fb] text-[#0b698e] border border-[#0d7da8]/25 font-mono text-[10px] font-bold">
+          <div className="flex flex-wrap items-center gap-1.5 mt-1">
+            <h4 className="font-display text-sm font-extrabold text-[var(--pogo-ink-strong)] leading-snug">{ev.name}</h4>
+            <span className="px-2 py-0.5 rounded-full bg-[var(--pogo-tag-bg)] text-[var(--pogo-accent-ink)] border border-[var(--pogo-tag-border)] font-mono text-[11px] font-bold">
               #{ev.tag}
             </span>
           </div>
-          <p className="text-[11px] text-[#285d72] font-semibold">{ev.location}</p>
+          <p className="text-xs text-[var(--pogo-ink-secondary)] font-semibold">{ev.location}</p>
         </div>
 
         <div className="flex items-center gap-1.5 shrink-0">
-          <label className="compact-inline-chip inline-flex items-center gap-1 text-[10px] font-extrabold text-[#1b4d60] bg-white/90 px-2.5 py-1 rounded-full border border-white shadow-2xs cursor-pointer">
+          <label className="compact-inline-chip inline-flex items-center gap-1 text-[11px] font-extrabold text-[var(--pogo-ink-primary)] bg-[var(--pogo-pill-bg)] px-2.5 py-1 rounded-full border border-[var(--pogo-pill-border)] shadow-2xs cursor-pointer">
             <input
               type="checkbox"
               checked={ev.attended}
@@ -1207,7 +1230,7 @@ function TriagePipelineView({
     <TriageSessionContext.Provider value={sessionContextValue}>
     <div className="max-w-7xl mx-auto w-full pb-24">
       {/* Sticky Single-Row Pokémon GO Pill Tablist */}
-      <div className="sticky top-[var(--app-header-height,52px)] z-30 bg-[#bfeaf6]/88 backdrop-blur-md border-b border-white/65">
+      <div className="sticky top-[var(--app-header-height,52px)] z-30 pogo-pokedex-header">
         <div className="max-w-7xl mx-auto px-2 sm:px-4">
           {/* Single-Row Horizontally Scrolling Pill Tablist (mwg: tabs) */}
           <div
@@ -1260,16 +1283,16 @@ function TriagePipelineView({
           <div className="pt-3 space-y-3 mwg-accordion mwg-card-container">
             {/* Compact Dismissible "How Triage Works" Micro-Banner */}
             {!guideDismissed && (
-              <div className="pogo-glass-card px-3 py-2 flex items-center justify-between gap-2 text-[11px] text-[#123c4d]">
+              <div className="pogo-glass-card px-3 py-2 flex items-center justify-between gap-2 text-xs text-[var(--pogo-ink-strong)]">
                 <p className="font-semibold leading-snug">
-                  <span className="font-extrabold text-[#0b698e]">How Triage Works: </span>
+                  <span className="font-extrabold text-[var(--pogo-accent-ink)]">How Triage Works: </span>
                   Copy phases 1→6 in order, tag matches in Pokémon GO, then safely mass-transfer in Phase 6.
                 </p>
                 <button
                   type="button"
                   onClick={dismissGuide}
                   aria-label="Dismiss how triage works banner"
-                  className="compact-inline-chip mwg-icon-hit w-7 h-7 rounded-full bg-white/80 hover:bg-white text-[#123c4d] border border-[#0d7da8]/25 flex items-center justify-center text-xs font-extrabold shrink-0 cursor-pointer"
+                  className="compact-inline-chip mwg-icon-hit w-7 h-7 rounded-full bg-[var(--pogo-pill-bg)] hover:bg-[var(--pogo-pill-hover-bg)] text-[var(--pogo-ink-strong)] border border-[var(--pogo-ui-border)] flex items-center justify-center text-xs font-extrabold shrink-0 cursor-pointer"
                 >
                   ✕
                 </button>
@@ -1290,7 +1313,7 @@ function TriagePipelineView({
                   <span>{untaggedOnly ? '✓ Untagged only (!#)' : 'Untagged only (!#): Off'}</span>
                 </button>
 
-                <span className="text-[11px] font-bold text-[#1b4d60] truncate">
+                <span className="text-[11px] font-bold text-[var(--pogo-ink-primary)] truncate">
                   {bufferLabel} • Caps {cdShinyKeepCap}/{globalBgKeepCap}/{costumeKeepCap}
                 </span>
 
@@ -1355,7 +1378,7 @@ function TriagePipelineView({
 
             {/* Phase 1: Trophies */}
             <details open className="pogo-summary-card overflow-hidden">
-              <summary className="px-4 py-3 text-xs sm:text-sm font-display font-extrabold text-[#123c4d] select-none">
+              <summary className="px-4 py-3 text-xs sm:text-sm font-display font-extrabold text-[var(--pogo-ink-strong)] select-none">
                 <span className="flex-1 flex items-center justify-between gap-2">
                   <span>1. Hard Trophies &amp; 0% Nundos</span>
                   <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-amber-400 text-[#123c4d]">
@@ -1387,7 +1410,7 @@ function TriagePipelineView({
 
             {/* Phase 2: High-Demand Tradeables */}
             <details className="pogo-summary-card overflow-hidden">
-              <summary className="px-4 py-3 text-xs sm:text-sm font-display font-extrabold text-[#123c4d] select-none">
+              <summary className="px-4 py-3 text-xs sm:text-sm font-display font-extrabold text-[var(--pogo-ink-strong)] select-none">
                 <span className="flex-1 flex items-center justify-between gap-2">
                   <span>2. High-Demand Tradeables (BGs, Regionals, Rotom, Shinies)</span>
                   <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-[#8d52b5] text-white">
@@ -1458,7 +1481,7 @@ function TriagePipelineView({
 
             {/* Phase 3: Capped Trade Stock vs Excess Purge */}
             <details className="pogo-summary-card overflow-hidden">
-              <summary className="px-4 py-3 text-xs sm:text-sm font-display font-extrabold text-[#123c4d] select-none">
+              <summary className="px-4 py-3 text-xs sm:text-sm font-display font-extrabold text-[var(--pogo-ink-strong)] select-none">
                 <span className="flex-1 flex items-center justify-between gap-2">
                   <span>3. Capped Trade Stock vs. Excess Clutter</span>
                   <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-[#3b6fd4] text-white">
@@ -1549,7 +1572,7 @@ function TriagePipelineView({
 
             {/* Phase 4: Mirror Rerolls */}
             <details className="pogo-summary-card overflow-hidden">
-              <summary className="px-4 py-3 text-xs sm:text-sm font-display font-extrabold text-[#123c4d] select-none">
+              <summary className="px-4 py-3 text-xs sm:text-sm font-display font-extrabold text-[var(--pogo-ink-strong)] select-none">
                 <span className="flex-1 flex items-center justify-between gap-2">
                   <span>4. Mirror &amp; Special Trade Rerolls</span>
                   <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-[#0d7da8] text-white">
@@ -1583,7 +1606,7 @@ function TriagePipelineView({
 
             {/* Phase 5: PvP & PvE Meta */}
             <details className="pogo-summary-card overflow-hidden">
-              <summary className="px-4 py-3 text-xs sm:text-sm font-display font-extrabold text-[#123c4d] select-none">
+              <summary className="px-4 py-3 text-xs sm:text-sm font-display font-extrabold text-[var(--pogo-ink-strong)] select-none">
                 <span className="flex-1 flex items-center justify-between gap-2">
                   <span>5. PvPoke Top 100 (GL/UL/ML) &amp; DialgaDex Raiders</span>
                   <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-[#2b9e66] text-white">
@@ -1641,7 +1664,7 @@ function TriagePipelineView({
 
             {/* Phase 6: Safe Mass Transfer */}
             <details className="pogo-summary-card overflow-hidden">
-              <summary className="px-4 py-3 text-xs sm:text-sm font-display font-extrabold text-[#123c4d] select-none">
+              <summary className="px-4 py-3 text-xs sm:text-sm font-display font-extrabold text-[var(--pogo-ink-strong)] select-none">
                 <span className="flex-1 flex items-center justify-between gap-2">
                   <span>6. Safe Mass Transfer (Zero Meta / Regional Conflict)</span>
                   <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-rose-600 text-white">
@@ -1698,7 +1721,7 @@ function TriagePipelineView({
 
             {/* Phase 7: Interactive OR / AND Rule Combiner */}
             <details className="pogo-summary-card overflow-hidden">
-              <summary className="px-4 py-3 text-xs sm:text-sm font-display font-extrabold text-[#123c4d] select-none">
+              <summary className="px-4 py-3 text-xs sm:text-sm font-display font-extrabold text-[var(--pogo-ink-strong)] select-none">
                 <span className="flex-1 flex items-center justify-between gap-2">
                   <span>🔗 OR / AND Rule Combiner</span>
                   <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-[#0d7da8] text-white">
@@ -1918,7 +1941,7 @@ function TriagePipelineView({
             {/* Collapsible Custom Date Calculator, Trips & JSON Backup */}
             <div className="mwg-accordion space-y-2.5 pt-1">
               <details className="pogo-summary-card overflow-hidden">
-                <summary className="px-4 py-3 text-xs sm:text-sm font-display font-extrabold text-[#123c4d] select-none">
+                <summary className="px-4 py-3 text-xs sm:text-sm font-display font-extrabold text-[var(--pogo-ink-strong)] select-none">
                   <span>🧮 Custom Date Range → ageX-Y Calculator &amp; JSON Backup</span>
                 </summary>
                 <div className="p-3.5 border-t border-[#0d7da8]/12 space-y-3">
@@ -2025,7 +2048,7 @@ function TriagePipelineView({
               </details>
 
               <details className="pogo-summary-card overflow-hidden">
-                <summary className="px-4 py-3 text-xs sm:text-sm font-display font-extrabold text-[#123c4d] select-none">
+                <summary className="px-4 py-3 text-xs sm:text-sm font-display font-extrabold text-[var(--pogo-ink-strong)] select-none">
                   <span>✈️ Personal Travel Trips ({TRAVEL_TRIPS.length})</span>
                 </summary>
                 <div className="p-3 border-t border-[#0d7da8]/12 mwg-card-grid mwg-card-grid-3">
