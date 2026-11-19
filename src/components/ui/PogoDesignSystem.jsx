@@ -358,7 +358,7 @@ export function PogoMedallionBadge({
       </span>
 
       {count !== undefined && count !== null && (
-        <span className="text-[10px] sm:text-[11px] font-semibold text-[#2d6980] leading-none -mt-0.5">
+        <span className="text-[11px] font-semibold text-[#2d6980] leading-none -mt-0.5">
           {count}
         </span>
       )}
@@ -413,7 +413,7 @@ export function PogoSummaryCard({ title, pillText, stats = [], rightAction = nul
                 <div className="font-display text-base sm:text-xl font-bold text-[#0c6c91] leading-tight">
                   {st.value}
                 </div>
-                <div className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-[#245669] truncate mt-0.5">
+                <div className="text-[11px] font-bold uppercase tracking-wider text-[#245669] truncate mt-0.5">
                   {st.label}
                 </div>
               </Wrapper>
@@ -519,7 +519,7 @@ export function PogoRegionBanner({
             <button
               type="button"
               onClick={onSelectAll}
-              className="compact-inline-chip px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider bg-[#0d7da8] hover:bg-[#0b698e] text-white shadow-2xs cursor-pointer"
+              className="compact-inline-chip px-2.5 py-1 rounded-full text-[11px] font-extrabold uppercase tracking-wider bg-[#0d7da8] hover:bg-[#0b698e] text-white shadow-2xs cursor-pointer"
             >
               Select All
             </button>
@@ -528,7 +528,7 @@ export function PogoRegionBanner({
             <button
               type="button"
               onClick={onDeselectAll}
-              className="compact-inline-chip px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider bg-white/90 hover:bg-rose-50 text-[#1b4d60] hover:text-rose-700 border border-[#0d7da8]/25 cursor-pointer"
+              className="compact-inline-chip px-2.5 py-1 rounded-full text-[11px] font-extrabold uppercase tracking-wider bg-white/90 hover:bg-rose-50 text-[#1b4d60] hover:text-rose-700 border border-[#0d7da8]/25 cursor-pointer"
             >
               Clear
             </button>

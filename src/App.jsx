@@ -38,6 +38,23 @@ function App() {
   const [selectedOnly, setSelectedOnly] = useState(false);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [activeRegion, setActiveRegion] = useState('');
+  const [theme, setTheme] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = window.localStorage.getItem('pogo_theme');
+      if (saved === 'dark' || saved === 'light') return saved;
+      if (window.matchMedia?.('(prefers-color-scheme: dark)').matches) return 'dark';
+    }
+    return 'light';
+  });
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    try {
+      window.localStorage.setItem('pogo_theme', theme);
+    } catch {
+      // Ignore storage quota / private mode errors
+    }
+  }, [theme]);
 
   useEffect(() => {
     ensureCopyCommandRegistered();
@@ -145,6 +162,17 @@ function App() {
 
   const activeSearchString = customBarString !== null ? customBarString : gridSearchString;
 
+  const activeFilterCount = useMemo(() => {
+    let count = 0;
+    count += filters.appraisal.length;
+    count += filters.types.length;
+    if (filters.ageMin !== '' || filters.ageMax !== '') count += 1;
+    ATTRIBUTES.forEach((attr) => {
+      if (filters[attr] === true || filters[attr] === false) count += 1;
+    });
+    return count;
+  }, [filters]);
+
   const regions = useMemo(() => {
     const uniqueRegions = new Set();
     pokemonData.forEach(p => uniqueRegions.add(p.region));
@@ -200,9 +228,11 @@ function App() {
                 <h1 className="font-display text-base sm:text-lg font-extrabold tracking-wider uppercase text-[#0b698e] leading-tight whitespace-nowrap">
                   POKÉDEX
                 </h1>
-                <span className="hidden sm:inline-block text-xs font-bold text-[#0c749c] tracking-wide whitespace-nowrap">
-                  Selected: {selectedIds.size} / {pokemonData.length}
-                </span>
+                {viewMode === 'grid' && (
+                  <span className="hidden sm:inline-block text-xs font-bold text-[#0c749c] tracking-wide whitespace-nowrap">
+                    Selected: {selectedIds.size} / {pokemonData.length}
+                  </span>
+                )}
               </div>
               <div className="hidden md:block text-[10px] font-bold text-[#285d72] tracking-wider uppercase leading-none mt-0.5">
                 Pokémon GO Search String &amp; Storage Triage
@@ -235,6 +265,15 @@ function App() {
             >
               <span className="long">POKÉMON ({selectedIds.size})</span>
               <span className="short" aria-hidden="true">DEX ({selectedIds.size})</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'))}
+              aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+              title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+              className="pogo-pill w-8 h-8 sm:w-9 sm:h-9 inline-flex items-center justify-center text-sm cursor-pointer shrink-0"
+            >
+              <span aria-hidden="true">{theme === 'dark' ? '☀️' : '🌙'}</span>
             </button>
           </div>
         </div>
@@ -275,9 +314,9 @@ function App() {
           <aside
             aria-label="Pokédex Filter By Controls"
             className={`
-              fixed inset-y-0 left-0 z-[60] w-full max-w-sm transform transition-transform duration-300 ease-in-out overflow-y-auto shadow-2xl
-              ${isFilterModalOpen ? 'translate-x-0' : '-translate-x-full'}
-              lg:translate-x-0 lg:static lg:w-[340px] lg:h-[calc(100dvh-132px)] lg:sticky lg:top-[116px] lg:overflow-y-auto lg:z-20 lg:shadow-none lg:py-4 lg:pl-4
+              fixed inset-x-0 bottom-0 z-[60] w-full max-h-[85dvh] rounded-t-3xl flex flex-col overflow-hidden transform transition-transform duration-300 ease-in-out shadow-2xl
+              ${isFilterModalOpen ? 'translate-y-0' : 'translate-y-full'}
+              lg:translate-y-0 lg:static lg:w-[340px] lg:max-h-none lg:h-[calc(100dvh-132px)] lg:sticky lg:top-[116px] lg:rounded-none lg:overflow-y-auto lg:z-20 lg:shadow-none lg:py-4 lg:pl-4
             `}
           >
             <FilterPanel
@@ -314,6 +353,7 @@ function App() {
         viewMode={viewMode}
         searchString={activeSearchString}
         selectedCount={selectedIds.size}
+        activeFilterCount={activeFilterCount}
         onClearSelection={handleClearSelection}
         onSearchUpdate={handleSearchUpdate}
         onOpenFilters={() => {

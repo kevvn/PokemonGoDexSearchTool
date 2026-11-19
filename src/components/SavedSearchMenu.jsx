@@ -42,7 +42,7 @@ function SavedSearchMenu({ currentSearch, onSelect, onClose }) {
 
   const renderedList = useMemo(
     () => (
-      <div className="max-h-60 overflow-y-auto space-y-2 pr-1 no-scrollbar">
+      <div className="flex-1 min-h-0 max-h-60 overflow-y-auto space-y-2 pr-1 no-scrollbar">
         {savedSearches.length === 0 ? (
           <div className="text-center py-7 text-[#285d72]">
             <div className="text-3xl mb-2 select-none">★</div>
@@ -57,10 +57,13 @@ function SavedSearchMenu({ currentSearch, onSelect, onClose }) {
           savedSearches.map((search) => (
             <div
               key={search.id}
-              onClick={() => onSelect(search.value)}
-              className="group flex items-center justify-between p-3 bg-white/90 hover:bg-white rounded-2xl cursor-pointer transition-all duration-150 border border-white hover:border-[#0d7da8]/50 shadow-2xs"
+              className="group flex items-center justify-between gap-2 p-1.5 pl-3 bg-white/90 hover:bg-white rounded-2xl transition-all duration-150 border border-white hover:border-[#0d7da8]/50 shadow-2xs"
             >
-              <div className="flex-1 min-w-0 mr-3">
+              <button
+                type="button"
+                onClick={() => onSelect(search.value)}
+                className="flex-1 min-w-0 py-1.5 text-left cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0d7da8] rounded-xl"
+              >
                 <div
                   className="font-display font-extrabold text-xs text-[#123c4d] truncate group-hover:text-[#0b698e] uppercase tracking-wide"
                   title={search.label}
@@ -68,16 +71,16 @@ function SavedSearchMenu({ currentSearch, onSelect, onClose }) {
                   {search.label}
                 </div>
                 <div
-                  className="text-[10px] text-[#0c749c] truncate font-mono mt-0.5 font-bold"
+                  className="text-[11px] text-[#0c749c] truncate font-mono mt-0.5 font-bold"
                   title={search.value}
                 >
                   {search.value}
                 </div>
-              </div>
+              </button>
               <button
                 type="button"
                 onClick={(e) => handleDelete(search.id, e)}
-                className="compact-inline-chip text-[#396d82] hover:text-rose-600 p-1.5 rounded-full hover:bg-rose-50 transition-colors cursor-pointer"
+                className="compact-inline-chip shrink-0 text-[#396d82] hover:text-rose-600 p-2 rounded-full hover:bg-rose-50 transition-colors cursor-pointer"
                 title="Delete Saved Search"
                 aria-label={`Delete saved search ${search.label}`}
               >
@@ -114,13 +117,18 @@ function SavedSearchMenu({ currentSearch, onSelect, onClose }) {
         aria-hidden="true"
       />
 
-      {/* Frosted Ice-White Popover Card */}
+      {/* Frosted Ice-White Bottom Sheet (Mobile) / Popover Card (Desktop) */}
       <div
         ref={menuRef}
-        className="fixed bottom-[88px] left-0 right-0 mx-4 sm:mx-0 sm:absolute sm:bottom-full sm:right-0 sm:left-auto sm:mb-3 sm:w-96 pogo-summary-card p-4 sm:p-5 z-50 shadow-2xl text-[#123c4d]"
+        className="fixed inset-x-0 bottom-0 rounded-t-3xl rounded-b-none max-h-[75dvh] flex flex-col sm:inset-auto sm:absolute sm:bottom-full sm:right-0 sm:left-auto sm:mb-3 sm:w-96 sm:rounded-3xl sm:max-h-none pogo-summary-card px-4 pt-2 pb-[calc(1rem+env(safe-area-inset-bottom,0px))] sm:p-5 z-50 shadow-2xl text-[#123c4d]"
       >
+        {/* Mobile Drag-Handle Pill */}
+        <div className="sm:hidden flex justify-center pb-2 shrink-0" aria-hidden="true">
+          <div className="w-10 h-1.5 rounded-full bg-[#0d7da8]/30" />
+        </div>
+
         {/* Header */}
-        <div className="flex justify-between items-center mb-3.5 pb-2.5 border-b border-[#0d7da8]/15">
+        <div className="flex justify-between items-center mb-3.5 pb-2.5 border-b border-[#0d7da8]/15 shrink-0">
           <h3 className="font-display font-extrabold text-[#0b698e] text-sm flex items-center gap-2 uppercase tracking-wider">
             <span className="text-amber-500" aria-hidden="true">★</span> Saved Searches
           </h3>
@@ -128,13 +136,13 @@ function SavedSearchMenu({ currentSearch, onSelect, onClose }) {
         </div>
 
         {/* New Saved Input Form */}
-        <div className="flex gap-2 mb-3.5">
+        <div className="flex gap-2 mb-3.5 shrink-0">
           <input
             type="text"
             value={newLabel}
             onChange={(e) => setNewLabel(e.target.value)}
             placeholder="Label (e.g. 'PvP Great League')"
-            className="flex-1 px-4 py-2 pogo-search-pill text-xs text-[#123c4d] placeholder-[#396d82]/70 focus:outline-none font-bold"
+            className="flex-1 px-4 py-2 pogo-search-pill text-base sm:text-xs text-[#123c4d] placeholder-[#396d82]/70 focus:outline-none font-bold"
             onKeyDown={(e) => e.key === 'Enter' && handleSave()}
           />
           <button

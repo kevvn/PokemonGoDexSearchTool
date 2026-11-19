@@ -1,6 +1,6 @@
 import React, { useMemo, useEffect, useRef, useCallback } from 'react';
 
-function RegionSelector({ regions, selectedIds, pokemonList, activeRegion, handleRegionSelection }) {
+function RegionSelector({ regions, selectedIds, pokemonList, activeRegion }) {
   const scrollContainerRef = useRef(null);
 
   // Auto-scroll the region selector to keep active region in view
@@ -54,13 +54,6 @@ function RegionSelector({ regions, selectedIds, pokemonList, activeRegion, handl
     scrollContainerRef.current?.scrollBy({ left: 240, behavior: 'smooth' });
   }, []);
 
-  const onSelectAllToggle = (region, shouldSelect) => {
-    if (pokemonList && handleRegionSelection) {
-      const regionPokemonIds = pokemonList.filter((p) => p.region === region).map((p) => p.id);
-      handleRegionSelection(regionPokemonIds, shouldSelect);
-    }
-  };
-
   return (
     <nav aria-label="Region quick navigation" className="relative group">
       {/* Desktop Scroll Left Circular Button */}
@@ -94,20 +87,20 @@ function RegionSelector({ regions, selectedIds, pokemonList, activeRegion, handl
           const isActive = region === activeRegion;
 
           return (
-            <div key={region} data-region={region} className="flex flex-col items-center shrink-0">
+            <div key={region} data-region={region} className="shrink-0">
               <button
                 type="button"
                 onClick={() => scrollToRegion(region)}
                 aria-current={isActive ? 'true' : undefined}
                 aria-label={`${region} region: ${stats.selected} of ${stats.total} species selected`}
-                className={`flex items-center gap-2 px-3.5 py-1.5 text-xs uppercase cursor-pointer ${
+                className={`flex items-center gap-2 px-3.5 py-1.5 min-h-[38px] text-xs uppercase cursor-pointer ${
                   isActive ? 'pogo-pill-active' : 'pogo-pill'
                 }`}
               >
                 <span className="font-extrabold tracking-wider">{region}</span>
 
                 <span
-                  className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                  className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${
                     isActive
                       ? 'bg-white/22 text-white'
                       : isAllSelected
@@ -120,31 +113,6 @@ function RegionSelector({ regions, selectedIds, pokemonList, activeRegion, handl
                   {hasSelected ? `${stats.selected}/${stats.total}` : stats.total}
                 </span>
               </button>
-
-              {/* Mobile Quick Select All */}
-              {isActive && (
-                <div className="md:hidden mt-1 flex justify-center w-full select-none">
-                  {!isAllSelected ? (
-                    <button
-                      type="button"
-                      onClick={() => onSelectAllToggle(region, true)}
-                      aria-label={`Select all ${region} Pokémon`}
-                      className="compact-inline-chip text-[9px] bg-white/95 text-[#0b698e] border border-[#0d7da8]/30 py-0.5 px-2.5 rounded-full font-extrabold uppercase tracking-wider shadow-2xs cursor-pointer"
-                    >
-                      Select All
-                    </button>
-                  ) : hasSelected ? (
-                    <button
-                      type="button"
-                      onClick={() => onSelectAllToggle(region, false)}
-                      aria-label={`Deselect all ${region} Pokémon`}
-                      className="compact-inline-chip text-[9px] bg-rose-600 text-white py-0.5 px-2.5 rounded-full font-extrabold uppercase tracking-wider shadow-2xs cursor-pointer"
-                    >
-                      Clear
-                    </button>
-                  ) : null}
-                </div>
-              )}
             </div>
           );
         })}

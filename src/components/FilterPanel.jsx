@@ -184,9 +184,14 @@ function FilterPanel({
   };
 
   return (
-    <div className="pogo-pokedex-canvas lg:rounded-3xl lg:border-2 lg:border-white/85 lg:shadow-pogo-glass relative h-full flex flex-col text-[#123c4d]">
+    <div className="pogo-pokedex-canvas rounded-t-3xl lg:rounded-3xl lg:border-2 lg:border-white/85 lg:shadow-pogo-glass relative max-h-[85dvh] lg:max-h-none h-full flex flex-col overflow-hidden text-[#123c4d]">
+      {/* Mobile Drag-Handle Pill */}
+      <div className="lg:hidden flex justify-center pt-2.5 pb-1 bg-[#c4effa]/90 backdrop-blur-md shrink-0" aria-hidden="true">
+        <div className="w-10 h-1.5 rounded-full bg-[#0d7da8]/30" />
+      </div>
+
       {/* Screenshot 1 Top Header: FILTER BY: + Reset + Circular Close */}
-      <div className="flex items-center justify-between px-4 py-3.5 border-b border-white/60 bg-[#c4effa]/90 backdrop-blur-md shrink-0 lg:rounded-t-3xl">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-white/60 bg-[#c4effa]/90 backdrop-blur-md shrink-0 lg:rounded-t-3xl">
         <div className="flex items-center gap-2 select-none">
           <PogoCategoryIcon name="funnel" className="w-4 h-4 text-[#1b4d60]" />
           <div>
@@ -219,14 +224,14 @@ function FilterPanel({
       </div>
 
       {/* Scrollable Pokédex Medallion & Modifier Sections */}
-      <div className="px-4 py-4 space-y-6 overflow-y-auto flex-1 pb-20 lg:pb-6">
+      <div className="px-4 py-4 space-y-6 overflow-y-auto flex-1 pb-6">
         {/* Screenshot 1: Special & Status Circular Medallions */}
         <section className="space-y-2.5">
           <div className="flex items-baseline justify-between">
             <h4 className="font-display font-bold text-sm text-[#1b4d60]">
               Special &amp; Status
             </h4>
-            <span className="text-[10px] font-semibold text-[#285d72]">
+            <span className="text-[11px] font-semibold text-[#285d72]">
               Tap: ✓ Require • ✕ Exclude
             </span>
           </div>
@@ -236,18 +241,28 @@ function FilterPanel({
               const val = filters[item.attr];
               const triState = val === true ? 'include' : val === false ? 'exclude' : 'off';
               return (
-                <PogoMedallionBadge
-                  key={item.attr}
-                  label={item.label}
-                  colorStyle={{ backgroundColor: item.bg }}
-                  triState={triState}
-                  onClick={() => cycleMedallionAttribute(item.attr)}
-                  ariaLabel={`${item.label} filter (${
-                    triState === 'include' ? 'required' : triState === 'exclude' ? 'excluded' : 'off'
-                  })`}
-                >
-                  <PogoCategoryIcon name={item.icon} className="w-6 h-6" />
-                </PogoMedallionBadge>
+                <div key={item.attr} className="flex flex-col items-center">
+                  <PogoMedallionBadge
+                    label={item.label}
+                    colorStyle={{ backgroundColor: item.bg }}
+                    triState={triState}
+                    onClick={() => cycleMedallionAttribute(item.attr)}
+                    ariaLabel={`${item.label} filter (${
+                      triState === 'include' ? 'required' : triState === 'exclude' ? 'excluded' : 'off'
+                    })`}
+                  >
+                    <PogoCategoryIcon name={item.icon} className="w-6 h-6" />
+                  </PogoMedallionBadge>
+                  {triState !== 'off' && (
+                    <span
+                      className={`text-[11px] font-extrabold leading-none mt-0.5 ${
+                        triState === 'include' ? 'text-[#0b698e]' : 'text-rose-600'
+                      }`}
+                    >
+                      {triState === 'include' ? 'Require' : 'Exclude'}
+                    </span>
+                  )}
+                </div>
               );
             })}
           </div>
@@ -263,7 +278,7 @@ function FilterPanel({
               <button
                 type="button"
                 onClick={() => setFilters((prev) => ({ ...prev, types: [] }))}
-                className="compact-inline-chip text-[10px] font-bold text-[#0b698e] hover:underline cursor-pointer"
+                className="compact-inline-chip text-[11px] font-bold text-[#0b698e] hover:underline cursor-pointer"
               >
                 Clear ({filters.types.length})
               </button>
@@ -329,7 +344,7 @@ function FilterPanel({
               type="button"
               onClick={handleInvertSelection}
               aria-label="Invert current Pokémon selection"
-              className="compact-inline-chip px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-white/85 hover:bg-white text-[#0b698e] border border-white shadow-2xs cursor-pointer"
+              className="compact-inline-chip px-2.5 py-1 rounded-full text-[11px] font-extrabold uppercase tracking-wider bg-white/85 hover:bg-white text-[#0b698e] border border-white shadow-2xs cursor-pointer"
             >
               ⇄ Invert Dex
             </button>
@@ -373,7 +388,7 @@ function FilterPanel({
                 key={b.id}
                 type="button"
                 onClick={() => applyAgePreset(b.id)}
-                className="compact-inline-chip py-1.5 rounded-full text-[10px] font-extrabold uppercase bg-white hover:bg-[#e6f6fc] text-[#1b4d60] border border-[#0d7da8]/20 cursor-pointer text-center"
+                className="compact-inline-chip py-1.5 rounded-full text-[11px] font-extrabold uppercase bg-white hover:bg-[#e6f6fc] text-[#1b4d60] border border-[#0d7da8]/20 cursor-pointer text-center"
               >
                 {b.label}
               </button>
@@ -382,7 +397,7 @@ function FilterPanel({
 
           <div className="flex items-center gap-2">
             <div className="relative flex-1">
-              <span className="absolute left-3 top-2.5 text-[9px] font-extrabold text-[#0b698e] uppercase tracking-wider">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[11px] font-extrabold text-[#0b698e] uppercase tracking-wider pointer-events-none">
                 MIN
               </span>
               <input
@@ -391,12 +406,12 @@ function FilterPanel({
                 value={filters.ageMin}
                 onChange={(e) => setFilters((prev) => ({ ...prev, ageMin: e.target.value }))}
                 aria-label="Minimum caught age in days"
-                className="w-full pl-11 pr-2 py-2 rounded-full bg-white border border-[#0d7da8]/25 text-xs text-[#123c4d] placeholder-[#396d82]/60 focus:outline-none focus:border-[#0d7da8] font-bold"
+                className="w-full pl-12 pr-2 py-2 rounded-full bg-white border border-[#0d7da8]/25 text-base sm:text-xs text-[#123c4d] placeholder-[#396d82]/60 focus:outline-none focus:border-[#0d7da8] font-bold"
               />
             </div>
             <span className="text-[#285d72] font-bold">–</span>
             <div className="relative flex-1">
-              <span className="absolute left-3 top-2.5 text-[9px] font-extrabold text-[#0b698e] uppercase tracking-wider">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[11px] font-extrabold text-[#0b698e] uppercase tracking-wider pointer-events-none">
                 MAX
               </span>
               <input
@@ -405,7 +420,7 @@ function FilterPanel({
                 value={filters.ageMax}
                 onChange={(e) => setFilters((prev) => ({ ...prev, ageMax: e.target.value }))}
                 aria-label="Maximum caught age in days"
-                className="w-full pl-11 pr-2 py-2 rounded-full bg-white border border-[#0d7da8]/25 text-xs text-[#123c4d] placeholder-[#396d82]/60 focus:outline-none focus:border-[#0d7da8] font-bold"
+                className="w-full pl-12 pr-2 py-2 rounded-full bg-white border border-[#0d7da8]/25 text-base sm:text-xs text-[#123c4d] placeholder-[#396d82]/60 focus:outline-none focus:border-[#0d7da8] font-bold"
               />
             </div>
           </div>
@@ -418,7 +433,7 @@ function FilterPanel({
               All Modifiers
             </h4>
 
-            <div className="inline-flex items-center rounded-full bg-[#dff3fb] p-0.5 border border-[#0d7da8]/20 text-[10px] font-extrabold select-none">
+            <div className="inline-flex items-center rounded-full bg-[#dff3fb] p-0.5 border border-[#0d7da8]/20 text-[11px] font-extrabold select-none">
               <button
                 type="button"
                 onClick={() => setFilters((prev) => ({ ...prev, attributeLogic: 'AND' }))}
@@ -452,7 +467,7 @@ function FilterPanel({
                 key={cat.name}
                 type="button"
                 onClick={() => setActiveTab(cat.name)}
-                className={`compact-inline-chip px-3 py-1 text-[10px] uppercase whitespace-nowrap cursor-pointer ${
+                className={`compact-inline-chip px-3 py-1 text-[11px] uppercase whitespace-nowrap cursor-pointer ${
                   activeTab === cat.name ? 'pogo-pill-active' : 'pogo-pill'
                 }`}
               >
@@ -480,7 +495,7 @@ function FilterPanel({
                       onClick={() => setAttribute(attr, currentVal === true ? null : true)}
                       aria-label={`Require ${attr}`}
                       aria-pressed={currentVal === true}
-                      className={`compact-inline-chip px-2.5 py-0.5 font-black border-r border-[#0d7da8]/15 cursor-pointer ${
+                      className={`compact-inline-chip min-h-[36px] px-3 py-1 flex items-center justify-center font-black border-r border-[#0d7da8]/15 cursor-pointer ${
                         currentVal === true
                           ? 'bg-[#0d7da8] text-white'
                           : 'text-[#396d82] hover:bg-white'
@@ -494,7 +509,7 @@ function FilterPanel({
                       onClick={() => setAttribute(attr, null)}
                       aria-label={`Ignore ${attr} filter`}
                       aria-pressed={currentVal === null}
-                      className={`compact-inline-chip px-2.5 py-0.5 font-bold border-r border-[#0d7da8]/15 cursor-pointer ${
+                      className={`compact-inline-chip min-h-[36px] px-3 py-1 flex items-center justify-center font-bold border-r border-[#0d7da8]/15 cursor-pointer ${
                         currentVal === null
                           ? 'bg-white text-[#123c4d] font-black'
                           : 'text-[#396d82] hover:bg-white'
@@ -508,7 +523,7 @@ function FilterPanel({
                       onClick={() => setAttribute(attr, currentVal === false ? null : false)}
                       aria-label={`Exclude ${attr}`}
                       aria-pressed={currentVal === false}
-                      className={`compact-inline-chip px-2.5 py-0.5 font-black cursor-pointer ${
+                      className={`compact-inline-chip min-h-[36px] px-3 py-1 flex items-center justify-center font-black cursor-pointer ${
                         currentVal === false
                           ? 'bg-rose-600 text-white'
                           : 'text-[#396d82] hover:bg-white'
@@ -524,11 +539,15 @@ function FilterPanel({
         </section>
       </div>
 
-      {/* Screenshot 1 Floating Bottom-Center Circular Close Button (Mobile Drawer) */}
-      <div className="lg:hidden sticky bottom-3 inset-x-0 flex justify-center pointer-events-none pb-1">
-        <div className="pointer-events-auto">
-          <PogoCloseButton onClick={onClose} ariaLabel="Done and close filters" size="lg" />
-        </div>
+      {/* Mobile Sticky Bottom Done / Apply Bar */}
+      <div className="lg:hidden sticky bottom-0 inset-x-0 px-4 py-3 bg-[#c4effa]/95 backdrop-blur-md border-t border-white/60 shrink-0 safe-bottom-dock">
+        <button
+          type="button"
+          onClick={onClose}
+          className="w-full pogo-pill-active py-2.5 text-xs uppercase tracking-wider font-extrabold cursor-pointer"
+        >
+          Done / Apply
+        </button>
       </div>
     </div>
   );

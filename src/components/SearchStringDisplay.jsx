@@ -7,6 +7,7 @@ function SearchStringDisplay({
   viewMode = 'triage',
   searchString,
   selectedCount,
+  activeFilterCount = 0,
   onClearSelection,
   onSearchUpdate,
   onOpenFilters,
@@ -54,8 +55,18 @@ function SearchStringDisplay({
     return () => window.removeEventListener('keydown', handleGlobalKeyDown);
   }, [isMenuOpen]);
 
+  const clearTypingTimeout = useCallback(() => {
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+      typingTimeoutRef.current = null;
+    }
+  }, []);
+
+  useEffect(() => clearTypingTimeout, [clearTypingTimeout]);
+
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
+      clearTypingTimeout();
       onSearchUpdate(inputValue);
       e.currentTarget.blur();
       setIsTyping(false);
@@ -63,6 +74,7 @@ function SearchStringDisplay({
   };
 
   const handleBlur = () => {
+    clearTypingTimeout();
     setIsTyping(false);
     if (inputValue !== searchString) {
       onSearchUpdate(inputValue);
@@ -70,23 +82,42 @@ function SearchStringDisplay({
   };
 
   const handleChange = (e) => {
-    setDraftValue(e.target.value);
+    const nextValue = e.target.value;
+    setDraftValue(nextValue);
     setIsTyping(true);
-    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+    clearTypingTimeout();
     typingTimeoutRef.current = setTimeout(() => {
+      typingTimeoutRef.current = null;
+      onSearchUpdate(nextValue);
       setIsTyping(false);
-    }, 1000);
+    }, 450);
   };
 
   const handleSelect = useCallback(
     (val) => {
+      clearTypingTimeout();
       onSearchUpdate(val);
       setDraftValue(val);
       setIsTyping(false);
       setIsMenuOpen(false);
     },
-    [onSearchUpdate]
+    [clearTypingTimeout, onSearchUpdate]
   );
+
+  const handleMobileShareOrQR = async () => {
+    if (inputValue && typeof navigator !== 'undefined' && typeof navigator.share === 'function') {
+      try {
+        await navigator.share({
+          title: 'Pokémon GO Search String',
+          text: inputValue,
+        });
+        return;
+      } catch (err) {
+        if (err?.name === 'AbortError') return;
+      }
+    }
+    setShowQR(true);
+  };
 
   const charLength = inputValue.length;
   const isHighLength = charLength > 600;
@@ -153,6 +184,7 @@ function SearchStringDisplay({
               <button
                 type="button"
                 onClick={() => {
+                  clearTypingTimeout();
                   setDraftValue(precedenceCheck.fixedCnfQuery);
                   setIsTyping(false);
                   onSearchUpdate(precedenceCheck.fixedCnfQuery);
@@ -185,10 +217,12 @@ function SearchStringDisplay({
               <button
                 type="button"
                 onClick={onOpenFilters}
-                className="compact-inline-chip lg:hidden pogo-pill inline-flex items-center gap-1.5 px-3 py-1 text-[11px] uppercase cursor-pointer"
+                className={`compact-inline-chip lg:hidden inline-flex items-center gap-1.5 px-3 py-1 text-[11px] uppercase cursor-pointer ${
+                  activeFilterCount > 0 ? 'pogo-pill-active' : 'pogo-pill'
+                }`}
               >
                 <PogoCategoryIcon name="funnel" className="w-3.5 h-3.5" />
-                <span>FILTER BY</span>
+                <span>{activeFilterCount > 0 ? `FILTER BY (${activeFilterCount})` : 'FILTER BY'}</span>
               </button>
             </div>
           )}
@@ -212,12 +246,12 @@ function SearchStringDisplay({
                 onBlur={handleBlur}
                 aria-label="Active Pokémon GO search string"
                 placeholder="Tap Pokémon or enter a PoGO search query..."
-                className="w-full pr-20 py-2 bg-transparent text-base sm:text-xs text-[#123c4d] placeholder-[#28708c]/70 font-mono focus:outline-none truncate font-bold"
+                className="w-full pr-24 py-2 bg-transparent text-base sm:text-xs text-[#123c4d] placeholder-[#28708c]/70 font-mono focus:outline-none truncate font-bold"
               />
               {inputValue && (
                 <div className="absolute right-1.5 top-1/2 -translate-y-1/2 flex items-center gap-1 select-none">
                   <span
-                    className={`text-[9px] border font-black px-1.5 py-0.5 rounded-full ${
+                    className={`text-[11px] border font-black px-1.5 py-0.5 rounded-full ${
                       isVeryHighLength
                         ? 'bg-rose-100 text-rose-700 border-rose-300'
                         : isHighLength
@@ -231,12 +265,13 @@ function SearchStringDisplay({
                   <button
                     type="button"
                     onClick={() => {
+                      clearTypingTimeout();
                       setDraftValue('');
                       setIsTyping(false);
                       onSearchUpdate('');
                     }}
                     aria-label="Clear search string"
-                    className="compact-inline-chip mwg-icon-hit text-[#245364] hover:text-[#073b50] bg-[#e6f6fc] border border-[#0d7da8]/30 w-5 h-5 flex items-center justify-center rounded-full cursor-pointer text-[10px] font-bold"
+                    className="compact-inline-chip mwg-icon-hit text-[#245364] hover:text-[#073b50] bg-[#e6f6fc] border border-[#0d7da8]/30 w-7 h-7 flex items-center justify-center rounded-full cursor-pointer text-xs font-bold"
                   >
                     ✕
                   </button>
@@ -267,6 +302,16 @@ function SearchStringDisplay({
                 />
               )}
             </div>
+
+            {/* Mobile Share / QR Trigger */}
+            <button
+              type="button"
+              onClick={handleMobileShareOrQR}
+              aria-label="Share or show QR code for search string"
+              className="sm:hidden inline-flex items-center justify-center px-2.5 py-2 text-xs uppercase pogo-pill cursor-pointer shrink-0"
+            >
+              <span aria-hidden="true">📤</span>
+            </button>
 
             {/* Desktop / Tablet QR Code Button */}
             <button

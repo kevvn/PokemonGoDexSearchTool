@@ -16,18 +16,11 @@ const FALLBACK_SPRITE =
 /**
  * Screenshot 2 Frosted Ice-Glass Pokédex Tile (0494, 0495, 0496...)
  */
-const PokemonCard = React.memo(({ pokemon, selected, toggle, onSelectFamily }) => {
+const PokemonCard = React.memo(({ pokemon, selected, toggle, onSelectFamily, familyMode }) => {
   const handleFamilyClick = (e) => {
     e.stopPropagation();
     const familyIds = getFamilyIds(pokemon.id);
     onSelectFamily(familyIds);
-  };
-
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      toggle(pokemon.id, e);
-    }
   };
 
   const handleImageError = (e) => {
@@ -40,69 +33,74 @@ const PokemonCard = React.memo(({ pokemon, selected, toggle, onSelectFamily }) =
 
   return (
     <div
-      role="button"
-      aria-pressed={selected}
-      aria-label={`#${formattedId} ${pokemon.name}, ${pokemon.types.join(', ')}`}
-      tabIndex={0}
-      onClick={(e) => toggle(pokemon.id, e)}
-      onKeyDown={handleKeyDown}
-      className={`pogo-dex-tile cursor-pointer pt-2 pb-2 px-1.5 flex flex-col items-center justify-between select-none group/card min-h-[122px] sm:min-h-[132px] ${
+      className={`pogo-dex-tile relative select-none group/card min-h-[122px] sm:min-h-[132px] ${
         selected ? 'pogo-dex-tile-selected' : ''
       }`}
     >
-      {/* Top Row: Mini Circular Type Dots + Family Action */}
-      <div className="w-full flex items-center justify-between gap-1 px-0.5 z-10 min-h-[18px]">
-        <div className="flex items-center gap-1">
-          {pokemon.types.map((t) => (
-            <span
-              key={t}
-              title={t}
-              className={`w-4 h-4 rounded-full inline-flex items-center justify-center text-white border border-white/75 shadow-2xs bg-type-${t}`}
-            >
-              <PogoTypeIcon type={t} className="w-2.5 h-2.5" />
-            </span>
-          ))}
+      <button
+        type="button"
+        aria-pressed={selected}
+        aria-label={`#${formattedId} ${pokemon.name}, ${pokemon.types.join(', ')}${
+          familyMode ? ' (selects evolution family)' : ''
+        }`}
+        onClick={(e) => toggle(pokemon.id, e)}
+        className="w-full h-full pt-2 pb-2 px-1.5 flex flex-col items-center justify-between cursor-pointer rounded-[inherit] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0d7da8]"
+      >
+        {/* Top Row: Mini Circular Type Dots */}
+        <div className="w-full flex items-center justify-start gap-1 px-0.5 z-10 min-h-[18px]">
+          <div className="flex items-center gap-1">
+            {pokemon.types.map((t) => (
+              <span
+                key={t}
+                title={t}
+                className={`w-4 h-4 rounded-full inline-flex items-center justify-center text-white border border-white/75 shadow-2xs bg-type-${t}`}
+              >
+                <PogoTypeIcon type={t} className="w-2.5 h-2.5" />
+              </span>
+            ))}
+          </div>
         </div>
 
-        <button
-          type="button"
-          onClick={handleFamilyClick}
-          title={`Select evolution family for ${pokemon.name}`}
-          aria-label={`Select evolution family for ${pokemon.name}`}
-          className="pogo-tile-actions compact-inline-chip text-[9px] bg-white/95 hover:bg-[#0d7da8] text-[#0b698e] hover:text-white font-extrabold px-1.5 py-0.5 rounded-full border border-[#0d7da8]/30 cursor-pointer shadow-2xs leading-none"
-        >
-          +Fam
-        </button>
-      </div>
-
-      {/* Center Sprite Stage */}
-      <div className="relative w-16 h-16 sm:w-[72px] sm:h-[72px] flex items-center justify-center my-0.5">
-        <img
-          src={pokemon.sprite}
-          alt={pokemon.name}
-          onError={handleImageError}
-          className="w-16 h-16 sm:w-[70px] sm:h-[70px] object-contain rendering-pixelated relative z-10 drop-shadow-[0_3px_5px_rgba(9,65,92,0.22)] transition-transform duration-200 group-hover/card:scale-110"
-          loading="lazy"
-          width="70"
-          height="70"
-        />
-      </div>
-
-      {/* Bottom Name + Authentic 4-Digit Dex Number (0494) */}
-      <div className="w-full text-center px-0.5 leading-tight">
-        <div className="text-[10px] sm:text-[11px] font-bold capitalize text-[#194a5d] truncate w-full">
-          {pokemon.name.replace(/-/g, ' ')}
+        {/* Center Sprite Stage */}
+        <div className="relative w-16 h-16 sm:w-[72px] sm:h-[72px] flex items-center justify-center my-0.5">
+          <img
+            src={pokemon.sprite}
+            alt={pokemon.name}
+            onError={handleImageError}
+            className="w-16 h-16 sm:w-[70px] sm:h-[70px] object-contain rendering-pixelated relative z-10 drop-shadow-[0_3px_5px_rgba(9,65,92,0.22)] transition-transform duration-200 group-hover/card:scale-110"
+            loading="lazy"
+            width="70"
+            height="70"
+          />
         </div>
-        <div className="font-display text-xs sm:text-[13px] font-bold text-[#255f75] tracking-wider mt-0.5">
-          {formattedId}
-        </div>
-      </div>
 
-      {/* Selected Badge (Non-color state indicator + Pokéball) */}
+        {/* Bottom Name + Authentic 4-Digit Dex Number (0494) */}
+        <div className="w-full text-center px-0.5 leading-tight">
+          <div className="text-[11px] font-bold capitalize text-[#194a5d] truncate w-full">
+            {pokemon.name.replace(/-/g, ' ')}
+          </div>
+          <div className="font-display text-xs sm:text-[13px] font-bold text-[#255f75] tracking-wider mt-0.5">
+            {formattedId}
+          </div>
+        </div>
+      </button>
+
+      {/* Desktop/Tablet Family Quick-Select Sibling Button */}
+      <button
+        type="button"
+        onClick={handleFamilyClick}
+        title={`Select evolution family for ${pokemon.name}`}
+        aria-label={`Select evolution family for ${pokemon.name}`}
+        className="hidden sm:inline-flex items-center justify-center absolute top-2 right-2 z-20 pogo-tile-actions compact-inline-chip text-[10px] bg-white/95 hover:bg-[#0d7da8] text-[#0b698e] hover:text-white font-extrabold px-1.5 py-0.5 rounded-full border border-[#0d7da8]/30 cursor-pointer shadow-2xs leading-none"
+      >
+        +Fam
+      </button>
+
+      {/* Selected Badge (Non-color state indicator) */}
       {selected && (
         <div
           aria-hidden="true"
-          className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-[#0d7da8] text-white border-2 border-white flex items-center justify-center text-[10px] font-black shadow-md z-20"
+          className="pointer-events-none absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-[#0d7da8] text-white border-2 border-white flex items-center justify-center text-[10px] font-black shadow-md z-20"
         >
           ✓
         </div>
@@ -121,6 +119,7 @@ const RegionSection = React.memo(
     isCollapsed,
     toggleCollapse,
     onSelectFamily,
+    familyMode,
   }) => {
     const selectedCount = pokemons.filter((p) => selectedIds.has(p.id)).length;
     const totalCount = pokemons.length;
@@ -168,6 +167,7 @@ const RegionSection = React.memo(
                   selected={selectedIds.has(p.id)}
                   toggle={togglePokemon}
                   onSelectFamily={onSelectFamily}
+                  familyMode={familyMode}
                 />
               ))}
             </div>
@@ -191,9 +191,9 @@ function PokemonGrid({
   filters,
   setFilters,
   onRegionVisible,
-  onOpenFilters,
 }) {
   const [collapsedRegions, setCollapsedRegions] = useState({});
+  const [familyMode, setFamilyMode] = useState(false);
   const lastClickedId = useRef(null);
 
   const visibleListRef = useRef([]);
@@ -253,9 +253,17 @@ function PokemonGrid({
     [handleRegionSelection]
   );
 
-  // Shift + Click range selection support
+  // Shift + Click range selection support (and Family Mode full-tile toggle)
   const handleToggleCard = useCallback(
     (id, event) => {
+      if (familyMode) {
+        const familyIds = getFamilyIds(id);
+        const shouldSelect = !selectedIdsRef.current.has(id);
+        handleRegionSelection(familyIds, shouldSelect);
+        lastClickedId.current = id;
+        return;
+      }
+
       if (
         event &&
         event.shiftKey &&
@@ -282,7 +290,7 @@ function PokemonGrid({
       togglePokemon(id);
       lastClickedId.current = id;
     },
-    [togglePokemon, handleRegionSelection]
+    [togglePokemon, handleRegionSelection, familyMode]
   );
 
   // Track visible region via IntersectionObserver
@@ -374,18 +382,6 @@ function PokemonGrid({
     [shinyFilter, luckyFilter, xxlFilter, xxsFilter, is4StarActive, toggleQuickAttr, togglePerfect4Star]
   );
 
-  const activeFilterBadgeCount = useMemo(() => {
-    if (!filters) return 0;
-    let c = (filters.appraisal?.length || 0) + (filters.types?.length || 0);
-    if (filters.ageMin !== '' || filters.ageMax !== '') c += 1;
-    Object.keys(filters).forEach((k) => {
-      if (!['appraisal', 'ageMin', 'ageMax', 'types', 'attributeLogic'].includes(k) && filters[k] !== null) {
-        c += 1;
-      }
-    });
-    return c;
-  }, [filters]);
-
   return (
     <div className="space-y-4 pb-36 px-3 sm:px-5 max-w-7xl mx-auto pt-4">
       {/* Screenshot 2 Frosted Pokédex Summary Card */}
@@ -407,37 +403,22 @@ function PokemonGrid({
             className="flex-1"
           />
 
-          <div className="flex items-center gap-2 shrink-0">
-            {/* Mobile / Tablet Filter Trigger with Screenshot 1 Funnel Icon */}
+          {visibleList.length > 0 && (
             <button
               type="button"
-              onClick={onOpenFilters}
-              aria-label="Open Filter By panel"
-              className={`lg:hidden flex-1 sm:flex-none px-4 py-2.5 text-xs uppercase inline-flex items-center justify-center gap-1.5 cursor-pointer ${
-                activeFilterBadgeCount > 0 ? 'pogo-pill-active' : 'pogo-pill'
-              }`}
+              onClick={() => {
+                const visibleIds = visibleList.map((p) => p.id);
+                const hasAnySelected = visibleIds.some((id) => selectedIds.has(id));
+                handleRegionSelection(visibleIds, !hasAnySelected);
+              }}
+              className="pogo-pill px-4 py-2.5 text-xs uppercase cursor-pointer whitespace-nowrap shrink-0"
             >
-              <PogoCategoryIcon name="funnel" className="w-4 h-4" />
-              <span>FILTER BY{activeFilterBadgeCount > 0 ? ` (${activeFilterBadgeCount})` : ''}</span>
+              {visibleList.some((p) => selectedIds.has(p.id)) ? 'CLEAR VISIBLE' : 'SELECT VISIBLE'}
             </button>
-
-            {visibleList.length > 0 && (
-              <button
-                type="button"
-                onClick={() => {
-                  const visibleIds = visibleList.map((p) => p.id);
-                  const hasAnySelected = visibleIds.some((id) => selectedIds.has(id));
-                  handleRegionSelection(visibleIds, !hasAnySelected);
-                }}
-                className="flex-1 sm:flex-none pogo-pill px-4 py-2.5 text-xs uppercase cursor-pointer whitespace-nowrap"
-              >
-                {visibleList.some((p) => selectedIds.has(p.id)) ? 'CLEAR VISIBLE' : 'SELECT VISIBLE'}
-              </button>
-            )}
-          </div>
+          )}
         </div>
 
-        {/* Screenshot 2 & 3 Floating Horizontal Category Pill Strip (POKÉMON, SHINY, LUCKY, XXL, XXS, ★ 100%) */}
+        {/* Horizontal Mode Pill Strip (POKÉMON, SELECTED (N), FAMILY MODE) */}
         <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5 select-none">
           <button
             type="button"
@@ -463,57 +444,13 @@ function PokemonGrid({
 
           <button
             type="button"
-            onClick={() => toggleQuickAttr('shiny')}
-            aria-pressed={filters?.shiny === true}
+            onClick={() => setFamilyMode((v) => !v)}
+            aria-pressed={familyMode}
             className={`px-4 py-1.5 text-xs uppercase shrink-0 cursor-pointer ${
-              filters?.shiny === true ? 'pogo-pill-active' : 'pogo-pill'
+              familyMode ? 'pogo-pill-active' : 'pogo-pill'
             }`}
           >
-            SHINY
-          </button>
-
-          <button
-            type="button"
-            onClick={() => toggleQuickAttr('lucky')}
-            aria-pressed={filters?.lucky === true}
-            className={`px-4 py-1.5 text-xs uppercase shrink-0 cursor-pointer ${
-              filters?.lucky === true ? 'pogo-pill-active' : 'pogo-pill'
-            }`}
-          >
-            LUCKY
-          </button>
-
-          <button
-            type="button"
-            onClick={() => toggleQuickAttr('xxl')}
-            aria-pressed={filters?.xxl === true}
-            className={`px-4 py-1.5 text-xs uppercase shrink-0 cursor-pointer ${
-              filters?.xxl === true ? 'pogo-pill-active' : 'pogo-pill'
-            }`}
-          >
-            XXL
-          </button>
-
-          <button
-            type="button"
-            onClick={() => toggleQuickAttr('xxs')}
-            aria-pressed={filters?.xxs === true}
-            className={`px-4 py-1.5 text-xs uppercase shrink-0 cursor-pointer ${
-              filters?.xxs === true ? 'pogo-pill-active' : 'pogo-pill'
-            }`}
-          >
-            XXS
-          </button>
-
-          <button
-            type="button"
-            onClick={togglePerfect4Star}
-            aria-pressed={is4StarActive}
-            className={`px-4 py-1.5 text-xs uppercase shrink-0 cursor-pointer ${
-              is4StarActive ? 'pogo-pill-active' : 'pogo-pill'
-            }`}
-          >
-            ★ 100%
+            FAMILY MODE
           </button>
         </div>
       </div>
@@ -546,6 +483,7 @@ function PokemonGrid({
             isCollapsed={collapsedRegions[region]}
             toggleCollapse={toggleCollapse}
             onSelectFamily={handleSelectFamily}
+            familyMode={familyMode}
           />
         ))}
       </div>
