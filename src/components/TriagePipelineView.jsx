@@ -115,7 +115,7 @@ function SearchRecipeCard({
 
   return (
     <div
-      className={`min-w-0 flex flex-col justify-between gap-2.5 p-3.5 transition-opacity ${accentStyles} ${
+      className={`min-w-0 max-w-full overflow-hidden flex flex-col justify-between gap-2.5 p-3.5 transition-opacity ${accentStyles} ${
         isDone ? 'opacity-80' : ''
       }`}
     >
@@ -191,8 +191,8 @@ function SearchRecipeCard({
           </span>
         </button>
 
-        <div className="flex items-center gap-2">
-          <span className="mwg-copy flex-1 min-w-0">
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="mwg-copy mwg-copy-full">
             <button
               type="button"
               {...{ command: '--copy', commandfor: inputId }}
@@ -246,7 +246,7 @@ function MajorEventCard({
 
   return (
     <div
-      className={`min-w-0 pogo-glass-card p-3.5 space-y-2.5 transition-opacity ${
+      className={`min-w-0 max-w-full overflow-hidden pogo-glass-card p-3.5 space-y-2.5 transition-opacity ${
         ev.attended ? '' : 'opacity-75'
       }`}
     >

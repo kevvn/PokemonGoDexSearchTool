@@ -148,7 +148,7 @@
 
 .mwg-card-grid {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1fr);
   gap: 0.7rem;
 }
 
@@ -264,6 +264,12 @@
   display: inline-flex;
   align-items: center;
   flex: none;
+}
+
+.mwg-copy.mwg-copy-full {
+  display: flex;
+  flex: 1 1 0%;
+  min-width: 0;
 }
 
 .mwg-copy-btn {
