@@ -358,7 +358,7 @@ export function PogoMedallionBadge({
       </span>
 
       {count !== undefined && count !== null && (
-        <span className="text-[10px] sm:text-[11px] font-semibold text-[#2d6980] leading-none -mt-0.5">
+        <span className="text-[11px] font-semibold text-[#2d6980] leading-none -mt-0.5">
           {count}
         </span>
       )}
@@ -374,7 +374,7 @@ export function PogoSummaryCard({ title, pillText, stats = [], rightAction = nul
   return (
     <section className="pogo-summary-card px-4 py-3.5 sm:px-5 sm:py-4 select-none">
       <div className="flex items-center justify-between gap-2">
-        <h2 className="text-sm sm:text-base font-extrabold uppercase tracking-wider text-[#0c6c91] truncate">
+        <h2 className="text-sm sm:text-base font-extrabold uppercase tracking-wider text-[var(--pogo-accent-ink)] truncate">
           {title}
         </h2>
 
@@ -393,7 +393,7 @@ export function PogoSummaryCard({ title, pillText, stats = [], rightAction = nul
       </div>
 
       {stats.length > 0 && (
-        <div className="grid grid-cols-5 gap-1.5 sm:gap-3 mt-3 pt-2.5 border-t border-[#0d7da8]/12 text-center">
+        <div className="grid grid-cols-5 gap-1.5 sm:gap-3 mt-3 pt-2.5 border-t border-[var(--pogo-ui-border)] text-center">
           {stats.map((st) => {
             const Wrapper = st.onClick ? 'button' : 'div';
             return (
@@ -405,15 +405,15 @@ export function PogoSummaryCard({ title, pillText, stats = [], rightAction = nul
                       onClick: st.onClick,
                       'aria-pressed': st.active,
                       className: `rounded-xl py-1 px-0.5 transition-colors cursor-pointer ${
-                        st.active ? 'bg-[#0d7da8]/14 ring-1 ring-[#0d7da8]/40' : 'hover:bg-white/60'
+                        st.active ? 'bg-[#0d7da8]/20 ring-1 ring-[#0d7da8]/50' : 'hover:bg-[var(--pogo-glass-subtle)]'
                       }`,
                     }
                   : { className: 'py-1 px-0.5' })}
               >
-                <div className="font-display text-base sm:text-xl font-bold text-[#0c6c91] leading-tight">
+                <div className="font-display text-base sm:text-xl font-bold text-[var(--pogo-accent-ink)] leading-tight">
                   {st.value}
                 </div>
-                <div className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-[#245669] truncate mt-0.5">
+                <div className="text-[11px] font-bold uppercase tracking-wider text-[var(--pogo-ink-secondary)] truncate mt-0.5">
                   {st.label}
                 </div>
               </Wrapper>
@@ -519,7 +519,7 @@ export function PogoRegionBanner({
             <button
               type="button"
               onClick={onSelectAll}
-              className="compact-inline-chip px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider bg-[#0d7da8] hover:bg-[#0b698e] text-white shadow-2xs cursor-pointer"
+              className="compact-inline-chip px-2.5 py-1 rounded-full text-[11px] font-extrabold uppercase tracking-wider bg-[#0d7da8] hover:bg-[#0b698e] text-white shadow-2xs cursor-pointer"
             >
               Select All
             </button>
@@ -528,7 +528,7 @@ export function PogoRegionBanner({
             <button
               type="button"
               onClick={onDeselectAll}
-              className="compact-inline-chip px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider bg-white/90 hover:bg-rose-50 text-[#1b4d60] hover:text-rose-700 border border-[#0d7da8]/25 cursor-pointer"
+              className="compact-inline-chip px-2.5 py-1 rounded-full text-[11px] font-extrabold uppercase tracking-wider bg-white/90 hover:bg-rose-50 text-[#1b4d60] hover:text-rose-700 border border-[#0d7da8]/25 cursor-pointer"
             >
               Clear
             </button>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef, useCallback, useId } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback, useId, createContext, useContext } from 'react';
 import {
   COMMUNITY_DAY_EVENTS,
   getCommunityDaysByYear,
@@ -31,6 +31,12 @@ const GLOBAL_REGIONAL_NEGATION = GLOBAL_REGIONAL_ROTOM_UNOWN_RANGES
   .map((r) => `!${r}`)
   .join('&');
 
+const TriageSessionContext = createContext({
+  doneCards: new Set(),
+  markCardDone: () => {},
+  toggleCardDone: () => {},
+});
+
 /**
  * Compact Accessible Copy Chip using Pokémon GO Pill Design Language + mwg `copy-button`.
  */
@@ -56,7 +62,7 @@ function CopyChip({ label, text, ariaLabel, variant = 'teal' }) {
         type="button"
         {...{ command: '--copy', commandfor: targetId }}
         aria-label={ariaLabel || `Copy ${label}`}
-        className={`mwg-copy-btn compact-inline-chip min-h-[34px] px-3 py-1 rounded-full text-[11px] font-extrabold border shadow-2xs ${styles}`}
+        className={`mwg-copy-btn compact-inline-chip min-h-[40px] sm:min-h-[34px] px-3 py-1 rounded-full text-[11px] font-extrabold border shadow-2xs ${styles}`}
       >
         <span className="icon-copy" aria-hidden="true">{label}</span>
         <span className="icon-check" aria-hidden="true">✓ {label}</span>
@@ -70,6 +76,7 @@ function CopyChip({ label, text, ariaLabel, variant = 'teal' }) {
  * Frosted Ice-Glass Search Recipe Card consuming the Pokémon GO Pokédex Design System.
  */
 function SearchRecipeCard({
+  recipeKey,
   badge,
   title,
   tagSuggestion,
@@ -82,6 +89,11 @@ function SearchRecipeCard({
   children,
 }) {
   const inputId = useId();
+  const [isExpanded, setIsExpanded] = useState(false);
+  const { doneCards, markCardDone, toggleCardDone } = useContext(TriageSessionContext);
+  const cardKey = recipeKey || `${badge || ''}::${title}`;
+  const isDone = doneCards.has(cardKey);
+  const isTransfer = accent === 'rose';
 
   const accentStyles = {
     teal: 'pogo-glass-card',
@@ -89,7 +101,7 @@ function SearchRecipeCard({
     purple: 'pogo-glass-card ring-1 ring-[#ab6ac8]/45',
     indigo: 'pogo-glass-card ring-1 ring-[#5090d6]/45',
     emerald: 'pogo-glass-card ring-1 ring-[#63bc5a]/50',
-    rose: 'pogo-glass-card ring-1 ring-rose-300/75',
+    rose: 'pogo-glass-card pogo-transfer-card ring-1 ring-rose-300/75',
   }[accent] || 'pogo-glass-card';
 
   const badgeStyles = {
@@ -102,69 +114,117 @@ function SearchRecipeCard({
   }[accent] || 'bg-[#0d7da8] text-white';
 
   return (
-    <div className={`p-3.5 space-y-2 ${accentStyles}`}>
-      <div className="flex items-start justify-between gap-2">
-        <div className="min-w-0 flex-1 space-y-0.5">
-          <div className="flex flex-wrap items-center gap-1.5">
+    <div
+      className={`min-w-0 max-w-full overflow-hidden flex flex-col justify-between gap-2.5 p-3.5 transition-opacity ${accentStyles} ${
+        isDone ? 'opacity-80' : ''
+      }`}
+    >
+      <div className="space-y-2 min-w-0">
+        {/* Top Meta Row: Badge + Tag on left, Done toggle on right */}
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex flex-wrap items-center gap-1.5 min-w-0">
             {badge && (
-              <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider ${badgeStyles}`}>
+              <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-extrabold uppercase tracking-wider leading-tight ${badgeStyles}`}>
                 {badge}
               </span>
             )}
             {tagSuggestion && (
-              <span className="px-2 py-0.5 rounded-full bg-[#dff4fb] text-[#0b698e] border border-[#0d7da8]/25 font-mono text-[10px] font-bold">
+              <span className="px-2 py-0.5 rounded-full bg-[var(--pogo-tag-bg)] text-[var(--pogo-accent-ink)] border border-[var(--pogo-tag-border)] font-mono text-[11px] font-bold leading-tight">
                 #{tagSuggestion}
               </span>
             )}
           </div>
-          <h4 className="font-display text-[13px] font-extrabold text-[#123c4d] leading-snug">{title}</h4>
+
+          <button
+            type="button"
+            onClick={() => toggleCardDone(cardKey)}
+            aria-pressed={isDone}
+            aria-label={isDone ? `Mark ${title} as not done` : `Mark ${title} as done`}
+            className={`compact-inline-chip mwg-icon-hit shrink-0 min-h-[30px] px-2.5 py-0.5 rounded-full text-[11px] font-extrabold border cursor-pointer transition-colors ${
+              isDone
+                ? 'bg-emerald-600 text-white border-white/85'
+                : 'pogo-pill'
+            }`}
+          >
+            {isDone ? '✓ Done' : '○ Done'}
+          </button>
+        </div>
+
+        {/* Full-Width Title & Subtitle (never squeezed by action buttons) */}
+        <div className="space-y-1 min-w-0">
+          <h4 className="font-display text-sm font-extrabold text-[var(--pogo-ink-strong)] leading-snug">
+            {title}
+          </h4>
           {subtitle && (
-            <p className="text-[11px] text-[#285d72] font-medium leading-snug">{subtitle}</p>
+            <p className="text-xs text-[var(--pogo-ink-secondary)] font-medium leading-relaxed">
+              {subtitle}
+            </p>
           )}
         </div>
 
-        <div className="flex items-center gap-1.5 shrink-0">
+        {children && <div className="pt-0.5">{children}</div>}
+      </div>
+
+      {/* Bottom Stack: Expandable Query Preview + Full-Width Action Bar */}
+      <div className="space-y-2 min-w-0 pt-0.5">
+        <span id={inputId} data-copy-text={searchString} hidden>
+          {searchString}
+        </span>
+        <button
+          type="button"
+          onClick={() => {
+            setIsExpanded((v) => !v);
+            if (onLoadToBar) onLoadToBar(searchString);
+          }}
+          aria-expanded={isExpanded}
+          aria-label={`Search string preview for ${title}. Tap to ${isExpanded ? 'collapse' : 'expand'} and load into bottom bar.`}
+          className={`w-full min-w-0 flex items-center justify-between gap-2 text-left font-mono text-[11px] font-bold bg-[#073b50] text-[#c6effa] px-3 py-2 border border-[#0d7da8]/45 focus:outline-none focus:ring-2 focus:ring-[#3bb4e0] cursor-pointer select-none min-h-[38px] ${
+            isExpanded ? 'rounded-2xl items-start' : 'rounded-full'
+          }`}
+        >
+          <span className={`min-w-0 flex-1 ${isExpanded ? 'break-all whitespace-normal' : 'truncate'}`}>
+            {searchString}
+          </span>
+          <span className="shrink-0 inline-flex items-center gap-1 text-[10px] text-[#88d7f0] font-sans font-extrabold">
+            <span>{searchString.length}c</span>
+            <span aria-hidden="true">{isExpanded ? '▴' : '▾'}</span>
+          </span>
+        </button>
+
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="mwg-copy mwg-copy-full">
+            <button
+              type="button"
+              {...{ command: '--copy', commandfor: inputId }}
+              onClick={() => markCardDone(cardKey)}
+              aria-label={`${isTransfer ? 'Copy transfer search string' : 'Copy search string'} for ${title}`}
+              className={`mwg-copy-btn w-full min-h-[42px] sm:min-h-[36px] px-4 py-1.5 text-xs font-extrabold uppercase rounded-full border shadow-2xs ${
+                isTransfer
+                  ? 'bg-rose-600 hover:bg-rose-700 text-white border-white/85'
+                  : 'pogo-pill-active'
+              }`}
+            >
+              <span className="icon-copy" aria-hidden="true">📋</span>
+              <span className="icon-check" aria-hidden="true">✓</span>
+              <span>{isTransfer ? 'COPY TRANSFER' : 'COPY'}</span>
+            </button>
+            <span className="mwg-copy-tip" role="status" />
+          </span>
+
           {speciesIds.length > 0 && onSelectSpeciesInGrid && (
             <button
               type="button"
               onClick={() => onSelectSpeciesInGrid(speciesIds)}
               aria-label={`View ${speciesIds.length} species in Pokédex Grid`}
-              className="compact-inline-chip pogo-pill min-h-[34px] px-2.5 py-1 text-[11px] cursor-pointer"
+              className="compact-inline-chip pogo-pill shrink-0 min-h-[42px] sm:min-h-[36px] px-3 py-1.5 text-xs font-extrabold cursor-pointer inline-flex items-center gap-1"
               title="Open species in Pokédex Grid"
             >
-              🔍 {speciesIds.length}
+              <span aria-hidden="true">🔍</span>
+              <span>{speciesIds.length}</span>
             </button>
           )}
-          <span className="mwg-copy">
-            <button
-              type="button"
-              {...{ command: '--copy', commandfor: inputId }}
-              aria-label={`Copy search string for ${title}`}
-              className="mwg-copy-btn compact-inline-chip pogo-pill-active min-h-[34px] px-3.5 py-1 text-[11px] uppercase"
-            >
-              <span className="icon-copy" aria-hidden="true">📋</span>
-              <span className="icon-check" aria-hidden="true">✓</span>
-              <span>COPY</span>
-            </button>
-            <span className="mwg-copy-tip" role="status" />
-          </span>
         </div>
       </div>
-
-      {children && <div>{children}</div>}
-
-      <input
-        id={inputId}
-        type="text"
-        readOnly
-        value={searchString}
-        onClick={(e) => {
-          e.target.select();
-          if (onLoadToBar) onLoadToBar(searchString);
-        }}
-        aria-label={`Search string for ${title}`}
-        className="w-full font-mono text-[11px] font-bold bg-[#073b50] text-[#c6effa] px-3 py-1.5 rounded-full border border-[#0d7da8]/45 focus:outline-none focus:ring-2 focus:ring-[#3bb4e0] truncate cursor-pointer"
-      />
     </div>
   );
 }
@@ -186,7 +246,7 @@ function MajorEventCard({
 
   return (
     <div
-      className={`pogo-glass-card p-3.5 space-y-2.5 transition-opacity ${
+      className={`min-w-0 max-w-full overflow-hidden pogo-glass-card p-3.5 space-y-2.5 transition-opacity ${
         ev.attended ? '' : 'opacity-75'
       }`}
     >
@@ -195,7 +255,7 @@ function MajorEventCard({
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-1.5">
             <span
-              className={`px-2.5 py-0.5 rounded-full text-[9px] font-extrabold uppercase tracking-wider ${
+              className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider ${
                 ev.scope === 'in-person'
                   ? 'bg-[#8d52b5] text-white'
                   : ev.scope === 'global'
@@ -208,22 +268,22 @@ function MajorEventCard({
             <span className="px-2 py-0.5 rounded-full bg-[#073b50] text-[#bfeaf6] font-mono text-[10px] font-bold">
               {built.ageCalc.ageToken}
             </span>
-            <span className="text-[10px] font-bold text-[#285d72]">
+            <span className="text-[11px] font-bold text-[var(--pogo-ink-secondary)]">
               {ev.start}{ev.end !== ev.start ? ` → ${ev.end}` : ''}
             </span>
           </div>
 
-          <div className="flex flex-wrap items-center gap-1.5 mt-0.5">
-            <h4 className="font-display text-[13px] font-extrabold text-[#123c4d] leading-snug">{ev.name}</h4>
-            <span className="px-2 py-0.5 rounded-full bg-[#dff4fb] text-[#0b698e] border border-[#0d7da8]/25 font-mono text-[10px] font-bold">
+          <div className="flex flex-wrap items-center gap-1.5 mt-1">
+            <h4 className="font-display text-sm font-extrabold text-[var(--pogo-ink-strong)] leading-snug">{ev.name}</h4>
+            <span className="px-2 py-0.5 rounded-full bg-[var(--pogo-tag-bg)] text-[var(--pogo-accent-ink)] border border-[var(--pogo-tag-border)] font-mono text-[11px] font-bold">
               #{ev.tag}
             </span>
           </div>
-          <p className="text-[11px] text-[#285d72] font-semibold">{ev.location}</p>
+          <p className="text-xs text-[var(--pogo-ink-secondary)] font-semibold">{ev.location}</p>
         </div>
 
         <div className="flex items-center gap-1.5 shrink-0">
-          <label className="compact-inline-chip inline-flex items-center gap-1 text-[10px] font-extrabold text-[#1b4d60] bg-white/90 px-2.5 py-1 rounded-full border border-white shadow-2xs cursor-pointer">
+          <label className="compact-inline-chip inline-flex items-center gap-1 text-[11px] font-extrabold text-[var(--pogo-ink-primary)] bg-[var(--pogo-pill-bg)] px-2.5 py-1 rounded-full border border-[var(--pogo-pill-border)] shadow-2xs cursor-pointer">
             <input
               type="checkbox"
               checked={ev.attended}
@@ -363,36 +423,43 @@ function MajorEventCard({
             </div>
           )}
 
-          <div className="space-y-1 bg-[#073b50] text-[#bfeaf6] p-2.5 rounded-xl font-mono text-[10px]">
-            <div
+          <div className="space-y-1 bg-[#073b50] text-[#bfeaf6] p-2.5 rounded-xl font-mono text-[11px]">
+            <button
+              type="button"
               onClick={() => onLoadToBar?.(built.raidAndMegaString)}
-              className="truncate cursor-pointer hover:text-white"
+              className="block w-full text-left truncate cursor-pointer hover:text-white focus:outline-none focus:underline py-0.5"
               title="Tap to load into bottom bar"
             >
               <span className="text-[#88d7f0]">Raids: </span>{built.raidAndMegaString}
-            </div>
+            </button>
             {built.regionalAndRareTradeString && (
-              <div
+              <button
+                type="button"
                 onClick={() => onLoadToBar?.(built.regionalAndRareTradeString)}
-                className="truncate cursor-pointer hover:text-white"
+                className="block w-full text-left truncate cursor-pointer hover:text-white focus:outline-none focus:underline py-0.5"
+                title="Tap to load into bottom bar"
               >
                 <span className="text-[#88d7f0]">Special: </span>{built.regionalAndRareTradeString}
-              </div>
+              </button>
             )}
             {built.backgroundKeepString && (
-              <div
+              <button
+                type="button"
                 onClick={() => onLoadToBar?.(built.backgroundKeepString)}
-                className="truncate cursor-pointer hover:text-white"
+                className="block w-full text-left truncate cursor-pointer hover:text-white focus:outline-none focus:underline py-0.5"
+                title="Tap to load into bottom bar"
               >
                 <span className="text-[#88d7f0]">BG: </span>{built.backgroundKeepString}
-              </div>
+              </button>
             )}
-            <div
+            <button
+              type="button"
               onClick={() => onLoadToBar?.(built.eventLeftoverTrashString)}
-              className="truncate cursor-pointer hover:text-white"
+              className="block w-full text-left truncate cursor-pointer hover:text-white focus:outline-none focus:underline py-0.5"
+              title="Tap to load into bottom bar"
             >
               <span className="text-rose-300">Safe Trash: </span>{built.eventLeftoverTrashString}
-            </div>
+            </button>
           </div>
         </div>
       </details>
@@ -437,6 +504,69 @@ function TriagePipelineView({
   const [referenceDate, setReferenceDate] = useState(() => getTodayPlainDateString());
   const [bufferMode, setBufferMode] = useState('exact');
   const [temporalReady, setTemporalReady] = useState(false);
+
+  // Dismissible "How Triage Works" micro-banner
+  const [guideDismissed, setGuideDismissed] = useState(() => {
+    try {
+      return localStorage.getItem('pogo_triage_guide_dismissed') === '1';
+    } catch {
+      return false;
+    }
+  });
+  const dismissGuide = useCallback(() => {
+    setGuideDismissed(true);
+    try {
+      localStorage.setItem('pogo_triage_guide_dismissed', '1');
+    } catch {
+      // ignore storage errors
+    }
+  }, []);
+
+  // Session check-off state persisted across Pokémon GO app switches
+  const [doneCards, setDoneCards] = useState(() => {
+    try {
+      const raw = sessionStorage.getItem('pogo_triage_done_cards');
+      const parsed = raw ? JSON.parse(raw) : [];
+      return Array.isArray(parsed) ? new Set(parsed) : new Set();
+    } catch {
+      return new Set();
+    }
+  });
+
+  useEffect(() => {
+    try {
+      sessionStorage.setItem('pogo_triage_done_cards', JSON.stringify([...doneCards]));
+    } catch {
+      // ignore storage errors
+    }
+  }, [doneCards]);
+
+  const markCardDone = useCallback((key) => {
+    setDoneCards((prev) => {
+      if (prev.has(key)) return prev;
+      const next = new Set(prev);
+      next.add(key);
+      return next;
+    });
+  }, []);
+
+  const toggleCardDone = useCallback((key) => {
+    setDoneCards((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  }, []);
+
+  const resetSession = useCallback(() => {
+    setDoneCards(new Set());
+  }, []);
+
+  const sessionContextValue = useMemo(
+    () => ({ doneCards, markCardDone, toggleCardDone }),
+    [doneCards, markCardDone, toggleCardDone]
+  );
 
   // Trade stock caps
   const [cdShinyKeepCap, setCdShinyKeepCap] = useState(3);
@@ -1097,9 +1227,10 @@ function TriagePipelineView({
     bufferMode === 'evening-safe' ? '-1d Eve' : bufferMode === 'plus-minus-1' ? '±1d TZ' : 'Exact Age';
 
   return (
+    <TriageSessionContext.Provider value={sessionContextValue}>
     <div className="max-w-7xl mx-auto w-full pb-24">
-      {/* Sticky Single-Row Pokémon GO Pill Tablist + Compact Quick Controls */}
-      <div className="sticky top-[48px] sm:top-[52px] z-30 bg-[#bfeaf6]/88 backdrop-blur-md border-b border-white/65">
+      {/* Sticky Single-Row Pokémon GO Pill Tablist */}
+      <div className="sticky top-[var(--app-header-height,52px)] z-30 pogo-pokedex-header">
         <div className="max-w-7xl mx-auto px-2 sm:px-4">
           {/* Single-Row Horizontally Scrolling Pill Tablist (mwg: tabs) */}
           <div
@@ -1133,35 +1264,6 @@ function TriagePipelineView({
               );
             })}
           </div>
-
-          {/* Slim Toolbar: !# Untagged Pill + Active Summary + Options Pill Trigger */}
-          <div className="flex items-center justify-between gap-2 py-1.5 px-1 text-xs">
-            <div className="flex items-center gap-2 min-w-0">
-              <button
-                type="button"
-                onClick={() => setUntaggedOnly((v) => !v)}
-                aria-pressed={untaggedOnly}
-                className={`compact-inline-chip min-h-[30px] px-3 py-0.5 text-[11px] uppercase cursor-pointer inline-flex items-center gap-1 ${
-                  untaggedOnly ? 'pogo-pill-active' : 'pogo-pill'
-                }`}
-              >
-                <span>{untaggedOnly ? '✓ !# UNTAGGED' : '!# OFF'}</span>
-              </button>
-
-              <span className="text-[11px] font-bold text-[#1b4d60] truncate">
-                {bufferLabel} • Caps {cdShinyKeepCap}/{globalBgKeepCap}/{costumeKeepCap}
-              </span>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => optionsDialogRef.current?.showModal()}
-              className="compact-inline-chip pogo-pill min-h-[30px] px-3 py-0.5 text-[11px] uppercase cursor-pointer shrink-0 inline-flex items-center gap-1"
-            >
-              <span aria-hidden="true">⚙️</span>
-              <span>OPTIONS</span>
-            </button>
-          </div>
         </div>
       </div>
 
@@ -1178,11 +1280,73 @@ function TriagePipelineView({
           aria-labelledby={`${tabBaseId}-tab-pipeline`}
           hidden={activeSubTab !== 'pipeline' ? 'until-found' : undefined}
         >
-          <div className="pt-3.5 space-y-3 mwg-accordion mwg-card-container">
+          <div className="pt-3 space-y-3 mwg-accordion mwg-card-container">
+            {/* Compact Dismissible "How Triage Works" Micro-Banner */}
+            {!guideDismissed && (
+              <div className="pogo-glass-card px-3 py-2 flex items-center justify-between gap-2 text-xs text-[var(--pogo-ink-strong)]">
+                <p className="font-semibold leading-snug">
+                  <span className="font-extrabold text-[var(--pogo-accent-ink)]">How Triage Works: </span>
+                  Copy phases 1→6 in order, tag matches in Pokémon GO, then safely mass-transfer in Phase 6.
+                </p>
+                <button
+                  type="button"
+                  onClick={dismissGuide}
+                  aria-label="Dismiss how triage works banner"
+                  className="compact-inline-chip mwg-icon-hit w-7 h-7 rounded-full bg-[var(--pogo-pill-bg)] hover:bg-[var(--pogo-pill-hover-bg)] text-[var(--pogo-ink-strong)] border border-[var(--pogo-ui-border)] flex items-center justify-center text-xs font-extrabold shrink-0 cursor-pointer"
+                >
+                  ✕
+                </button>
+              </div>
+            )}
+
+            {/* Non-Sticky Control Strip right above STORAGE TRIAGE */}
+            <div className="flex flex-wrap items-center justify-between gap-2 px-0.5 text-xs">
+              <div className="flex flex-wrap items-center gap-2 min-w-0">
+                <button
+                  type="button"
+                  onClick={() => setUntaggedOnly((v) => !v)}
+                  aria-pressed={untaggedOnly}
+                  className={`compact-inline-chip min-h-[40px] sm:min-h-[32px] px-3 py-1 text-[11px] cursor-pointer inline-flex items-center gap-1 font-extrabold ${
+                    untaggedOnly ? 'pogo-pill-active' : 'pogo-pill'
+                  }`}
+                >
+                  <span>{untaggedOnly ? '✓ Untagged only (!#)' : 'Untagged only (!#): Off'}</span>
+                </button>
+
+                <span className="text-[11px] font-bold text-[var(--pogo-ink-primary)] truncate">
+                  {bufferLabel} • Caps {cdShinyKeepCap}/{globalBgKeepCap}/{costumeKeepCap}
+                </span>
+
+                {doneCards.size > 0 && (
+                  <span className="inline-flex items-center gap-1.5">
+                    <span className="px-2.5 py-0.5 rounded-full bg-emerald-600 text-white text-[11px] font-extrabold">
+                      {doneCards.size} done
+                    </span>
+                    <button
+                      type="button"
+                      onClick={resetSession}
+                      className="compact-inline-chip pogo-pill min-h-[40px] sm:min-h-[32px] px-2.5 py-1 text-[11px] font-extrabold cursor-pointer"
+                    >
+                      Reset Session
+                    </button>
+                  </span>
+                )}
+              </div>
+
+              <button
+                type="button"
+                onClick={() => optionsDialogRef.current?.showModal()}
+                className="compact-inline-chip pogo-pill min-h-[40px] sm:min-h-[32px] px-3 py-1 text-[11px] font-extrabold cursor-pointer shrink-0 inline-flex items-center gap-1"
+              >
+                <span aria-hidden="true">⚙️</span>
+                <span>Options</span>
+              </button>
+            </div>
+
             {/* Screenshot 2 Frosted Pokédex Summary Card for Inventory Triage */}
             <PogoSummaryCard
               title="STORAGE TRIAGE"
-              pillText={untaggedOnly ? '!# UNTAGGED' : 'ALL STORAGE'}
+              pillText={untaggedOnly ? 'Untagged only (!#)' : 'ALL STORAGE'}
               stats={[
                 {
                   label: 'CD SHINY',
@@ -1214,7 +1378,7 @@ function TriagePipelineView({
 
             {/* Phase 1: Trophies */}
             <details open className="pogo-summary-card overflow-hidden">
-              <summary className="px-4 py-3 text-xs sm:text-sm font-display font-extrabold text-[#123c4d] select-none">
+              <summary className="px-4 py-3 text-xs sm:text-sm font-display font-extrabold text-[var(--pogo-ink-strong)] select-none">
                 <span className="flex-1 flex items-center justify-between gap-2">
                   <span>1. Hard Trophies &amp; 0% Nundos</span>
                   <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-amber-400 text-[#123c4d]">
@@ -1224,7 +1388,7 @@ function TriagePipelineView({
               </summary>
               <div className="p-3 border-t border-[#0d7da8]/12 mwg-card-grid">
                 <SearchRecipeCard
-                  badge="1A • Crown Jewels (CNF)"
+                  badge="1A • Crown Jewels"
                   title="4*, Gigantamax, Shiny Shadows, Shiny Legendaries & Shiny Location BGs"
                   tagSuggestion="Trophy"
                   subtitle="Distributed CNF (X,Y & X,Z) so PoGO matches any 4*, any G-Max, OR any Shiny Shadow/Legendary/Mythical/UB/Location BG."
@@ -1246,7 +1410,7 @@ function TriagePipelineView({
 
             {/* Phase 2: High-Demand Tradeables */}
             <details className="pogo-summary-card overflow-hidden">
-              <summary className="px-4 py-3 text-xs sm:text-sm font-display font-extrabold text-[#123c4d] select-none">
+              <summary className="px-4 py-3 text-xs sm:text-sm font-display font-extrabold text-[var(--pogo-ink-strong)] select-none">
                 <span className="flex-1 flex items-center justify-between gap-2">
                   <span>2. High-Demand Tradeables (BGs, Regionals, Rotom, Shinies)</span>
                   <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-[#8d52b5] text-white">
@@ -1317,7 +1481,7 @@ function TriagePipelineView({
 
             {/* Phase 3: Capped Trade Stock vs Excess Purge */}
             <details className="pogo-summary-card overflow-hidden">
-              <summary className="px-4 py-3 text-xs sm:text-sm font-display font-extrabold text-[#123c4d] select-none">
+              <summary className="px-4 py-3 text-xs sm:text-sm font-display font-extrabold text-[var(--pogo-ink-strong)] select-none">
                 <span className="flex-1 flex items-center justify-between gap-2">
                   <span>3. Capped Trade Stock vs. Excess Clutter</span>
                   <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-[#3b6fd4] text-white">
@@ -1408,7 +1572,7 @@ function TriagePipelineView({
 
             {/* Phase 4: Mirror Rerolls */}
             <details className="pogo-summary-card overflow-hidden">
-              <summary className="px-4 py-3 text-xs sm:text-sm font-display font-extrabold text-[#123c4d] select-none">
+              <summary className="px-4 py-3 text-xs sm:text-sm font-display font-extrabold text-[var(--pogo-ink-strong)] select-none">
                 <span className="flex-1 flex items-center justify-between gap-2">
                   <span>4. Mirror &amp; Special Trade Rerolls</span>
                   <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-[#0d7da8] text-white">
@@ -1442,7 +1606,7 @@ function TriagePipelineView({
 
             {/* Phase 5: PvP & PvE Meta */}
             <details className="pogo-summary-card overflow-hidden">
-              <summary className="px-4 py-3 text-xs sm:text-sm font-display font-extrabold text-[#123c4d] select-none">
+              <summary className="px-4 py-3 text-xs sm:text-sm font-display font-extrabold text-[var(--pogo-ink-strong)] select-none">
                 <span className="flex-1 flex items-center justify-between gap-2">
                   <span>5. PvPoke Top 100 (GL/UL/ML) &amp; DialgaDex Raiders</span>
                   <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-[#2b9e66] text-white">
@@ -1500,7 +1664,7 @@ function TriagePipelineView({
 
             {/* Phase 6: Safe Mass Transfer */}
             <details className="pogo-summary-card overflow-hidden">
-              <summary className="px-4 py-3 text-xs sm:text-sm font-display font-extrabold text-[#123c4d] select-none">
+              <summary className="px-4 py-3 text-xs sm:text-sm font-display font-extrabold text-[var(--pogo-ink-strong)] select-none">
                 <span className="flex-1 flex items-center justify-between gap-2">
                   <span>6. Safe Mass Transfer (Zero Meta / Regional Conflict)</span>
                   <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-rose-600 text-white">
@@ -1555,11 +1719,11 @@ function TriagePipelineView({
               </div>
             </details>
 
-            {/* Phase 7: Interactive AND (&) / OR (,) Rule Combiner (PoGO CNF Compiler) */}
+            {/* Phase 7: Interactive OR / AND Rule Combiner */}
             <details className="pogo-summary-card overflow-hidden">
-              <summary className="px-4 py-3 text-xs sm:text-sm font-display font-extrabold text-[#123c4d] select-none">
+              <summary className="px-4 py-3 text-xs sm:text-sm font-display font-extrabold text-[var(--pogo-ink-strong)] select-none">
                 <span className="flex-1 flex items-center justify-between gap-2">
-                  <span>🔗 AND (&amp;) / OR (,) Rule Combiner (PoGO CNF Compiler)</span>
+                  <span>🔗 OR / AND Rule Combiner</span>
                   <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-[#0d7da8] text-white">
                     (X,Y)&amp;(X,Z)
                   </span>
@@ -1670,8 +1834,8 @@ function TriagePipelineView({
                 </div>
 
                 <SearchRecipeCard
-                  badge={`${customCompiledCnfString.split('&').filter(Boolean).length} CNF AND-Clauses`}
-                  title="Compiled Pokémon GO CNF Search String"
+                  badge={`${customCompiledCnfString.split('&').filter(Boolean).length} AND-Clauses`}
+                  title="Combined Pokémon GO Search String"
                   subtitle="Distributes OR (,) over AND (&) and absorbs redundant supersets."
                   searchString={customCompiledCnfString}
                   accent="teal"
@@ -1777,7 +1941,7 @@ function TriagePipelineView({
             {/* Collapsible Custom Date Calculator, Trips & JSON Backup */}
             <div className="mwg-accordion space-y-2.5 pt-1">
               <details className="pogo-summary-card overflow-hidden">
-                <summary className="px-4 py-3 text-xs sm:text-sm font-display font-extrabold text-[#123c4d] select-none">
+                <summary className="px-4 py-3 text-xs sm:text-sm font-display font-extrabold text-[var(--pogo-ink-strong)] select-none">
                   <span>🧮 Custom Date Range → ageX-Y Calculator &amp; JSON Backup</span>
                 </summary>
                 <div className="p-3.5 border-t border-[#0d7da8]/12 space-y-3">
@@ -1884,7 +2048,7 @@ function TriagePipelineView({
               </details>
 
               <details className="pogo-summary-card overflow-hidden">
-                <summary className="px-4 py-3 text-xs sm:text-sm font-display font-extrabold text-[#123c4d] select-none">
+                <summary className="px-4 py-3 text-xs sm:text-sm font-display font-extrabold text-[var(--pogo-ink-strong)] select-none">
                   <span>✈️ Personal Travel Trips ({TRAVEL_TRIPS.length})</span>
                 </summary>
                 <div className="p-3 border-t border-[#0d7da8]/12 mwg-card-grid mwg-card-grid-3">
@@ -2753,6 +2917,7 @@ function TriagePipelineView({
         </form>
       </dialog>
     </div>
+    </TriageSessionContext.Provider>
   );
 }
 
