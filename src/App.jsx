@@ -388,7 +388,11 @@ function App() {
 
       {activeTab === 'tags' && (
         <main className="flex-1 max-w-7xl mx-auto w-full px-3 sm:px-5 py-4 sm:py-5">
-          <TagSystemTab customTags={customTags} />
+          <TagSystemTab
+            customTags={customTags}
+            metaSnapshot={metaSnapshot}
+            onLoadQuery={handleLoadFromTriage}
+          />
         </main>
       )}
 

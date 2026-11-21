@@ -41,9 +41,36 @@ def test():
         page.wait_for_timeout(250)
         page.screenshot(path="/tmp/events_mobile.png")
 
-        # 3. Switch to Tag System tab & verify live Custom Tag Mapper + Collision Linter
+        # 3. Switch to Tag System tab & verify Quick-Hydrate walkthrough, 1-tap hydration Copy, and live Collision Linter
         nav.get_by_role("button", name="Tag System", exact=False).click()
         page.wait_for_selector('[aria-label="Tag system summary and actions"]')
+
+        # Verify Quick-Hydrate walkthrough drawer opens and displays Stage 1..6
+        walkthrough_section = page.locator('[aria-label="Quick-Hydrate Your Box (28-Tag Walkthrough)"]')
+        walkthrough_section.wait_for(state="visible", timeout=5000)
+        walkthrough_section.get_by_role("button", name="Quick-Hydrate Your Box", exact=False).click()
+        page.wait_for_timeout(150)
+        assert walkthrough_section.get_by_text("Stage 1: Events & Backgrounds").is_visible(), (
+            "Expected Stage 1 heading in Quick-Hydrate walkthrough"
+        )
+        assert walkthrough_section.get_by_text("Stage 6: Operational Queues").is_visible(), (
+            "Expected Stage 6 heading in Quick-Hydrate walkthrough"
+        )
+
+        # Verify 1-tap hydration Copy button on EV-ShBG tag card syncs to bottom search dock
+        hydrate_copy_btn = page.locator('button[aria-label="Copy hydration query Shiny + Background for EV-ShBG"]')
+        hydrate_copy_btn.scroll_into_view_if_needed()
+        hydrate_copy_btn.click()
+        page.wait_for_timeout(150)
+        assert "Copied" in (hydrate_copy_btn.inner_text() or ""), (
+            "Expected instant Copied feedback on Tag System hydration Copy button"
+        )
+        dock_input = page.locator('input[aria-label="Active Pokémon GO search string"]')
+        assert dock_input.input_value() == "shiny&background&!#", (
+            f"Expected bottom dock to sync hydration query 'shiny&background&!#', got: {dock_input.input_value()!r}"
+        )
+        page.screenshot(path="/tmp/tags_hydration_mobile.png")
+
         op_input = page.locator('input[aria-label="Custom name for OP-2xXfer"]')
         op_input.fill("shiny")
         page.wait_for_timeout(150)

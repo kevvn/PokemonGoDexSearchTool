@@ -1,4 +1,5 @@
-import { REGION_KEYWORDS, TYPES } from './searchUtils';
+import { REGION_KEYWORDS, TYPES, compressIds } from './searchUtils';
+import { ALL_COMMUNITY_DAY_PRE_EVO_IDS } from '../data/communityDayRegistry';
 
 // Complete 28-tag, 7-namespace opinionated taxonomy (+ optional 29th OP-Purify1k)
 // Verified collision-free against Leidwesen/SearchPhrases v0.435.1.
@@ -579,4 +580,491 @@ export function getRecommendedDragOrder(tagMap) {
       name: merged[def.id].name,
       enabled: merged[def.id].enabled,
     }));
+}
+
+// Local fallback dex lists (avoids circular import with triageFunnels.js)
+const DEFAULT_CANDY_12_FODDER_IDS = [10, 13, 16, 265, 293, 519];
+const DEFAULT_TRADE_EVOLVE_IDS = [64, 67, 75, 93, 525, 533, 588, 616, 708, 710];
+const COMPRESSED_CD_PRE_EVO_DEX = compressIds(ALL_COMMUNITY_DAY_PRE_EVO_IDS);
+
+/**
+ * 6-stage top-to-bottom initial box hydration walkthrough order covering all 29 tags
+ * (28 core + optional OP-Purify1k). Running in this order ensures `!#` cascades cleanly
+ * from highest-priority grails & built rosters down to WIPs, trade queues, and daily ops.
+ */
+export const HYDRATION_STAGES = [
+  {
+    id: 'stage_1_events',
+    stageNumber: 1,
+    title: 'Stage 1: Events & Backgrounds',
+    subtitle: 'Lock irreplaceable shiny backgrounds, location cards, global BGs, and live-event souvenirs first.',
+    tagIds: ['ev_shbg', 'ev_locbg', 'ev_global', 'ev_inperson'],
+  },
+  {
+    id: 'stage_2_collection',
+    stageNumber: 2,
+    title: 'Stage 2: Collection & Trophies',
+    subtitle: 'Protect 0% nundos, Living Dex singletons, and museum costumes/legacy moves before combat sweeps.',
+    tagIds: ['keep_trophy'],
+  },
+  {
+    id: 'stage_3_built',
+    stageNumber: 3,
+    title: 'Stage 3: Built Competitive Rosters',
+    subtitle: 'Tag already-built double-moved PvP teams, powered-up PvE raiders, and upgraded Max Battle squads.',
+    tagIds: ['pvp_gl', 'pvp_ul', 'pvp_ml', 'pvp_cup', 'pve_raid', 'max_atk', 'max_tank', 'max_heal'],
+  },
+  {
+    id: 'stage_4_wip',
+    stageNumber: 4,
+    title: 'Stage 4: Unbuilt WIP & Candy Mules',
+    subtitle: 'Sweep untagged meta PvP spreads, 15-Atk/Shadow PvE projects, Max WIPs, and disposable Power Spot mules.',
+    tagIds: ['pvp_wip', 'pve_wip', 'max_wip', 'max_candy'],
+  },
+  {
+    id: 'stage_5_trading',
+    stageNumber: 5,
+    title: 'Stage 5: Trading Queues',
+    subtitle: 'Route remaining untagged tradeables into Special/Lucky, 100km+ Distance, and Mirror queues.',
+    tagIds: ['tr_spec', 'tr_dist', 'tr_mirror'],
+  },
+  {
+    id: 'stage_6_ops',
+    stageNumber: 6,
+    title: 'Stage 6: Operational Queues',
+    subtitle: 'Populate daily & event housekeeping queues (Mega grind, XXLs, Rocket TM, Buddy, CD/XP Evos, Power-Up, 2x Xfer).',
+    tagIds: ['op_mega', 'op_xxl', 'op_tmfrust', 'op_buddy', 'op_evocd', 'op_evoxp', 'op_powerup', 'op_2xxfer', 'op_purify1k'],
+  },
+];
+
+/**
+ * Build verified, Leidwesen v0.435.1-compliant initial box hydration search string(s) for a single tag ID.
+ * Returns an array of `{ id, label, query, note?, isSecondary? }`.
+ */
+export function buildTagHydrationQueries(tagId, tagMap = null, metaSnapshot = null) {
+  const merged = tagMap ? mergeTagMap(tagMap) : createDefaultTagMap();
+  const pvp = metaSnapshot?.pvp || {};
+  const pve = metaSnapshot?.pve || {};
+  const special = metaSnapshot?.specialLists || {};
+
+  switch (tagId) {
+    // --- Stage 1: Events & Backgrounds ---
+    case 'ev_shbg':
+      return [
+        {
+          id: 'ev_shbg_primary',
+          label: 'Shiny + Background',
+          query: 'shiny&background&!#',
+          note: 'Dual-lock every hit with Favorite (★) + tag.',
+        },
+      ];
+
+    case 'ev_locbg':
+      return [
+        {
+          id: 'ev_locbg_primary',
+          label: 'Location Backgrounds',
+          query: 'locationbackground&!#',
+        },
+      ];
+
+    case 'ev_global':
+      return [
+        {
+          id: 'ev_global_primary',
+          label: 'Special Backgrounds',
+          query: 'specialbackground&!#',
+        },
+        {
+          id: 'ev_global_profile',
+          label: 'Profile Backgrounds',
+          query: 'profilebackground&!#',
+          isSecondary: true,
+        },
+      ];
+
+    case 'ev_inperson':
+      return [
+        {
+          id: 'ev_inperson_primary',
+          label: 'Event Souvenirs',
+          query: 'costume,unown,shiny&!#',
+          note: 'Combine with exact trip ageX-Y dates from the Events & Trips tab.',
+        },
+      ];
+
+    // --- Stage 2: Collection & Trophies ---
+    case 'keep_trophy':
+      return [
+        {
+          id: 'keep_trophy_nundos',
+          label: 'Nundos (0%)',
+          query: '0attack&0defense&0hp&!#',
+        },
+        {
+          id: 'keep_trophy_singletons',
+          label: 'Singletons',
+          query: 'count1&!#',
+        },
+        {
+          id: 'keep_trophy_costumes_legacy',
+          label: 'Costumes & Legacy',
+          query: 'costume,@special&!#',
+        },
+      ];
+
+    // --- Stage 3: Built Competitive Rosters ---
+    case 'pvp_gl':
+      return [
+        {
+          id: 'pvp_gl_primary',
+          label: 'Built GL (Double-Moved)',
+          query: 'cp1300-1500&!@3mov&!#',
+        },
+      ];
+
+    case 'pvp_ul':
+      return [
+        {
+          id: 'pvp_ul_primary',
+          label: 'Built UL (Double-Moved)',
+          query: 'cp2300-2500&!@3mov&!#',
+        },
+      ];
+
+    case 'pvp_ml':
+      return [
+        {
+          id: 'pvp_ml_primary',
+          label: 'Built ML (15-Atk Double-Moved)',
+          query: 'cp3000-&!@3mov&3*,4*&4attack&!#',
+        },
+        {
+          id: 'pvp_ml_xl',
+          label: 'XL Double-Moved ML',
+          query: 'candyxl&!@3mov&3*,4*&!#',
+          isSecondary: true,
+        },
+      ];
+
+    case 'pvp_cup':
+      return [
+        {
+          id: 'pvp_cup_primary',
+          label: 'Built Little Cup (Double-Moved)',
+          query: 'cp400-500&!@3mov&!#',
+        },
+      ];
+
+    case 'pve_raid':
+      return [
+        {
+          id: 'pve_raid_primary',
+          label: 'Built Raid Attackers',
+          query: 'cp3000-,candyxl,mega3-&3*,4*,shadow&!#',
+        },
+      ];
+
+    case 'max_atk':
+      return [
+        {
+          id: 'max_atk_primary',
+          label: 'Max Attack Lv2–3',
+          query: 'maxmove2-&!#',
+        },
+        {
+          id: 'max_atk_gmax',
+          label: 'Powered-Up Gigantamax',
+          query: 'gigantamax&cp2000-&!#',
+          isSecondary: true,
+        },
+      ];
+
+    case 'max_tank':
+      return [
+        {
+          id: 'max_tank_primary',
+          label: 'Max Guard Unlocked',
+          query: 'maxmove1-&maxguard1-&!#',
+        },
+      ];
+
+    case 'max_heal':
+      return [
+        {
+          id: 'max_heal_primary',
+          label: 'Max Spirit Unlocked',
+          query: 'maxmove1-&maxspirit1-&!#',
+        },
+        {
+          id: 'max_heal_blissey',
+          label: 'Chansey / Blissey Max',
+          query: '113,242&maxmove1-&!#',
+          isSecondary: true,
+        },
+      ];
+
+    // --- Stage 4: Unbuilt WIP & Candy Mules ---
+    case 'pvp_wip': {
+      const glLow = Array.isArray(pvp.gl?.top100?.lowAtk) ? pvp.gl.top100.lowAtk : [];
+      const ulLow = Array.isArray(pvp.ul?.top100?.lowAtk) ? pvp.ul.top100.lowAtk : [];
+      const glUlLowAtkDex = compressIds([...glLow, ...ulLow]);
+      const queries = [];
+      if (glUlLowAtkDex) {
+        queries.push({
+          id: 'pvp_wip_meta',
+          label: 'Meta GL/UL Low-Atk',
+          query: `!#&0-1attack&3-4defense&3-4hp&${glUlLowAtkDex}`,
+        });
+      }
+      queries.push({
+        id: 'pvp_wip_broad',
+        label: glUlLowAtkDex ? 'Broad Fallback' : 'Low-Atk PvP IVs',
+        query: '0-1attack&3-4defense&3-4hp&!#',
+        isSecondary: Boolean(glUlLowAtkDex),
+      });
+      return queries;
+    }
+
+    case 'pve_wip': {
+      const pveTop30Dex = compressIds(Array.isArray(pve.top30Overall) ? pve.top30Overall : []);
+      const pveShadowDex = compressIds(Array.isArray(pve.topShadow) ? pve.topShadow : []);
+      return [
+        {
+          id: 'pve_wip_regulars',
+          label: 'Top PvE Regulars',
+          query: pveTop30Dex
+            ? `!#&!shadow&3*,4*&4attack&${pveTop30Dex}`
+            : '!#&!shadow&3*,4*&4attack',
+        },
+        {
+          id: 'pve_wip_shadows',
+          label: 'Top PvE Shadows',
+          query: pveShadowDex ? `!#&shadow&${pveShadowDex}` : '!#&shadow',
+        },
+      ];
+    }
+
+    case 'max_wip':
+      return [
+        {
+          id: 'max_wip_primary',
+          label: 'Unbuilt High-Value Max',
+          query: 'maxmove1-&!maxmove2-&!maxguard1-&!maxspirit1-&3*,4*,gigantamax,legendary&!#',
+        },
+      ];
+
+    case 'max_candy':
+      return [
+        {
+          id: 'max_candy_primary',
+          label: 'Power Spot Candy Mules',
+          query: 'dynamax&!maxmove2-&!maxguard1-&!maxspirit1-&0*,1*,2*&!shiny&!background&!#',
+        },
+      ];
+
+    // --- Stage 5: Trading Queues ---
+    case 'tr_spec':
+      return [
+        {
+          id: 'tr_spec_primary',
+          label: 'Special / Lucky Tradeables',
+          query: 'shiny,legendary,ultrabeast,costume,background&!traded&!favorite&!4*&!#',
+        },
+      ];
+
+    case 'tr_dist':
+      return [
+        {
+          id: 'tr_dist_primary',
+          label: '100km+ Distance Tradeables',
+          query: 'distance100-&!traded&!shiny&!legendary&!mythical&!ultrabeast&!4*&!favorite&!#',
+        },
+      ];
+
+    case 'tr_mirror':
+      return [
+        {
+          id: 'tr_mirror_primary',
+          label: 'Duplicate Mirror Tradeables',
+          query: '!traded&!favorite&!shiny&!4*&count2-&!#',
+        },
+      ];
+
+    // --- Stage 6: Operational Queues ---
+    case 'op_mega':
+      return [
+        {
+          id: 'op_mega_primary',
+          label: 'Mega Lv1–2 Grind',
+          query: 'mega1-2&!#',
+        },
+        {
+          id: 'op_mega_lv4',
+          label: 'Lv4 Super Max Target',
+          query: 'mega1-3&!#',
+          isSecondary: true,
+        },
+      ];
+
+    case 'op_xxl':
+      return [
+        {
+          id: 'op_xxl_primary',
+          label: 'Untagged XXLs',
+          query: 'xxl&!#',
+        },
+      ];
+
+    case 'op_tmfrust':
+      return [
+        {
+          id: 'op_tmfrust_highiv',
+          label: 'High-IV Shadows',
+          query: 'shadow&@frustration&3*,4*&!#',
+        },
+        {
+          id: 'op_tmfrust_pvp',
+          label: 'PvP IVs',
+          query: 'shadow&@frustration&0-1attack&3-4defense&3-4hp&!#',
+        },
+      ];
+
+    case 'op_buddy':
+      return [
+        {
+          id: 'op_buddy_primary',
+          label: 'Active Buddies (Lv1–4)',
+          query: 'buddy1-4&!#',
+        },
+      ];
+
+    case 'op_evocd': {
+      const wipEvoHashes = [
+        getTagHash('pvp_wip', merged),
+        getTagHash('pve_wip', merged),
+      ].filter(Boolean);
+      return [
+        {
+          id: 'op_evocd_cd',
+          label: 'Community Day Pre-Evos',
+          query: `evolve&!#&!favorite&${COMPRESSED_CD_PRE_EVO_DEX}`,
+        },
+        {
+          id: 'op_evocd_wip',
+          label: 'WIP Evolves',
+          query: wipEvoHashes.length > 0 ? `${wipEvoHashes.join(',')}&evolve` : 'evolve&!#&3*,4*',
+        },
+      ];
+    }
+
+    case 'op_evoxp': {
+      const candy12Ids =
+        Array.isArray(special.candy12Fodder) && special.candy12Fodder.length > 0
+          ? special.candy12Fodder
+          : DEFAULT_CANDY_12_FODDER_IDS;
+      const tradeEvoIds =
+        Array.isArray(special.tradeEvolve) && special.tradeEvolve.length > 0
+          ? special.tradeEvolve
+          : DEFAULT_TRADE_EVOLVE_IDS;
+      return [
+        {
+          id: 'op_evoxp_candy12',
+          label: '12-Candy Fodder',
+          query: `evolve&!favorite&!shiny&!4*&!shadow&!maxmove1-&!#&${compressIds(candy12Ids)}`,
+        },
+        {
+          id: 'op_evoxp_traded',
+          label: 'Already-Traded Free Evos',
+          query: `traded&evolve&!favorite&!#&${compressIds(tradeEvoIds)}`,
+        },
+      ];
+    }
+
+    case 'op_powerup': {
+      const wipHashes = [
+        getTagHash('pvp_wip', merged),
+        getTagHash('pve_wip', merged),
+        getTagHash('max_wip', merged),
+      ].filter(Boolean);
+      const opPowerupHash = getTagHash('op_powerup', merged);
+      let query;
+      if (wipHashes.length > 0 && opPowerupHash) {
+        query = `${wipHashes.join(',')}&!${opPowerupHash}`;
+      } else if (wipHashes.length > 0) {
+        query = wipHashes.join(',');
+      } else if (opPowerupHash) {
+        query = `3*,4*&!${opPowerupHash}`;
+      } else {
+        query = '3*,4*&!#';
+      }
+      return [
+        {
+          id: 'op_powerup_primary',
+          label: 'Tagged WIPs Not Yet Queued',
+          query,
+          note: 'Run after Stage 4 WIP tags are populated so only genuine build projects enter your Power-Up queue.',
+        },
+      ];
+    }
+
+    case 'op_2xxfer':
+      return [
+        {
+          id: 'op_2xxfer_primary',
+          label: '2x Transfer Queue',
+          query: 'legendary,ultrabeast,mythical,traded&!lucky&!shiny&!4*&!background&!favorite&@3mov&!#',
+          note: 'Shielded with @3mov (single-move only) so double-moved builds are protected.',
+        },
+      ];
+
+    case 'op_purify1k':
+      return [
+        {
+          id: 'op_purify1k_primary',
+          label: '1k Stardust Shadows',
+          query: 'shadow&candykm1&!shiny&!4*&!favorite&!#',
+        },
+      ];
+
+    default:
+      return [];
+  }
+}
+
+/**
+ * Returns all 29 tag hydration steps (28 core + optional OP-Purify1k) in the exact
+ * recommended top-to-bottom 6-stage hydration order.
+ */
+export function getAllTagHydrationSteps(tagMap = null, metaSnapshot = null) {
+  const merged = tagMap ? mergeTagMap(tagMap) : createDefaultTagMap();
+  const steps = [];
+  let stepNumber = 1;
+
+  for (const stage of HYDRATION_STAGES) {
+    for (const tagId of stage.tagIds) {
+      const def = TAG_DEFINITION_BY_ID[tagId];
+      if (!def) continue;
+      const entry = merged[tagId];
+      steps.push({
+        stepNumber: stepNumber++,
+        stageId: stage.id,
+        stageNumber: stage.stageNumber,
+        stageTitle: stage.title,
+        stageSubtitle: stage.subtitle,
+        tagId: def.id,
+        tagName: entry?.name || def.defaultName,
+        defaultName: def.defaultName,
+        tagHash: getTagHash(def.id, merged),
+        color: def.color,
+        namespace: def.namespace,
+        enabled: Boolean(entry?.enabled),
+        optional: Boolean(def.optional),
+        purpose: def.purpose,
+        queries: buildTagHydrationQueries(def.id, merged, metaSnapshot),
+      });
+    }
+  }
+
+  return steps;
 }

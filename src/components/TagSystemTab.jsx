@@ -1,9 +1,14 @@
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import {
   TAG_NAMESPACES,
+  HYDRATION_STAGES,
   getNamespaceHashes,
   getRecommendedDragOrder,
+  buildTagHydrationQueries,
+  getAllTagHydrationSteps,
 } from '../utils/tagSystem';
+
+const HYDRATION_PROGRESS_STORAGE_KEY = 'pogo_tag_hydration_checked_v1';
 
 const COLOR_SWATCHES = {
   purple: {
@@ -53,32 +58,72 @@ const COLOR_SWATCHES = {
   },
 };
 
-function copyTextToClipboard(text) {
-  if (!text) return Promise.resolve(false);
-  if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
-    return navigator.clipboard
-      .writeText(text)
-      .then(() => true)
-      .catch(() => fallbackCopy(text));
-  }
-  return Promise.resolve(fallbackCopy(text));
-}
-
 function fallbackCopy(text) {
   try {
     const textarea = document.createElement('textarea');
     textarea.value = text;
     textarea.setAttribute('readonly', '');
     textarea.style.position = 'fixed';
+    textarea.style.top = '0';
+    textarea.style.left = '-9999px';
     textarea.style.opacity = '0';
     document.body.appendChild(textarea);
+    textarea.focus();
     textarea.select();
+    textarea.setSelectionRange(0, text.length);
     const ok = document.execCommand('copy');
     document.body.removeChild(textarea);
     return ok;
   } catch {
     return false;
   }
+}
+
+function copyText(text, syncToDock = true) {
+  if (!text) return Promise.resolve(false);
+  const finalize = (ok) => {
+    if (syncToDock && typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('pogo-copied-string', { detail: { text } }));
+    }
+    return ok;
+  };
+
+  if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+    return navigator.clipboard
+      .writeText(text)
+      .then(() => finalize(true))
+      .catch(() => finalize(fallbackCopy(text)));
+  }
+  return Promise.resolve(finalize(fallbackCopy(text)));
+}
+
+function loadCheckedTags() {
+  if (typeof window === 'undefined') return {};
+  try {
+    const raw = window.localStorage.getItem(HYDRATION_PROGRESS_STORAGE_KEY);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === 'object' ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+function resolveSynergyQueries(tag, hashPreview) {
+  const raw = tag.nativeSearchSynergy || '';
+  if (!raw) return [];
+  const defaultHash = `#${(tag.defaultName || '').trim().toLowerCase()}`;
+  const liveHash = hashPreview || defaultHash;
+
+  return raw
+    .split(/,\s+/)
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .map((query) =>
+      defaultHash && liveHash && defaultHash !== liveHash
+        ? query.split(defaultHash).join(liveHash)
+        : query
+    );
 }
 
 function CopyIcon({ className = 'w-3.5 h-3.5' }) {
@@ -116,6 +161,25 @@ function CheckIcon({ className = 'w-3.5 h-3.5' }) {
   );
 }
 
+function BuilderIcon({ className = 'w-3.5 h-3.5' }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+      <polyline points="15 3 21 3 21 9" />
+      <line x1="10" y1="14" x2="21" y2="3" />
+    </svg>
+  );
+}
+
 function ResetIcon({ className = 'w-3.5 h-3.5' }) {
   return (
     <svg
@@ -134,7 +198,24 @@ function ResetIcon({ className = 'w-3.5 h-3.5' }) {
   );
 }
 
-export function TagSystemTab({ customTags }) {
+function ChevronIcon({ open, className = 'w-4 h-4' }) {
+  return (
+    <svg
+      className={`${className} transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <polyline points="6 9 12 15 18 9" />
+    </svg>
+  );
+}
+
+export function TagSystemTab({ customTags, metaSnapshot, onLoadQuery }) {
   const {
     tagMap = {},
     resolvedTags = [],
@@ -147,6 +228,8 @@ export function TagSystemTab({ customTags }) {
 
   const [copiedId, setCopiedId] = useState(null);
   const [confirmReset, setConfirmReset] = useState(false);
+  const [walkthroughOpen, setWalkthroughOpen] = useState(false);
+  const [checkedTags, setCheckedTags] = useState(loadCheckedTags);
   const copyTimerRef = useRef(null);
   const resetTimerRef = useRef(null);
 
@@ -157,16 +240,33 @@ export function TagSystemTab({ customTags }) {
     };
   }, []);
 
-  const triggerCopy = useCallback((id, text, syncToDock = false) => {
-    copyTextToClipboard(text).then((ok) => {
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      window.localStorage.setItem(HYDRATION_PROGRESS_STORAGE_KEY, JSON.stringify(checkedTags));
+    } catch {
+      // Ignore storage quota / private mode failures
+    }
+  }, [checkedTags]);
+
+  const triggerCopy = useCallback((id, text, syncToDock = true) => {
+    copyText(text, syncToDock).then((ok) => {
       if (!ok) return;
       setCopiedId(id);
-      if (syncToDock && typeof window !== 'undefined') {
-        window.dispatchEvent(new CustomEvent('pogo-copied-string', { detail: { text } }));
-      }
       if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
       copyTimerRef.current = setTimeout(() => setCopiedId(null), 1800);
     });
+  }, []);
+
+  const toggleCheckedTag = useCallback((tagId) => {
+    setCheckedTags((prev) => ({
+      ...prev,
+      [tagId]: !prev[tagId],
+    }));
+  }, []);
+
+  const resetHydrationProgress = useCallback(() => {
+    setCheckedTags({});
   }, []);
 
   const enabledCount = useMemo(
@@ -178,6 +278,37 @@ export function TagSystemTab({ customTags }) {
     () => getRecommendedDragOrder(tagMap).slice(0, 12),
     [tagMap]
   );
+
+  const allHydrationSteps = useMemo(
+    () => getAllTagHydrationSteps(tagMap, metaSnapshot),
+    [tagMap, metaSnapshot]
+  );
+
+  const hydrationStagesGrouped = useMemo(() => {
+    const byStage = new Map();
+    for (const stage of HYDRATION_STAGES) {
+      byStage.set(stage.id, { ...stage, steps: [] });
+    }
+    for (const step of allHydrationSteps) {
+      byStage.get(step.stageId)?.steps.push(step);
+    }
+    return Array.from(byStage.values());
+  }, [allHydrationSteps]);
+
+  const enabledHydrationSteps = useMemo(
+    () => allHydrationSteps.filter((s) => s.enabled),
+    [allHydrationSteps]
+  );
+
+  const completedHydrationCount = useMemo(
+    () => enabledHydrationSteps.filter((s) => Boolean(checkedTags[s.tagId])).length,
+    [enabledHydrationSteps, checkedTags]
+  );
+
+  const hydrationPct =
+    enabledHydrationSteps.length > 0
+      ? Math.round((completedHydrationCount / enabledHydrationSteps.length) * 100)
+      : 0;
 
   const handleCopySetupList = useCallback(() => {
     const ordered = getRecommendedDragOrder(tagMap).filter((t) => t.enabled);
@@ -240,9 +371,9 @@ export function TagSystemTab({ customTags }) {
             )}
           </div>
           <p className="text-xs sm:text-sm text-[#285d72] leading-relaxed font-medium">
-            Rename any tag below to match your personal Pokémon GO box — every Triage Funnel search
-            string updates live and is linted against native PoGO keywords &amp;{' '}
-            <code className="font-mono font-bold text-[#0b698e]">#</code> prefix collisions.
+            Rename any tag below to match your personal Pokémon GO box, then 1-tap copy the verified{' '}
+            <strong className="text-[#123c4d]">Hydrate in Pokémon GO</strong> search strings to
+            bootstrap your entire existing storage box.
           </p>
         </div>
 
@@ -273,6 +404,209 @@ export function TagSystemTab({ customTags }) {
             <span>{confirmReset ? 'Click Again to Reset' : 'Reset All to Defaults'}</span>
           </button>
         </div>
+      </section>
+
+      {/* Collapsible Quick-Hydrate Your Box (28-Tag Walkthrough) */}
+      <section
+        aria-label="Quick-Hydrate Your Box (28-Tag Walkthrough)"
+        className="pogo-summary-card overflow-hidden border border-[#0d7da8]/25"
+      >
+        <button
+          type="button"
+          onClick={() => setWalkthroughOpen((prev) => !prev)}
+          aria-expanded={walkthroughOpen}
+          className="w-full px-4 py-3.5 sm:px-5 bg-gradient-to-r from-[#dff5fc]/95 via-[#e8f8fd]/90 to-[#e3f7ee]/85 hover:from-[#d4f0fa] hover:to-[#d8f3e6] transition-colors flex flex-wrap items-center justify-between gap-3 text-left cursor-pointer"
+        >
+          <div className="min-w-0 flex-1 space-y-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="font-display text-sm sm:text-base font-extrabold text-[#0b698e] uppercase tracking-wide">
+                Quick-Hydrate Your Box (28-Tag Walkthrough)
+              </span>
+              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-white/95 text-[#1d7a4d] border border-[#2b9e66]/35 shadow-2xs">
+                {completedHydrationCount} / {enabledHydrationSteps.length} Done ({hydrationPct}%)
+              </span>
+            </div>
+            <p className="text-xs text-[#285d72] font-medium">
+              Run Stages 1 → 6 top-to-bottom: each{' '}
+              <code className="font-mono font-bold text-[#0b698e]">!#</code> query automatically
+              skips Pokémon you already tagged in earlier stages.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0">
+            <span className="hidden sm:inline-block w-24 h-2 rounded-full bg-white/90 border border-[#0d7da8]/20 overflow-hidden">
+              <span
+                className="block h-full bg-[#2b9e66] transition-all duration-300"
+                style={{ width: `${hydrationPct}%` }}
+              />
+            </span>
+            <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[11px] font-extrabold uppercase bg-white/95 text-[#0b698e] border border-[#0d7da8]/30 shadow-2xs">
+              <span>{walkthroughOpen ? 'Hide' : 'Open'}</span>
+              <ChevronIcon open={walkthroughOpen} className="w-3.5 h-3.5" />
+            </span>
+          </div>
+        </button>
+
+        {walkthroughOpen && (
+          <div className="p-4 sm:p-5 space-y-4 bg-white/55 border-t border-white/85">
+            <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-[#285d72]">
+              <p className="font-medium">
+                Tap <strong className="text-[#123c4d]">Copy</strong>, paste into Pokémon GO, apply
+                the tag, then check it off to track your initial box setup.
+              </p>
+              {completedHydrationCount > 0 && (
+                <button
+                  type="button"
+                  onClick={resetHydrationProgress}
+                  className="compact-inline-chip inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-extrabold text-[#0b698e] bg-white hover:bg-[#e6f6fc] border border-[#0d7da8]/30 cursor-pointer"
+                >
+                  <ResetIcon className="w-3 h-3" />
+                  <span>Reset Checklist</span>
+                </button>
+              )}
+            </div>
+
+            <div className="space-y-3.5">
+              {hydrationStagesGrouped.map((stage) => {
+                const stageEnabled = stage.steps.filter((s) => s.enabled);
+                const stageDone = stageEnabled.filter((s) => Boolean(checkedTags[s.tagId])).length;
+
+                return (
+                  <div
+                    key={stage.id}
+                    className="pogo-glass-card overflow-hidden border border-[#0d7da8]/20"
+                  >
+                    <div className="px-3.5 py-2.5 bg-[#dff5fc]/75 border-b border-white/85 flex flex-wrap items-center justify-between gap-2">
+                      <div className="min-w-0">
+                        <h3 className="font-display text-xs sm:text-sm font-extrabold text-[#0b698e] uppercase tracking-wide">
+                          {stage.title}
+                        </h3>
+                        <p className="text-[11px] text-[#285d72] font-medium">{stage.subtitle}</p>
+                      </div>
+                      <span className="px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold bg-white/95 text-[#1b4d60] border border-white shadow-2xs shrink-0">
+                        {stageDone}/{stageEnabled.length}
+                      </span>
+                    </div>
+
+                    <ol className="divide-y divide-[#0d7da8]/10">
+                      {stage.steps.map((step) => {
+                        const swatch = COLOR_SWATCHES[step.color] || COLOR_SWATCHES.grey;
+                        const isChecked = Boolean(checkedTags[step.tagId]);
+
+                        return (
+                          <li
+                            key={step.tagId}
+                            className={`px-3.5 py-2.5 flex flex-col gap-2 transition-colors ${
+                              !step.enabled
+                                ? 'bg-[#e6f6fc]/35 opacity-60'
+                                : isChecked
+                                  ? 'bg-emerald-50/75'
+                                  : 'hover:bg-white/60'
+                            }`}
+                          >
+                            <div className="flex flex-wrap items-center justify-between gap-2">
+                              <label className="flex items-center gap-2.5 min-w-0 cursor-pointer select-none">
+                                <input
+                                  type="checkbox"
+                                  checked={isChecked}
+                                  disabled={!step.enabled}
+                                  onChange={() => toggleCheckedTag(step.tagId)}
+                                  aria-label={`Mark ${step.tagName} hydrated`}
+                                  className="h-4 w-4 rounded border-[#0d7da8]/40 text-[#2b9e66] focus:ring-[#0d7da8] cursor-pointer disabled:cursor-not-allowed"
+                                />
+                                <span className="font-mono text-[11px] font-extrabold text-[#0b698e] w-6 shrink-0">
+                                  {String(step.stepNumber).padStart(2, '0')}.
+                                </span>
+                                <span
+                                  className={`w-2.5 h-2.5 rounded-full shrink-0 ${swatch.dot}`}
+                                  aria-hidden="true"
+                                />
+                                <span
+                                  className={`text-xs sm:text-sm font-extrabold truncate ${
+                                    isChecked ? 'line-through text-[#2b7a55]' : 'text-[#123c4d]'
+                                  }`}
+                                >
+                                  {step.tagName}
+                                </span>
+                                {step.tagHash && (
+                                  <span
+                                    className={`hidden sm:inline-flex px-2 py-0.5 rounded-full text-[10px] font-mono font-bold border ${swatch.badge}`}
+                                  >
+                                    {step.tagHash}
+                                  </span>
+                                )}
+                                {step.optional && (
+                                  <span className="px-1.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-white/90 text-[#285d72] border border-[#0d7da8]/20">
+                                    {step.enabled ? 'Optional' : 'Optional · Off'}
+                                  </span>
+                                )}
+                              </label>
+                            </div>
+
+                            <div className="pl-6 sm:pl-9 flex flex-wrap items-center gap-1.5">
+                              {step.queries.map((q) => {
+                                const copyKey = `walk-${q.id}`;
+                                const isCopied = copiedId === copyKey;
+                                const showLabel = step.queries.length > 1;
+
+                                return (
+                                  <div
+                                    key={q.id}
+                                    className="inline-flex flex-wrap items-center gap-1 max-w-full"
+                                  >
+                                    <button
+                                      type="button"
+                                      onClick={() => triggerCopy(copyKey, q.query, true)}
+                                      className={`compact-inline-chip inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-extrabold border shadow-2xs transition-colors cursor-pointer ${
+                                        isCopied
+                                          ? 'bg-[#2b9e66] text-white border-white'
+                                          : q.isSecondary
+                                            ? 'bg-white/95 hover:bg-white text-[#0b698e] border-[#0d7da8]/35'
+                                            : 'bg-[#0d7da8] hover:bg-[#0b698e] text-white border-white/85'
+                                      }`}
+                                      aria-label={`Copy walkthrough query ${q.label} for ${step.tagName}`}
+                                      title={q.query}
+                                    >
+                                      {isCopied ? (
+                                        <CheckIcon className="w-3 h-3 shrink-0" />
+                                      ) : (
+                                        <CopyIcon className="w-3 h-3 shrink-0" />
+                                      )}
+                                      <span>
+                                        {isCopied
+                                          ? '✓ Copied'
+                                          : showLabel
+                                            ? `Copy ${q.label}`
+                                            : 'Copy'}
+                                      </span>
+                                    </button>
+
+                                    {typeof onLoadQuery === 'function' && (
+                                      <button
+                                        type="button"
+                                        onClick={() => onLoadQuery(q.query)}
+                                        className="compact-inline-chip inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-extrabold bg-white/90 hover:bg-white text-[#0b698e] border border-[#0d7da8]/25 cursor-pointer"
+                                        aria-label={`Load walkthrough query ${q.label} for ${step.tagName} in Builder`}
+                                        title="Load in Pokédex Builder"
+                                      >
+                                        <BuilderIcon className="w-3 h-3" />
+                                        <span className="hidden sm:inline">Builder</span>
+                                      </button>
+                                    )}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </li>
+                        );
+                      })}
+                    </ol>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </section>
 
       {/* Dual-Lock & !# Inbox Zero Rules + Recommended Top-12 Drag-and-Drop Order */}
@@ -397,16 +731,20 @@ export function TagSystemTab({ customTags }) {
                   <button
                     type="button"
                     onClick={() => triggerCopy(`ns-${ns.id}`, nsHashes.join(','), true)}
-                    className="compact-inline-chip inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-mono font-bold bg-white/95 hover:bg-white text-[#0b698e] border border-[#0d7da8]/30 shadow-2xs transition-colors cursor-pointer"
+                    className={`compact-inline-chip inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-mono font-bold border shadow-2xs transition-colors cursor-pointer ${
+                      copiedId === `ns-${ns.id}`
+                        ? 'bg-[#2b9e66] text-white border-white'
+                        : 'bg-white/95 hover:bg-white text-[#0b698e] border-[#0d7da8]/30'
+                    }`}
                     title="Copy namespace umbrella search"
                   >
                     {copiedId === `ns-${ns.id}` ? (
-                      <CheckIcon className="w-3 h-3 text-[#2b9e66]" />
+                      <CheckIcon className="w-3 h-3" />
                     ) : (
                       <CopyIcon className="w-3 h-3" />
                     )}
                     <span className="truncate max-w-[180px] sm:max-w-[260px]">
-                      {nsHashes.join(',')}
+                      {copiedId === `ns-${ns.id}` ? '✓ Copied' : nsHashes.join(',')}
                     </span>
                   </button>
                 )}
@@ -425,11 +763,13 @@ export function TagSystemTab({ customTags }) {
                   const hasWarnings = lint.warnings.length > 0;
                   const hashPreview = getTagHash ? getTagHash(tag.id) : '';
                   const isRenamed = tag.name !== tag.defaultName;
+                  const hydrationQueries = buildTagHydrationQueries(tag.id, tagMap, metaSnapshot);
+                  const synergyQueries = resolveSynergyQueries(tag, hashPreview);
 
                   return (
                     <div
                       key={tag.id}
-                      className={`p-4 sm:px-5 transition-colors ${
+                      className={`p-4 sm:px-5 transition-colors space-y-3 ${
                         !tag.enabled
                           ? 'bg-[#e6f6fc]/40 opacity-65'
                           : hasErrors
@@ -494,15 +834,22 @@ export function TagSystemTab({ customTags }) {
                               <button
                                 type="button"
                                 onClick={() => triggerCopy(`tag-${tag.id}`, hashPreview, true)}
-                                className={`compact-inline-chip inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold border transition-colors cursor-pointer ${swatch.badge}`}
+                                className={`compact-inline-chip inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold border transition-colors cursor-pointer ${
+                                  copiedId === `tag-${tag.id}`
+                                    ? 'bg-[#2b9e66] text-white border-white'
+                                    : swatch.badge
+                                }`}
                                 title={`Copy ${hashPreview}`}
+                                aria-label={`Copy tag search ${hashPreview}`}
                               >
                                 {copiedId === `tag-${tag.id}` ? (
                                   <CheckIcon className="w-3 h-3" />
                                 ) : (
                                   <CopyIcon className="w-3 h-3 opacity-80" />
                                 )}
-                                <span>{hashPreview}</span>
+                                <span>
+                                  {copiedId === `tag-${tag.id}` ? '✓ Copied' : hashPreview}
+                                </span>
                               </button>
                             )}
 
@@ -525,28 +872,130 @@ export function TagSystemTab({ customTags }) {
                           </div>
                         </div>
 
-                        {/* Right: Placement Criteria + Native Search Synergy */}
+                        {/* Right: Placement Criteria + 1-Tap Copyable Post-Tagging Synergy */}
                         <div className="flex-1 min-w-0 space-y-1.5">
                           <p className="text-xs sm:text-[13px] text-[#1b4d60] leading-relaxed font-medium">
                             {tag.purpose}
                           </p>
-                          <div className="flex flex-wrap items-center gap-2 text-[11px]">
+                          <div className="flex flex-wrap items-center gap-1.5 text-[11px]">
                             <span className="text-[#285d72] font-extrabold uppercase tracking-wide text-[10px]">
                               Synergy:
                             </span>
-                            <code className="px-2.5 py-0.5 rounded-full bg-[#073b50] text-[#dff6fc] font-mono font-bold">
-                              {tag.nativeSearchSynergy}
-                            </code>
-                            <span className="text-[#285d72] font-mono font-bold">
+                            {synergyQueries.map((synQuery, synIdx) => {
+                              const synKey = `syn-${tag.id}-${synIdx}`;
+                              const synCopied = copiedId === synKey;
+                              return (
+                                <button
+                                  key={synKey}
+                                  type="button"
+                                  onClick={() => triggerCopy(synKey, synQuery, true)}
+                                  className={`compact-inline-chip inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-mono font-bold transition-colors cursor-pointer border ${
+                                    synCopied
+                                      ? 'bg-[#2b9e66] text-white border-white'
+                                      : 'bg-[#073b50] hover:bg-[#0b506b] text-[#dff6fc] border-[#0d7da8]/40'
+                                  }`}
+                                  title={`Copy synergy search: ${synQuery}`}
+                                  aria-label={`Copy synergy search ${synQuery}`}
+                                >
+                                  {synCopied ? (
+                                    <CheckIcon className="w-3 h-3 shrink-0" />
+                                  ) : (
+                                    <CopyIcon className="w-3 h-3 shrink-0 opacity-80" />
+                                  )}
+                                  <span>{synCopied ? '✓ Copied' : synQuery}</span>
+                                </button>
+                              );
+                            })}
+                            <span className="text-[#285d72] font-mono font-bold ml-0.5">
                               Drag #{tag.dragOrder}
                             </span>
                           </div>
                         </div>
                       </div>
 
+                      {/* Hydrate in Pokémon GO Row */}
+                      {hydrationQueries.length > 0 && (
+                        <div className="rounded-2xl bg-[#dff5fc]/55 border border-[#0d7da8]/20 p-3 space-y-2">
+                          <div className="flex flex-wrap items-center justify-between gap-2">
+                            <span className="font-display text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider text-[#0b698e]">
+                              Hydrate in Pokémon GO
+                            </span>
+                            <span className="text-[10px] font-semibold text-[#285d72]">
+                              Paste into PoGO → Select All → Apply{' '}
+                              <strong className="text-[#123c4d]">{tag.name || tag.defaultName}</strong>
+                            </span>
+                          </div>
+
+                          <div className="space-y-2">
+                            {hydrationQueries.map((item) => {
+                              const copyKey = `hydrate-${item.id}`;
+                              const isCopied = copiedId === copyKey;
+                              return (
+                                <div key={item.id} className="space-y-1">
+                                  <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                                    <div className="flex-1 min-w-0 flex flex-col sm:flex-row sm:items-center gap-1.5">
+                                      <span
+                                        className={`self-start sm:self-auto shrink-0 px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wide border ${
+                                          item.isSecondary
+                                            ? 'bg-white/90 text-[#285d72] border-[#0d7da8]/25'
+                                            : 'bg-[#0d7da8]/12 text-[#0b698e] border-[#0d7da8]/30'
+                                        }`}
+                                      >
+                                        {item.label}
+                                      </span>
+                                      <code className="block flex-1 min-w-0 px-2.5 py-1.5 rounded-xl bg-[#073b50] text-[#dff6fc] font-mono text-[11px] sm:text-xs font-bold break-all select-all max-h-20 overflow-y-auto shadow-inner">
+                                        {item.query}
+                                      </code>
+                                    </div>
+
+                                    <div className="flex items-center gap-1.5 shrink-0">
+                                      <button
+                                        type="button"
+                                        onClick={() => triggerCopy(copyKey, item.query, true)}
+                                        className={`compact-inline-chip inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-extrabold border shadow-2xs transition-all cursor-pointer ${
+                                          isCopied
+                                            ? 'bg-[#2b9e66] text-white border-white'
+                                            : 'bg-[#0d7da8] hover:bg-[#0b698e] text-white border-white/85'
+                                        }`}
+                                        aria-label={`Copy hydration query ${item.label} for ${tag.defaultName}`}
+                                      >
+                                        {isCopied ? (
+                                          <CheckIcon className="w-3.5 h-3.5" />
+                                        ) : (
+                                          <CopyIcon className="w-3.5 h-3.5" />
+                                        )}
+                                        <span>{isCopied ? '✓ Copied' : 'Copy'}</span>
+                                      </button>
+
+                                      {typeof onLoadQuery === 'function' && (
+                                        <button
+                                          type="button"
+                                          onClick={() => onLoadQuery(item.query)}
+                                          className="compact-inline-chip inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-extrabold bg-white/95 hover:bg-white text-[#0b698e] border border-[#0d7da8]/30 shadow-2xs transition-colors cursor-pointer"
+                                          aria-label={`Load hydration query ${item.label} for ${tag.defaultName} in Builder`}
+                                        >
+                                          <BuilderIcon className="w-3.5 h-3.5" />
+                                          <span>Builder</span>
+                                        </button>
+                                      )}
+                                    </div>
+                                  </div>
+
+                                  {item.note && (
+                                    <p className="text-[11px] text-[#285d72] font-medium pl-1">
+                                      Tip: {item.note}
+                                    </p>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+
                       {/* Inline Real-Time Collision Linter Feedback */}
                       {tag.enabled && (hasErrors || hasWarnings) && (
-                        <div className="mt-3 space-y-1.5 pl-0 md:pl-11">
+                        <div className="mt-2 space-y-1.5 pl-0 md:pl-11">
                           {lint.errors.map((err, idx) => (
                             <div
                               key={`err-${idx}`}

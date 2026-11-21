@@ -4,6 +4,7 @@ import {
   CORE_TAGS,
   OPTIONAL_TAGS,
   ALL_TAG_DEFINITIONS,
+  HYDRATION_STAGES,
   createDefaultTagMap,
   lintTagName,
   lintTagMap,
@@ -11,7 +12,17 @@ import {
   getNamespaceHashes,
   getNamespaceExclusions,
   getRecommendedDragOrder,
+  buildTagHydrationQueries,
+  getAllTagHydrationSteps,
 } from './tagSystem';
+import {
+  validateSearchString,
+  parseSearchString,
+  generateSearchString,
+  compressIds,
+} from './searchUtils';
+import { ALL_COMMUNITY_DAY_PRE_EVO_IDS } from '../data/communityDayRegistry';
+import realMetaSnapshot from '../data/meta_snapshot.json';
 
 describe('28-tag, 7-namespace blueprint', () => {
   test('defines exactly 28 core tags across 7 namespaces + optional 29th OP-Purify1k', () => {
@@ -108,5 +119,222 @@ describe('tag hash & smart namespace umbrella resolution', () => {
     expect(hashes).toContain('#greatleague');
     expect(hashes).toContain('#pvp-ul');
     expect(hashes).not.toEqual(['#pvp']);
+  });
+});
+
+describe('Initial Tag Hydration queries (all 29 tags, 6-stage walkthrough)', () => {
+  const defaultMap = createDefaultTagMap();
+  const customRenamedMap = {
+    ...createDefaultTagMap(),
+    pvp_wip: { name: 'BuildPvP', enabled: true },
+    pve_wip: { name: 'BuildRaid', enabled: true },
+    max_wip: { name: 'BuildMax', enabled: true },
+    op_powerup: { name: 'DustQueue', enabled: true },
+    op_purify1k: { name: 'PurifyCheap', enabled: true },
+  };
+
+  test('covers all 29 tags (28 core + optional op_purify1k) in exact Stage 1 -> Stage 6 order', () => {
+    expect(HYDRATION_STAGES).toHaveLength(6);
+    expect(HYDRATION_STAGES.map((s) => s.stageNumber)).toEqual([1, 2, 3, 4, 5, 6]);
+
+    const steps = getAllTagHydrationSteps(defaultMap, realMetaSnapshot);
+    expect(steps).toHaveLength(29);
+
+    // Every defined tag appears exactly once
+    const stepTagIds = steps.map((s) => s.tagId);
+    const uniqueIds = new Set(stepTagIds);
+    expect(uniqueIds.size).toBe(29);
+    for (const def of ALL_TAG_DEFINITIONS) {
+      expect(uniqueIds.has(def.id), `Missing hydration step for ${def.id}`).toBe(true);
+    }
+
+    // Stages are strictly non-decreasing (Stage 1 -> Stage 6)
+    let prevStage = 1;
+    for (const step of steps) {
+      expect(step.stageNumber).toBeGreaterThanOrEqual(prevStage);
+      prevStage = step.stageNumber;
+      expect(step.queries.length).toBeGreaterThanOrEqual(1);
+    }
+
+    // Spot-check exact stage boundaries
+    expect(steps.slice(0, 4).map((s) => s.tagId)).toEqual([
+      'ev_shbg',
+      'ev_locbg',
+      'ev_global',
+      'ev_inperson',
+    ]);
+    expect(steps[4].tagId).toBe('keep_trophy');
+    expect(steps.slice(5, 13).map((s) => s.tagId)).toEqual([
+      'pvp_gl',
+      'pvp_ul',
+      'pvp_ml',
+      'pvp_cup',
+      'pve_raid',
+      'max_atk',
+      'max_tank',
+      'max_heal',
+    ]);
+    expect(steps.slice(13, 17).map((s) => s.tagId)).toEqual([
+      'pvp_wip',
+      'pve_wip',
+      'max_wip',
+      'max_candy',
+    ]);
+    expect(steps.slice(17, 20).map((s) => s.tagId)).toEqual([
+      'tr_spec',
+      'tr_dist',
+      'tr_mirror',
+    ]);
+    expect(steps.slice(20).map((s) => s.tagId)).toEqual([
+      'op_mega',
+      'op_xxl',
+      'op_tmfrust',
+      'op_buddy',
+      'op_evocd',
+      'op_evoxp',
+      'op_powerup',
+      'op_2xxfer',
+      'op_purify1k',
+    ]);
+  });
+
+  test('ALL 29 tags produce valid non-empty queries with 0 validateSearchString errors/warnings, 0 banned patterns, and < 4000 chars', () => {
+    const configs = [
+      { label: 'default + realMetaSnapshot', map: defaultMap, meta: realMetaSnapshot },
+      { label: 'default + empty metaSnapshot', map: defaultMap, meta: {} },
+      { label: 'custom renamed + realMetaSnapshot', map: customRenamedMap, meta: realMetaSnapshot },
+    ];
+
+    for (const { label, map, meta } of configs) {
+      const steps = getAllTagHydrationSteps(map, meta);
+      expect(steps).toHaveLength(29);
+
+      for (const step of steps) {
+        const direct = buildTagHydrationQueries(step.tagId, map, meta);
+        expect(direct.length, `${label} ${step.tagId} queries`).toBeGreaterThan(0);
+        expect(direct).toEqual(step.queries);
+
+        for (const item of step.queries) {
+          expect(typeof item.query).toBe('string');
+          expect(item.query.trim().length, `${label} ${step.tagId}/${item.id} non-empty`).toBeGreaterThan(0);
+          expect(item.query.length, `${label} ${step.tagId}/${item.id} < 4000 chars`).toBeLessThan(4000);
+
+          // Banned patterns across all hydration strings
+          expect(item.query, `${label} ${step.tagId}/${item.id} no ultrabeasts`).not.toContain('ultrabeasts');
+          expect(item.query, `${label} ${step.tagId}/${item.id} no partyplay`).not.toContain('partyplay');
+          expect(item.query, `${label} ${step.tagId}/${item.id} no negated IV stats`).not.toMatch(
+            /![0-4](?:-[0-4])?(?:attack|defense|hp)/i
+          );
+          expect(item.query, `${label} ${step.tagId}/${item.id} no !mega`).not.toMatch(/!mega/i);
+
+          const isTrash = step.tagId === 'op_2xxfer';
+          const res = validateSearchString(item.query, { isTrashContext: isTrash });
+          expect(res.valid, `${label} ${step.tagId}/${item.id} valid: ${item.query}`).toBe(true);
+          expect(res.errors, `${label} ${step.tagId}/${item.id} errors: ${item.query}`).toEqual([]);
+          expect(res.warnings, `${label} ${step.tagId}/${item.id} warnings: ${item.query}`).toEqual([]);
+        }
+      }
+    }
+  });
+
+  test('verifies exact semantics for key hydration queries (!@3mov PvP, @3mov op_2xxfer, candykm1, CD pre-evos, keep_trophy 3 chips)', () => {
+    expect(buildTagHydrationQueries('ev_shbg', defaultMap, realMetaSnapshot)[0].query).toBe(
+      'shiny&background&!#'
+    );
+    expect(buildTagHydrationQueries('ev_locbg', defaultMap, realMetaSnapshot)[0].query).toBe(
+      'locationbackground&!#'
+    );
+    expect(buildTagHydrationQueries('ev_global', defaultMap, realMetaSnapshot).map((q) => q.query)).toEqual([
+      'specialbackground&!#',
+      'profilebackground&!#',
+    ]);
+    expect(buildTagHydrationQueries('ev_inperson', defaultMap, realMetaSnapshot)[0].query).toBe(
+      'costume,unown,shiny&!#'
+    );
+
+    expect(buildTagHydrationQueries('keep_trophy', defaultMap, realMetaSnapshot).map((q) => q.query)).toEqual([
+      '0attack&0defense&0hp&!#',
+      'count1&!#',
+      'costume,@special&!#',
+    ]);
+
+    // Built PvP rosters use !@3mov (double-moved)
+    expect(buildTagHydrationQueries('pvp_gl', defaultMap, realMetaSnapshot)[0].query).toBe(
+      'cp1300-1500&!@3mov&!#'
+    );
+    expect(buildTagHydrationQueries('pvp_ul', defaultMap, realMetaSnapshot)[0].query).toBe(
+      'cp2300-2500&!@3mov&!#'
+    );
+    expect(buildTagHydrationQueries('pvp_ml', defaultMap, realMetaSnapshot).map((q) => q.query)).toEqual([
+      'cp3000-&!@3mov&3*,4*&4attack&!#',
+      'candyxl&!@3mov&3*,4*&!#',
+    ]);
+    expect(buildTagHydrationQueries('pvp_cup', defaultMap, realMetaSnapshot)[0].query).toBe(
+      'cp400-500&!@3mov&!#'
+    );
+
+    // op_2xxfer uses @3mov single-move shield (NEVER !@3mov)
+    const xferQuery = buildTagHydrationQueries('op_2xxfer', defaultMap, realMetaSnapshot)[0].query;
+    expect(xferQuery).toBe(
+      'legendary,ultrabeast,mythical,traded&!lucky&!shiny&!4*&!background&!favorite&@3mov&!#'
+    );
+    expect(xferQuery).toContain('&@3mov&');
+    expect(xferQuery).not.toContain('!@3mov');
+
+    // op_purify1k uses candykm1
+    expect(buildTagHydrationQueries('op_purify1k', defaultMap, realMetaSnapshot)[0].query).toBe(
+      'shadow&candykm1&!shiny&!4*&!favorite&!#'
+    );
+
+    // op_evocd includes compressed Community Day pre-evo dex IDs + dynamic WIP evolves
+    const evoCd = buildTagHydrationQueries('op_evocd', defaultMap, realMetaSnapshot);
+    expect(evoCd[0].query).toBe(`evolve&!#&!favorite&${compressIds(ALL_COMMUNITY_DAY_PRE_EVO_IDS)}`);
+    expect(evoCd[1].query).toBe('#pvp-wip,#pve-wip&evolve');
+
+    // op_powerup uses dynamic WIP tags & !#op-powerup
+    expect(buildTagHydrationQueries('op_powerup', defaultMap, realMetaSnapshot)[0].query).toBe(
+      '#pvp-wip,#pve-wip,#max-wip&!#op-powerup'
+    );
+
+    // Unknown tag returns empty array
+    expect(buildTagHydrationQueries('nonexistent_tag', defaultMap, realMetaSnapshot)).toEqual([]);
+  });
+
+  test('dynamically updates op_powerup and op_evocd queries when user renames tags in tagMap', () => {
+    const powerupRenamed = buildTagHydrationQueries('op_powerup', customRenamedMap, realMetaSnapshot);
+    expect(powerupRenamed[0].query).toBe('#buildpvp,#buildraid,#buildmax&!#dustqueue');
+
+    const evoCdRenamed = buildTagHydrationQueries('op_evocd', customRenamedMap, realMetaSnapshot);
+    expect(evoCdRenamed[1].query).toBe('#buildpvp,#buildraid&evolve');
+  });
+
+  test('ALL 29 hydration queries achieve full parseSearchString -> generateSearchString round-trip stability', () => {
+    for (const map of [defaultMap, customRenamedMap]) {
+      const steps = getAllTagHydrationSteps(map, realMetaSnapshot);
+
+      for (const step of steps) {
+        const isTrash = step.tagId === 'op_2xxfer';
+        for (const item of step.queries) {
+          const parsed1 = parseSearchString(item.query);
+          const regenerated1 = generateSearchString(parsed1.selectedIds, parsed1.filters);
+
+          // Regenerated string must remain non-empty and pass validation cleanly
+          expect(regenerated1.length, `Round-trip non-empty for ${step.tagId}/${item.id}`).toBeGreaterThan(0);
+          const val1 = validateSearchString(regenerated1, { isTrashContext: isTrash });
+          expect(val1.errors, `Round-trip errors for ${step.tagId}/${item.id}: ${regenerated1}`).toEqual([]);
+          expect(val1.warnings, `Round-trip warnings for ${step.tagId}/${item.id}: ${regenerated1}`).toEqual([]);
+
+          // Second parse -> generate pass MUST be strictly idempotent
+          const parsed2 = parseSearchString(regenerated1);
+          const regenerated2 = generateSearchString(parsed2.selectedIds, parsed2.filters);
+          expect(regenerated2, `Idempotent round-trip for ${step.tagId}/${item.id}`).toBe(regenerated1);
+
+          // Selected Dex IDs must match identically across round-trip passes
+          expect(Array.from(parsed2.selectedIds).sort((a, b) => a - b)).toEqual(
+            Array.from(parsed1.selectedIds).sort((a, b) => a - b)
+          );
+        }
+      }
+    }
   });
 });
