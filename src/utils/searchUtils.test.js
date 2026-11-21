@@ -1,139 +1,270 @@
-import { expect, test, describe } from "bun:test";
-import { compressIdRanges, parseSearchString } from "./searchUtils";
+import { expect, test, describe } from 'vitest';
+import {
+  REGIONS,
+  TYPES,
+  ATTRIBUTES,
+  PVP_IV_EXCLUDE_CLAUSE,
+  NUNDO_EXCLUDE_CLAUSE,
+  compressIds,
+  compressIdRanges,
+  expandIds,
+  invertIvStatRange,
+  parseToAst,
+  parseSearchString,
+  generateSearchString,
+  normalizeSearchString,
+  validateSearchString,
+  createDefaultFilters,
+  compileDnfToPogoCnf,
+  inspectAndFixPogoQuery,
+} from './searchUtils';
 
-describe("compressIdRanges", () => {
-  test("should handle empty input", () => {
-    expect(compressIdRanges([])).toBe("");
-    expect(compressIdRanges(new Set())).toBe("");
-    expect(compressIdRanges(null)).toBe("");
-    expect(compressIdRanges(undefined)).toBe("");
+describe('constants', () => {
+  test('includes all 10 regions including Hisui', () => {
+    expect(REGIONS).toHaveLength(10);
+    expect(REGIONS).toContain('Hisui');
+    expect(REGIONS).toContain('Galar');
+    expect(REGIONS).toContain('Paldea');
   });
 
-  test("should handle single ID", () => {
-    expect(compressIdRanges([1])).toBe("1");
-    expect(compressIdRanges(new Set([5]))).toBe("5");
-  });
-
-  test("should compress continuous range", () => {
-    expect(compressIdRanges([1, 2, 3])).toBe("1-3");
-    expect(compressIdRanges(new Set([4, 5, 6, 7]))).toBe("4-7");
-  });
-
-  test("should handle discontinuous ranges", () => {
-    expect(compressIdRanges([1, 3, 5])).toBe("1,3,5");
-    expect(compressIdRanges([1, 2, 4, 5])).toBe("1-2,4-5");
-  });
-
-  test("should handle mixed ranges and single numbers", () => {
-    expect(compressIdRanges([1, 2, 3, 5, 7, 8])).toBe("1-3,5,7-8");
-  });
-
-  test("should handle unsorted input", () => {
-    expect(compressIdRanges([3, 1, 2])).toBe("1-3");
-    expect(compressIdRanges([5, 1, 3])).toBe("1,3,5");
-  });
-
-  test("should handle string inputs that are numbers", () => {
-    expect(compressIdRanges(["1", "2", "3"])).toBe("1-3");
-    expect(compressIdRanges(["1", "3"])).toBe("1,3");
-  });
-
-  test("should handle duplicates gracefully", () => {
-      // Current implementation might produce weird results with duplicates if not handled.
-      // If we decide to support array with duplicates, we should expect unique ranges.
-      // For now, let's verify what happens or expect the robust behavior if I fix it.
-      // I'll assume I will fix it.
-      expect(compressIdRanges([1, 1, 2, 3])).toBe("1-3");
-      expect(compressIdRanges([1, 2, 2, 3])).toBe("1-3");
-      expect(compressIdRanges([1, 3, 3, 5])).toBe("1,3,5");
+  test('uses canonical ultrabeast and party spellings', () => {
+    expect(ATTRIBUTES).toContain('ultrabeast');
+    expect(ATTRIBUTES).not.toContain('ultrabeasts');
+    expect(ATTRIBUTES).toContain('party');
+    expect(ATTRIBUTES).not.toContain('partyplay');
+    expect(ATTRIBUTES).toContain('background');
+    expect(ATTRIBUTES).toContain('locationbackground');
+    expect(ATTRIBUTES).toContain('specialbackground');
+    expect(ATTRIBUTES).toContain('profilebackground');
+    expect(ATTRIBUTES).toContain('maxmove1-');
+    expect(ATTRIBUTES).toContain('!@3mov');
+    expect(TYPES).toHaveLength(18);
   });
 });
 
-describe("parseSearchString", () => {
-  test("should handle empty or null string", () => {
-    const empty = parseSearchString("");
-    expect(empty.selectedIds.size).toBe(0);
-    expect(empty.filters.appraisal.length).toBe(0);
-    expect(empty.filters.ageMin).toBe("");
-    expect(empty.filters.ageMax).toBe("");
-    expect(empty.filters.shiny).toBe(null);
-
-    const nul = parseSearchString(null);
-    expect(nul.selectedIds.size).toBe(0);
+describe('compressIds / expandIds', () => {
+  test('handles empty, null, and single IDs', () => {
+    expect(compressIds([])).toBe('');
+    expect(compressIds(new Set())).toBe('');
+    expect(compressIds(null)).toBe('');
+    expect(compressIds(undefined)).toBe('');
+    expect(compressIds([1])).toBe('1');
+    expect(compressIdRanges(new Set([5]))).toBe('5');
   });
 
-  test("should parse IDs and ranges", () => {
-    const result = parseSearchString("1,3-5,10");
-    const ids = Array.from(result.selectedIds).sort((a, b) => a - b);
-    expect(ids).toEqual([1, 3, 4, 5, 10]);
+  test('compresses continuous, discontinuous, unsorted, string, and duplicate inputs', () => {
+    expect(compressIds([1, 2, 3])).toBe('1-3');
+    expect(compressIds([1, 2, 3, 5, 7, 8])).toBe('1-3,5,7-8');
+    expect(compressIds([3, 1, 2])).toBe('1-3');
+    expect(compressIds(['1', '2', '3'])).toBe('1-3');
+    expect(compressIds([1, 1, 2, 2, 3, 5, 5])).toBe('1-3,5');
   });
 
-  test("should parse attributes", () => {
-    const result = parseSearchString("shiny");
-    expect(result.filters.shiny).toBe(true);
-    expect(result.filters.legendary).toBe(null);
+  test('expandIds round-trips compressed ranges', () => {
+    const expanded = expandIds('1-3, 25-26, 172');
+    expect(Array.from(expanded).sort((a, b) => a - b)).toEqual([1, 2, 3, 25, 26, 172]);
+  });
+});
+
+describe('invertIvStatRange', () => {
+  test('inverts IV ranges into valid positive complement clauses (never !{N}attack)', () => {
+    expect(invertIvStatRange('attack', 0, 1)).toBe('2-4attack');
+    expect(invertIvStatRange('defense', 3, 4)).toBe('0-2defense');
+    expect(invertIvStatRange('hp', 0, 0)).toBe('1-4hp');
+    expect(invertIvStatRange('attack', 2, 2)).toBe('0-1attack,3-4attack');
+    expect(invertIvStatRange('hp', 0, 4)).toBe('');
+  });
+});
+
+describe('parseSearchString & generateSearchString round-trip (CNF)', () => {
+  test('round-trips comma-joined appraisals (0*,1*,2*) and comma-joined types (fire,water)', () => {
+    const input = '1-3,25&0*,1*,2*&fire,water&shiny&!legendary';
+    const { selectedIds, filters } = parseSearchString(input);
+
+    expect(Array.from(selectedIds).sort((a, b) => a - b)).toEqual([1, 2, 3, 25]);
+    expect(filters.appraisal).toEqual(['0*', '1*', '2*']);
+    expect(filters.types).toEqual(['fire', 'water']);
+    expect(filters.shiny).toBe(true);
+    expect(filters.legendary).toBe(false);
+
+    const out = generateSearchString(selectedIds, filters);
+    expect(out).toContain('1-3,25');
+    expect(out).toContain('0*,1*,2*');
+    expect(out).toContain('fire,water');
+    expect(out).toContain('shiny');
+    expect(out).toContain('!legendary');
   });
 
-  test("should parse negated attributes", () => {
-    const result = parseSearchString("!legendary");
-    expect(result.filters.legendary).toBe(false);
+  test('preserves dual-type AND semantics (dragon&flying) without collapsing to OR (dragon,flying)', () => {
+    const dualAnd = parseSearchString('dragon&flying');
+    expect(dualAnd.filters.types).toEqual(['dragon']);
+    expect(dualAnd.filters.rawClauses).toEqual(['flying']);
+    expect(generateSearchString(dualAnd.selectedIds, dualAnd.filters)).toBe('dragon&flying');
+
+    const dualOr = parseSearchString('dragon,flying');
+    expect(dualOr.filters.types).toEqual(['dragon', 'flying']);
+    expect(dualOr.filters.rawClauses).toEqual([]);
+    expect(generateSearchString(dualOr.selectedIds, dualOr.filters)).toBe('dragon,flying');
+
+    const multiDexAnd = parseSearchString('1-151&25');
+    expect(multiDexAnd.selectedIds.size).toBe(151);
+    expect(multiDexAnd.filters.rawClauses).toEqual(['25']);
+    expect(generateSearchString(multiDexAnd.selectedIds, multiDexAnd.filters)).toBe('1-151&25');
   });
 
-  test("should parse types", () => {
-    const result = parseSearchString("fire");
-    expect(result.filters.types).toContain("fire");
+  test('preserves negated IDs, negated age, negated appraisal, and negated types in rawClauses instead of stripping !', () => {
+    const { selectedIds, filters } = parseSearchString('!1-151&!age0-7&!4*&!fire');
+    expect(selectedIds.size).toBe(0);
+    expect(filters.ageMin).toBe('');
+    expect(filters.ageMax).toBe('');
+    expect(filters.appraisal).toEqual([]);
+    expect(filters.types).toEqual([]);
+    expect(filters.rawClauses).toEqual(['!1-151', '!age0-7', '!4*', '!fire']);
+    expect(generateSearchString(selectedIds, filters)).toBe('!1-151&!age0-7&!4*&!fire');
   });
 
-  test("should parse multiple types", () => {
-    const result = parseSearchString("fire&water");
-    expect(result.filters.types).toContain("fire");
-    expect(result.filters.types).toContain("water");
-    expect(result.filters.types.length).toBe(2);
+  test('preserves unknown/complex PoGO clauses (#tag, @frustration, 4*,shiny,background, countcandyxl296-)', () => {
+    const input = 'age0&!#&4*,shiny,background&#pvp-gl&@frustration&countcandyxl296-';
+    const { selectedIds, filters } = parseSearchString(input);
+    expect(filters.ageMin).toBe('0');
+    expect(filters.ageMax).toBe('0');
+    expect(filters['#']).toBe(false);
+    expect(filters.rawClauses).toEqual(['4*,shiny,background', '#pvp-gl', '@frustration', 'countcandyxl296-']);
+
+    const regenerated = generateSearchString(selectedIds, filters);
+    expect(regenerated).toContain('age0');
+    expect(regenerated).toContain('!#');
+    expect(regenerated).toContain('4*,shiny,background');
+    expect(regenerated).toContain('#pvp-gl');
+    expect(regenerated).toContain('@frustration');
+    expect(regenerated).toContain('countcandyxl296-');
   });
 
-  test("should parse appraisal", () => {
-    const result = parseSearchString("4*");
-    expect(result.filters.appraisal).toContain("4*");
+  test('handles !@3mov (has 2nd move) and @3mov (single-move shield) without double negation', () => {
+    const hasSecond = parseSearchString('!@3mov');
+    expect(hasSecond.filters['!@3mov']).toBe(true);
+    expect(generateSearchString(hasSecond.selectedIds, hasSecond.filters)).toBe('!@3mov');
+
+    const singleOnly = parseSearchString('@3mov');
+    expect(singleOnly.filters['!@3mov']).toBe(false);
+    expect(generateSearchString(singleOnly.selectedIds, singleOnly.filters)).toBe('@3mov');
   });
 
-  test("should parse age range", () => {
-    const result = parseSearchString("age0-10");
-    expect(result.filters.ageMin).toBe("0");
-    expect(result.filters.ageMax).toBe("10");
+  test('handles IV stat bar filters and De Morgan PvP/Nundo shields cleanly', () => {
+    const pvpScreen = parseSearchString('0-1attack&3-4defense&3-4hp');
+    expect(pvpScreen.filters.ivStats).toMatchObject({
+      attackMin: '0', attackMax: '1',
+      defenseMin: '3', defenseMax: '4',
+      hpMin: '3', hpMax: '4',
+    });
+    expect(generateSearchString(pvpScreen.selectedIds, pvpScreen.filters)).toBe('0-1attack&3-4defense&3-4hp');
+
+    const shielded = parseSearchString(`0*,1*,2*&${PVP_IV_EXCLUDE_CLAUSE}&${NUNDO_EXCLUDE_CLAUSE}`);
+    expect(shielded.filters.ivStats.excludePvpIv).toBe(true);
+    expect(shielded.filters.ivStats.excludeNundo).toBe(true);
+    expect(generateSearchString(shielded.selectedIds, shielded.filters)).toBe(
+      `0*,1*,2*&${PVP_IV_EXCLUDE_CLAUSE}&${NUNDO_EXCLUDE_CLAUSE}`
+    );
   });
 
-  test("should parse exact age", () => {
-    const result = parseSearchString("age5");
-    expect(result.filters.ageMin).toBe("5");
-    expect(result.filters.ageMax).toBe("5");
+  test('parses legacy alias "ultra beasts" to canonical "ultrabeast"', () => {
+    const parsed = parseSearchString('!ultra beasts');
+    expect(parsed.filters.ultrabeast).toBe(false);
+    expect(generateSearchString(parsed.selectedIds, parsed.filters)).toBe('!ultrabeast');
   });
 
-  test("should parse complex combination", () => {
-    const result = parseSearchString("shiny&!mythical&1-3&fire&4*&age1");
+  test('handles distance100- open minimum range properly', () => {
+    const parsed = parseSearchString('distance100-&!traded');
+    expect(parsed.filters.distanceMin).toBe('100');
+    expect(parsed.filters.distanceMax).toBe('');
+    expect(generateSearchString(parsed.selectedIds, parsed.filters)).toBe('distance100-&!traded');
 
-    // IDs
-    const ids = Array.from(result.selectedIds).sort((a, b) => a - b);
-    expect(ids).toEqual([1, 2, 3]);
-
-    // Filters
-    expect(result.filters.shiny).toBe(true);
-    expect(result.filters.mythical).toBe(false);
-    expect(result.filters.types).toContain("fire");
-    expect(result.filters.appraisal).toContain("4*");
-    expect(result.filters.ageMin).toBe("1");
-    expect(result.filters.ageMax).toBe("1");
+    // Bare distance100 in PoGO means <= 100
+    const bare = parseSearchString('distance100');
+    expect(bare.filters.distanceMin).toBe('');
+    expect(bare.filters.distanceMax).toBe('100');
   });
 
-  test("should handle whitespace and case insensitivity", () => {
-    const result = parseSearchString(" Shiny & FIRE & ! Shadow ");
-    expect(result.filters.shiny).toBe(true);
-    expect(result.filters.types).toContain("fire");
-    expect(result.filters.shadow).toBe(false);
+  test('normalizeSearchString converts | -> &, ;/: -> ,, strips space after !', () => {
+    expect(normalizeSearchString('0*;1*:2* | ! shiny & !ultra beasts')).toBe('0*,1*,2*&!shiny&!ultrabeast');
   });
 
-  test("should handle whitespace in ID list", () => {
-    const result = parseSearchString("1, 2, 3");
-    const ids = Array.from(result.selectedIds).sort((a, b) => a - b);
-    expect(ids).toEqual([1, 2, 3]);
+  test('parseToAst handles CNF combinators', () => {
+    const ast = parseToAst('a,b&!c|d;e');
+    expect(ast.clauses).toHaveLength(3);
+    expect(ast.clauses[0].atoms.map((a) => a.value)).toEqual(['a', 'b']);
+    expect(ast.clauses[1].atoms[0]).toMatchObject({ value: 'c', negated: true });
+    expect(ast.clauses[2].atoms.map((a) => a.value)).toEqual(['d', 'e']);
+  });
+});
+
+describe('validateSearchString guardrails', () => {
+  test('accepts valid ultra-safe trash string with @3mov and De Morgan shields', () => {
+    const validTrash =
+      'age0&!#&!favorite&0*,1*,2*&!shiny&!background&!costume&!legendary&!mythical&!ultrabeast&!shadow&!maxmove1-&!xxl&!xxs&!@special&!lucky&!fusion&!adventureeffect&@3mov&2-4attack,0-2defense,0-2hp&1-4attack,1-4defense,1-4hp';
+    const res = validateSearchString(validTrash, { isTrashContext: true });
+    expect(res.valid).toBe(true);
+    expect(res.errors).toHaveLength(0);
+    expect(res.warnings).toHaveLength(0);
+  });
+
+  test('catches ultrabeasts, partyplay, negated IV stats, +dex, invalid star range, and space after !', () => {
+    expect(validateSearchString('!ultrabeasts').errors.map((e) => e.code)).toContain('INVALID_ULTRABEASTS');
+    expect(validateSearchString('partyplay').errors.map((e) => e.code)).toContain('INVALID_PARTYPLAY');
+    expect(validateSearchString('!0-1attack').errors.map((e) => e.code)).toContain('NEGATED_IV_STAT');
+    expect(validateSearchString('!4hp').errors.map((e) => e.code)).toContain('NEGATED_IV_STAT');
+    expect(validateSearchString('+25').errors.map((e) => e.code)).toContain('PLUS_ON_DEX');
+    expect(validateSearchString('0-2*').errors.map((e) => e.code)).toContain('INVALID_STAR_RANGE');
+    expect(validateSearchString('! shiny').errors.map((e) => e.code)).toContain('SPACE_AFTER_NOT');
+  });
+
+  test('catches !mega and inverted !@3mov in trash context', () => {
+    const resMega = validateSearchString('0*,1*,2*&!shiny&!favorite&!mega1-3', { isTrashContext: true });
+    expect(resMega.errors.map((e) => e.code)).toContain('NEGATED_MEGA_IN_TRASH');
+
+    const res3Mov = validateSearchString('0*,1*,2*&!shiny&!favorite&!@3mov', { isTrashContext: true });
+    expect(res3Mov.errors.map((e) => e.code)).toContain('INVERTED_3MOV_IN_TRASH');
+  });
+
+  test('warns on bare distance100, pipe |, grouping (), and >4000 / >5000 chars', () => {
+    expect(validateSearchString('distance100').warnings.map((w) => w.code)).toContain('BARE_DISTANCE');
+    expect(validateSearchString('a|b').warnings.map((w) => w.code)).toContain('PIPE_IS_AND');
+    expect(validateSearchString('(a,b)&c').warnings.map((w) => w.code)).toContain('UNSUPPORTED_GROUPING');
+
+    const warnStr = '1,'.repeat(2050) + '2';
+    expect(validateSearchString(warnStr).warnings.map((w) => w.code)).toContain('LENGTH_WARNING');
+
+    const errStr = '1,'.repeat(2600) + '2';
+    expect(validateSearchString(errStr).errors.map((e) => e.code)).toContain('LENGTH_ERROR');
+  });
+
+  test('createDefaultFilters returns clean isolated state', () => {
+    const f1 = createDefaultFilters();
+    const f2 = createDefaultFilters();
+    f1.appraisal.push('4*');
+    expect(f2.appraisal).toEqual([]);
+  });
+});
+
+describe('compileDnfToPogoCnf & inspectAndFixPogoQuery (origin/main compatibility)', () => {
+  test('compiles DNF branches with global AND prefixes into minimal absorbed PoGO CNF', () => {
+    const cnf = compileDnfToPogoCnf(
+      ['4*', 'gigantamax', 'shiny&shadow', 'shiny&legendary'],
+      ['!#']
+    );
+    expect(cnf).toBe('!#&4*,gigantamax,shiny&4*,gigantamax,shadow,legendary');
+  });
+
+  test('detects and fixes comma-vs-ampersand precedence traps while leaving valid CNF untouched', () => {
+    const trapped = inspectAndFixPogoQuery('!#&4*,shiny&shadow,shiny&legendary');
+    expect(trapped.hasPrecedenceTrap).toBe(true);
+    expect(trapped.fixedCnfQuery).toBe('!#&4*,shiny&4*,shadow,legendary');
+
+    const alreadyCnf = inspectAndFixPogoQuery('!#&4*,shiny&4*,shadow,legendary');
+    expect(alreadyCnf.hasPrecedenceTrap).toBe(false);
+    expect(alreadyCnf.fixedCnfQuery).toBe('!#&4*,shiny&4*,shadow,legendary');
+
+    const standardTrash = inspectAndFixPogoQuery('!#&0*,1*,2*&!shiny');
+    expect(standardTrash.hasPrecedenceTrap).toBe(false);
   });
 });

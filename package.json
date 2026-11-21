@@ -8,10 +8,14 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "update:data": "node scripts/fetch_data.js",
+    "update:meta": "node scripts/fetch_meta.js",
     "sync-meta": "node scripts/fetch_meta.js"
   },
   "dependencies": {
-    "axios": "^1.13.4",
+    "qrcode": "^1.5.4",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "vite-plugin-pwa": "^1.2.0"
@@ -28,6 +32,7 @@
     "globals": "^16.5.0",
     "postcss": "^8.5.6",
     "tailwindcss": "^3.4.19",
-    "vite": "^7.2.4"
+    "vite": "^7.2.4",
+    "vitest": "^5.1.1"
   }
 }
