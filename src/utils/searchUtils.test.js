@@ -238,6 +238,19 @@ describe('validateSearchString guardrails', () => {
     expect(validateSearchString(errStr).errors.map((e) => e.code)).toContain('LENGTH_ERROR');
   });
 
+  test('warns on VARIANT_COUNT_TRAP and UNSCOPED_NEGATED_MAX', () => {
+    expect(validateSearchString('shiny&count4-').warnings.map((w) => w.code)).toContain('VARIANT_COUNT_TRAP');
+    expect(validateSearchString('specialbackground&count-3').warnings.map((w) => w.code)).toContain('VARIANT_COUNT_TRAP');
+    expect(validateSearchString('costume&count3-').warnings.map((w) => w.code)).toContain('VARIANT_COUNT_TRAP');
+    // count1 (exact 1-of-1 species) and non-variant legendary&count2- are valid
+    expect(validateSearchString('shiny&count1').warnings.map((w) => w.code)).not.toContain('VARIANT_COUNT_TRAP');
+    expect(validateSearchString('legendary&count2-').warnings.map((w) => w.code)).not.toContain('VARIANT_COUNT_TRAP');
+
+    expect(validateSearchString('!maxguard3').warnings.map((w) => w.code)).toContain('UNSCOPED_NEGATED_MAX');
+    expect(validateSearchString('maxmove1-&!maxguard3').warnings.map((w) => w.code)).not.toContain('UNSCOPED_NEGATED_MAX');
+    expect(validateSearchString('#max-tank&!maxguard3').warnings.map((w) => w.code)).not.toContain('UNSCOPED_NEGATED_MAX');
+  });
+
   test('createDefaultFilters returns clean isolated state', () => {
     const f1 = createDefaultFilters();
     const f2 = createDefaultFilters();

@@ -4,13 +4,20 @@
  * to compute exact relative `ageX-Y` search strings across Major Events, Trips, and Yearly/Monthly timelines.
  */
 import eventsArchiveJson from './events_archive.json';
-import { compressIdRanges } from '../utils/searchUtils';
+import {
+  compressIdRanges,
+  negateCompressedRanges,
+  PVP_IV_EXCLUDE_CLAUSE,
+  NUNDO_EXCLUDE_CLAUSE,
+} from '../utils/searchUtils';
+import { buildSafeTrashQuery } from '../utils/triageFunnels';
 
 const EVENT_DB_STORAGE_KEY = 'pogo_stored_event_db_v2';
 const LEGACY_EVENT_DB_KEY = 'pogo_stored_event_db_v1';
 
 /**
- * Canonical National Dex IDs for Regionals, Rotom (#479), Unown (#201), and Rare Egg/Ticket Tradeables.
+ * Canonical National Dex IDs for Regionals, Rotom (#479), Unown (#201), Spinda (#327), Stonjourner (#874),
+ * and Rare Egg/Ticket Tradeables.
  * Used both to isolate high-demand trade stock (even at 0*-2* IVs) and to guard Safe Trash sweeps.
  */
 export const GLOBAL_REGIONAL_ROTOM_UNOWN_IDS = [
@@ -24,6 +31,7 @@ export const GLOBAL_REGIONAL_ROTOM_UNOWN_IDS = [
   313, // Volbeat
   314, // Illumise
   324, // Torkoal
+  327, // Spinda
   335, // Zangoose
   336, // Seviper
   337, // Lunatone
@@ -59,16 +67,13 @@ export const GLOBAL_REGIONAL_ROTOM_UNOWN_IDS = [
   741, // Oricorio
   764, // Comfey
   848, // Toxel
+  874, // Stonjourner
   978, // Tatsugiri
 ];
 
 export const GLOBAL_REGIONAL_ROTOM_UNOWN_RANGES = compressIdRanges(GLOBAL_REGIONAL_ROTOM_UNOWN_IDS);
 
-const GLOBAL_REGIONAL_NEGATION = GLOBAL_REGIONAL_ROTOM_UNOWN_RANGES
-  .split(',')
-  .filter(Boolean)
-  .map((r) => `!${r}`)
-  .join('&');
+const GLOBAL_REGIONAL_NEGATION = negateCompressedRanges(GLOBAL_REGIONAL_ROTOM_UNOWN_RANGES);
 
 let temporalLoadPromise = null;
 
@@ -163,16 +168,21 @@ export function formatIntervalToAgeToken(iv) {
 /**
  * Calculates Pokémon GO `ageX-Y` search string for an event window [startDateStr, endDateStr]
  * relative to refDateStr (default: today).
+ * Because Pokémon GO increments `age` strictly 24 hours after catch (not at calendar midnight),
+ * `bufferMode = 'evening-safe'` (default) computes the true 24-hour rolling envelope so afternoon/evening
+ * catches on the final event day are never dropped.
  */
 export function calculateAgeSearchString(startDateStr, endDateStr, refDateStr = null, options = {}) {
-  const effectiveRef = refDateStr || getTodayPlainDateString();
+  const todayStr = getTodayPlainDateString();
+  const effectiveRef = refDateStr || todayStr;
   const effectiveEnd = endDateStr === 'PRESENT' ? effectiveRef : endDateStr || startDateStr;
-  const bufferMode = options.bufferMode || 'exact';
+  const bufferMode = options.bufferMode || 'evening-safe';
 
   let moreDaysAgo = 0;
   let fewerDaysAgo = 0;
   let humanSpan = '';
   let isUpcoming = false;
+  let usedLiveZonedRolling = false;
 
   if (typeof globalThis.Temporal !== 'undefined') {
     const Temporal = globalThis.Temporal;
@@ -186,6 +196,23 @@ export function calculateAgeSearchString(startDateStr, endDateStr, refDateStr = 
     isUpcoming = sinceStart.sign < 0;
     moreDaysAgo = Math.max(0, sinceStart.days);
     fewerDaysAgo = Math.max(0, sinceEnd.days);
+
+    // Exact wall-clock 24h rolling stopwatch differential when anchored to live "today"
+    if (!isUpcoming && effectiveRef === todayStr && bufferMode === 'evening-safe') {
+      try {
+        const nowZdt = Temporal.Now.zonedDateTimeISO();
+        const tz = nowZdt.timeZoneId;
+        const startZdt = startDate.toZonedDateTime({ timeZone: tz, plainTime: '00:00:00' });
+        const endZdt = endDate.toZonedDateTime({ timeZone: tz, plainTime: '23:59:59' });
+        const hoursSinceStart = nowZdt.since(startZdt, { largestUnit: 'hour' }).hours;
+        const hoursSinceEnd = nowZdt.since(endZdt, { largestUnit: 'hour' }).hours;
+        moreDaysAgo = Math.max(0, Math.floor(hoursSinceStart / 24));
+        fewerDaysAgo = Math.max(0, Math.floor(hoursSinceEnd / 24));
+        usedLiveZonedRolling = true;
+      } catch {
+        // Fall back to calendar envelope below
+      }
+    }
 
     try {
       if (sinceStart.sign >= 0) {
@@ -215,7 +242,7 @@ export function calculateAgeSearchString(startDateStr, endDateStr, refDateStr = 
   let maxAge = Math.max(fewerDaysAgo, moreDaysAgo);
 
   if (!isUpcoming) {
-    if (bufferMode === 'evening-safe') {
+    if (bufferMode === 'evening-safe' && !usedLiveZonedRolling) {
       minAge = Math.max(0, minAge - 1);
     } else if (bufferMode === 'plus-minus-1') {
       minAge = Math.max(0, minAge - 1);
@@ -252,22 +279,15 @@ export function calculateAgeSearchString(startDateStr, endDateStr, refDateStr = 
 }
 
 /**
- * Generates Poké Daxi / LuckyBunz "Tag First, Sweep Last" surgical search strings for a Major Event,
- * anchored to its exact relative `ageX-Y` window:
- * 1. raidAndMegaString: Raid Bosses, Primal/Origin/Fusion/Crowned, Mega/Super Mega, G-Max/D-Max catches.
- * 2. regionalAndRareTradeString: Untraded Event Regionals, Rotom (#479), Unown (#201), Mythicals, & Egg Rares.
- * 3. backgroundKeepString (& backgroundSurplusString): Venue Location Backgrounds or Global Special Backgrounds.
- * 4. pvpAndMightyString: Low-Attack PvP bulk (`0-1attack&3-4defense&3-4hp`) or Wild Area Mighty (`3*,4*&cp2200-`).
- * 5. eventKeepersString: Catch-all keeper scan (Shiny, 4*, Backgrounds, Costumes, G-Max, Legendaries/UBs).
- * 6. eventLeftoverTrashString: Safe 0*-2* wild trash sweep that explicitly NEGATES the event's Regionals,
- *    Rotom, Unown, and Raid/Mega species so low-IV tradeables are never accidentally transferred!
+ * Generates "Tag Keepers First, Sweep Shielded Remainder Last" surgical search strings for a Major Event,
+ * anchored to its exact relative 24h-rolling `ageX-Y` window.
+ * NEVER uses `count-N` / `count(N+1)-` on backgrounds or shinies (since PoGO `count` counts total species Dex #).
  */
 export function buildEventActionStrings(eventItem, refDateStr, options = {}) {
   const {
     untaggedOnly = true,
-    bufferMode = 'exact',
+    bufferMode = 'evening-safe',
     constrainFeaturedSpecies = false,
-    globalBgKeepCap = 3,
   } = options;
 
   const ageCalc = calculateAgeSearchString(eventItem.start, eventItem.end, refDateStr, {
@@ -296,25 +316,25 @@ export function buildEventActionStrings(eventItem, refDateStr, options = {}) {
   const speciesPart =
     constrainFeaturedSpecies && allSpecialRange ? `${allSpecialRange}&` : '';
 
-  // 1. Raids, Megas & Max Bosses
+  // 1. Raids, Megas & Max Bosses (uses `raid,maxmove1-` rather than `mega1-3` so freshly caught `mega0` raid bosses match!)
   const raidAndMegaString = raidMegaRange
     ? `${prefix}${ageCalc.ageToken}&${raidMegaRange}`
-    : `${prefix}${ageCalc.ageToken}&legendary,mythical,ultra beasts,gigantamax,dynamax,mega1-3`;
+    : `${prefix}${ageCalc.ageToken}&raid,maxmove1-,legendary,mythical,ultrabeast`;
 
   // 2. Regionals, Rotom (#479), Unown (#201) & Special Spawns (Untraded Trade Gold)
   const regionalAndRareTradeString = regionalRareRange
     ? `${prefix}!traded&${ageCalc.ageToken}&${regionalRareRange}`
     : null;
 
-  // 3. Backgrounds
+  // 3. Backgrounds (Zero `count` variant trap! Tag keepers first -> `!#` isolates genuine excess)
   let backgroundKeepString = null;
   let backgroundSurplusString = null;
 
   if (eventItem.backgroundType === 'locationbackground') {
-    backgroundKeepString = `${prefix}!traded&${speciesPart}locationbackground&${ageCalc.ageToken}&!4*`;
+    backgroundKeepString = `${prefix}${speciesPart}locationbackground&${ageCalc.ageToken}`;
   } else if (eventItem.backgroundType === 'specialbackground') {
-    backgroundKeepString = `${prefix}!traded&${speciesPart}specialbackground&!locationbackground&${ageCalc.ageToken}&!shiny&!4*&count-${globalBgKeepCap}`;
-    backgroundSurplusString = `${prefix}${speciesPart}specialbackground&!locationbackground&${ageCalc.ageToken}&!shiny&!4*&0*,1*,2*&count${globalBgKeepCap + 1}-&!favorite&!lucky`;
+    backgroundKeepString = `${prefix}${speciesPart}specialbackground&!locationbackground&${ageCalc.ageToken}`;
+    backgroundSurplusString = `!#&!favorite&${speciesPart}specialbackground&!locationbackground&${ageCalc.ageToken}&0*,1*,2*&!shiny&!4*&!lucky&@3mov&${PVP_IV_EXCLUDE_CLAUSE}&${NUNDO_EXCLUDE_CLAUSE}`;
   }
 
   // 4. PvP IV Check & Mighty Spawns
@@ -326,18 +346,22 @@ export function buildEventActionStrings(eventItem, refDateStr, options = {}) {
   // 5. Broad Event Keepers
   const remoteGuard =
     eventItem.scope === 'in-person' || eventItem.scope === 'personal-trip' ? '&!remoteraid' : '';
-  const eventKeepersString = `${prefix}${ageCalc.ageToken}&shiny,4*,locationbackground,specialbackground,costume,gigantamax,legendary,mythical,ultra beasts${remoteGuard}`;
+  const eventKeepersString = `${prefix}${ageCalc.ageToken}&shiny,4*,background,costume,maxmove1-,legendary,mythical,ultrabeast${remoteGuard}`;
 
-  // 6. Safe Event 0*-2* Trash Sweep (Negates all event-featured Regionals, Rotom, Unown & Special Bosses!)
-  const protectedEventNegations = allSpecialRange
-    ? `${allSpecialRange
-        .split(',')
-        .filter(Boolean)
-        .map((r) => `!${r}`)
-        .join('&')}&`
-    : '';
+  // 6. Ultra-Safe Event 0*-2* Trash Sweep (Full 22-shield protection + negates event-featured special species!)
+  const protectedEventNegations = negateCompressedRanges(allSpecialRange);
+  const extraExclusions = [
+    GLOBAL_REGIONAL_NEGATION,
+    ...(protectedEventNegations ? [protectedEventNegations] : []),
+  ].filter(Boolean);
 
-  const eventLeftoverTrashString = `${prefix}${ageCalc.ageToken}&0*,1*,2*&${protectedEventNegations}!shiny&!background&!locationbackground&!specialbackground&!costume&!shadow&!purified&!dynamax&!gigantamax&!favorite&!lucky&!4*&!legendary&!mythical&!ultra beasts&!@special`;
+  const eventLeftoverTrashString = buildSafeTrashQuery({
+    ageScope: ageCalc.ageToken,
+    starScope: '0*,1*,2*',
+    includeIvShields: true,
+    extraExclusions,
+    safetyShields: { untagged: untaggedOnly },
+  });
 
   return {
     ageCalc,
@@ -449,9 +473,8 @@ export function computeYearSlicerPlan({
   includeTrips = true,
   includeCommunityDays = true,
   refDateStr = null,
-  bufferMode = 'exact',
+  bufferMode = 'evening-safe',
   untaggedOnly = true,
-  globalBgKeepCap = 3,
 }) {
   const effectiveRef = refDateStr || getTodayPlainDateString();
   const prefix = untaggedOnly ? '!#&' : '';
@@ -539,7 +562,7 @@ export function computeYearSlicerPlan({
     const monthEnd = `${year}-${mm}-${String(daysInMonth).padStart(2, '0')}`;
 
     const clampedEnd = monthEnd > effectiveRef ? effectiveRef : monthEnd;
-    const calc = calculateAgeSearchString(monthStart, clampedEnd, effectiveRef, { bufferMode: 'exact' });
+    const calc = calculateAgeSearchString(monthStart, clampedEnd, effectiveRef, { bufferMode });
 
     const eventsInMonth = yearEvents.filter(
       (ev) => ev.start.slice(0, 7) === `${year}-${mm}` || (ev.end !== 'PRESENT' && ev.end.slice(0, 7) === `${year}-${mm}`)
@@ -565,9 +588,17 @@ export function computeYearSlicerPlan({
       });
     }
     const mergedMonthExclusions = mergeAgeIntervals(monthEventIntervals);
-    const monthNegationPart = mergedMonthExclusions
-      .map((iv) => `&!${formatIntervalToAgeToken(iv)}`)
-      .join('');
+    const monthNegationClauses = mergedMonthExclusions.map(
+      (iv) => `!${formatIntervalToAgeToken(iv)}`
+    );
+
+    const monthTrashString = buildSafeTrashQuery({
+      ageScope: `${yearToken}&${calc.ageToken}`,
+      starScope: '0*,1*,2*',
+      includeIvShields: true,
+      extraExclusions: [...monthNegationClauses, GLOBAL_REGIONAL_NEGATION],
+      safetyShields: { untagged: untaggedOnly },
+    });
 
     monthlySlices.push({
       monthNum: m,
@@ -580,11 +611,17 @@ export function computeYearSlicerPlan({
       cdsInMonth,
       tripsInMonth,
       monthAllString: `${prefix}${yearToken}&${calc.ageToken}`,
-      monthEverydayTrashString: `${prefix}${yearToken}&${calc.ageToken}${monthNegationPart}&0*,1*,2*&${GLOBAL_REGIONAL_NEGATION}&!shiny&!background&!locationbackground&!specialbackground&!costume&!shadow&!purified&!dynamax&!gigantamax&!favorite&!lucky&!4*&!legendary&!mythical&!ultra beasts&!@special`,
+      monthEverydayTrashString: monthTrashString,
     });
   }
 
-  const baseTrashTail = `0*,1*,2*&${GLOBAL_REGIONAL_NEGATION}&!shiny&!background&!locationbackground&!specialbackground&!costume&!shadow&!purified&!dynamax&!gigantamax&!favorite&!lucky&!4*&!legendary&!mythical&!ultra beasts&!@special`;
+  const everydayNonEventTrash0to2 = buildSafeTrashQuery({
+    ageScope: nonEventAgeNegations ? `${yearToken}&${nonEventAgeNegations}` : yearToken,
+    starScope: '0*,1*,2*',
+    includeIvShields: true,
+    extraExclusions: [GLOBAL_REGIONAL_NEGATION],
+    safetyShields: { untagged: untaggedOnly },
+  });
 
   return {
     year,
@@ -593,14 +630,14 @@ export function computeYearSlicerPlan({
     mergedProtectedWindowsCount: mergedProtectedWindows.length,
     strings: {
       inPersonBgCombined: inPersonAgeUnion
-        ? `${prefix}!traded&${yearToken}&locationbackground&${inPersonAgeUnion}&!4*`
-        : `${prefix}!traded&${yearToken}&locationbackground&!4*`,
+        ? `${prefix}${yearToken}&locationbackground&${inPersonAgeUnion}`
+        : `${prefix}${yearToken}&locationbackground`,
       globalBgKeepCombined: globalAgeUnion
-        ? `${prefix}!traded&${yearToken}&specialbackground&!locationbackground&${globalAgeUnion}&!shiny&!4*&count-${globalBgKeepCap}`
-        : `${prefix}!traded&${yearToken}&specialbackground&!locationbackground&!shiny&!4*&count-${globalBgKeepCap}`,
+        ? `${prefix}${yearToken}&specialbackground&!locationbackground&${globalAgeUnion}`
+        : `${prefix}${yearToken}&specialbackground&!locationbackground`,
       globalBgPurgeCombined: globalAgeUnion
-        ? `${prefix}${yearToken}&specialbackground&!locationbackground&${globalAgeUnion}&!shiny&!4*&0*,1*,2*&count${globalBgKeepCap + 1}-&!favorite&!lucky`
-        : `${prefix}${yearToken}&specialbackground&!locationbackground&!shiny&!4*&0*,1*,2*&count${globalBgKeepCap + 1}-&!favorite&!lucky`,
+        ? `!#&!favorite&${yearToken}&specialbackground&!locationbackground&${globalAgeUnion}&0*,1*,2*&!shiny&!4*&!lucky&@3mov&${PVP_IV_EXCLUDE_CLAUSE}&${NUNDO_EXCLUDE_CLAUSE}`
+        : `!#&!favorite&${yearToken}&specialbackground&!locationbackground&0*,1*,2*&!shiny&!4*&!lucky&@3mov&${PVP_IV_EXCLUDE_CLAUSE}&${NUNDO_EXCLUDE_CLAUSE}`,
       unmappedBgAudit: unmappedBgNegations
         ? `${prefix}${yearToken}&background&${unmappedBgNegations}`
         : `${prefix}${yearToken}&background`,
@@ -610,9 +647,7 @@ export function computeYearSlicerPlan({
       everydayNonEventAll: nonEventAgeNegations
         ? `${prefix}${yearToken}&${nonEventAgeNegations}`
         : `${prefix}${yearToken}`,
-      everydayNonEventTrash0to2: nonEventAgeNegations
-        ? `${prefix}${yearToken}&${nonEventAgeNegations}&${baseTrashTail}`
-        : `${prefix}${yearToken}&${baseTrashTail}`,
+      everydayNonEventTrash0to2,
     },
     monthlySlices,
   };

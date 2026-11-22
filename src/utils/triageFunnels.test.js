@@ -71,7 +71,7 @@ describe('triageFunnels exhaustive syntax & safety validation', () => {
 
         if (step.subQueries) {
           for (const sq of step.subQueries) {
-            const sqRes = validateSearchString(sq.query, { isTrashContext: step.isTrash });
+            const sqRes = validateSearchString(sq.query, { isTrashContext: sq.isTrash ?? step.isTrash });
             expect(sqRes.errors, `Errors in ${step.id}/${sq.label}: ${sq.query}`).toEqual([]);
             expect(sqRes.warnings, `Warnings in ${step.id}/${sq.label}: ${sq.query}`).toEqual([]);
           }
@@ -93,29 +93,35 @@ describe('triageFunnels exhaustive syntax & safety validation', () => {
       expect(step.query).not.toContain('partyplay');
     }
 
-    // Specifically verify A6 has @3mov and both De Morgan IV shields
+    // Specifically verify A6 has @3mov, 100km+, eggsonly, rare species, and both De Morgan IV shields
     const a6 = funnels.modes.modeA.steps.find((s) => s.id === 'A6');
     expect(a6.query).toContain('&@3mov');
+    expect(a6.query).toContain('!distance100-');
+    expect(a6.query).toContain('!eggsonly');
+    expect(a6.query).toContain('!201');
     expect(a6.query).toContain('2-4attack,0-2defense,0-2hp');
     expect(a6.query).toContain('1-4attack,1-4defense,1-4hp');
   });
 
-  test('Mode C2 mega0 query uses evolved-only dexes while family sub-query omits mega0 and includes PVE-MegaWIP lookup', () => {
+  test('Mode C2 mega0 query uses evolved-only dexes while pre-evo sub-query strictly excludes evolved Mega forms', () => {
     const funnels = buildTriageFunnels(SAMPLE_META);
     const megaStep = funnels.modes.modeC.sections.pve.steps.find((s) => s.id === 'C2_mega_candidates');
     expect(megaStep.query).toContain('mega0');
     expect(megaStep.query).toContain('6,384,448');
     expect(megaStep.subQueries[0].query).not.toContain('mega0');
-    expect(megaStep.subQueries[0].query).toContain('4-6,384,447-448');
+    expect(megaStep.subQueries[0].query).toBe('!#&!shadow&3*,4*&4attack&4-5,447');
     expect(megaStep.subQueries[1].query).toBe('#pve-megawip');
   });
 
-  test('Mode B8 low-IV shadow query intentionally omits !@special (Frustration) and includes @3mov & nundo shield', () => {
+  test('Mode B8 low-IV shadow query omits !@special (Frustration) while shielding PvE top shadows, PvP IVs, #op-tmfrust, @3mov & nundos', () => {
     const funnels = buildTriageFunnels(SAMPLE_META);
     const b8 = funnels.modes.modeB.steps.find((s) => s.id === 'B8');
     expect(b8.query).not.toContain('!@special');
     expect(b8.query).toContain('@3mov');
+    expect(b8.query).toContain('2-4attack,0-2defense,0-2hp');
     expect(b8.query).toContain('1-4attack,1-4defense,1-4hp');
+    expect(b8.query).toContain('!#op-tmfrust');
+    expect(b8.query).toContain('!374-376');
     expect(b8.query).toContain('!#keep');
     expect(b8.query).toContain('!#ev');
   });
@@ -185,7 +191,7 @@ describe('triageFunnels exhaustive syntax & safety validation', () => {
 
         if (step.subQueries) {
           for (const sq of step.subQueries) {
-            const sqRes = validateSearchString(sq.query, { isTrashContext: step.isTrash });
+            const sqRes = validateSearchString(sq.query, { isTrashContext: sq.isTrash ?? step.isTrash });
             expect(sqRes.errors, `Real snapshot errors in ${step.id}/${sq.label}: ${sq.query}`).toEqual([]);
             expect(sqRes.warnings, `Real snapshot warnings in ${step.id}/${sq.label}: ${sq.query}`).toEqual([]);
             expect(sqRes.charCount).toBeLessThan(4000);

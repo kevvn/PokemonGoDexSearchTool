@@ -244,7 +244,7 @@ describe('Initial Tag Hydration queries (all 31 tags, 6-stage walkthrough)', () 
     }
   });
 
-  test('verifies exact semantics for key hydration queries (!@3mov PvP, @3mov op_2xxfer, candykm1, CD pre-evos, keep_trophy 3 chips)', () => {
+  test('verifies exact semantics for key hydration queries (!@3mov PvP, @3mov op_2xxfer, candykm1, CD pre-evos, non-hijacking keep_trophy & ev_inperson)', () => {
     expect(buildTagHydrationQueries('ev_shbg', defaultMap, realMetaSnapshot)[0].query).toBe(
       'shiny&background&!#'
     );
@@ -255,14 +255,16 @@ describe('Initial Tag Hydration queries (all 31 tags, 6-stage walkthrough)', () 
       'specialbackground&!#',
       'profilebackground&!#',
     ]);
-    expect(buildTagHydrationQueries('ev_inperson', defaultMap, realMetaSnapshot)[0].query).toBe(
-      'costume,unown,shiny&!#'
-    );
+    expect(buildTagHydrationQueries('ev_inperson', defaultMap, realMetaSnapshot).map((q) => q.query)).toEqual([
+      'distance100-&shiny,costume,201,479&!traded&!#',
+      '201,479&!traded&!#',
+    ]);
 
     expect(buildTagHydrationQueries('keep_trophy', defaultMap, realMetaSnapshot).map((q) => q.query)).toEqual([
       '0attack&0defense&0hp&!#',
       'count1&!#',
-      'costume,@special&!#',
+      '@special&!@frustration&!@return&!shadow&!purified&count1&!#',
+      'year2016-2019&!#',
     ]);
 
     // Built PvP rosters use !@3mov (double-moved)
@@ -280,30 +282,31 @@ describe('Initial Tag Hydration queries (all 31 tags, 6-stage walkthrough)', () 
       'cp400-500&!@3mov&!#'
     );
 
-    // op_2xxfer uses @3mov single-move shield (NEVER !@3mov)
+    // op_2xxfer uses @3mov single-move shield, protects Mythicals/Fusions/Adventure Effects/PvP IVs (NEVER !@3mov)
     const xferQuery = buildTagHydrationQueries('op_2xxfer', defaultMap, realMetaSnapshot)[0].query;
     expect(xferQuery).toBe(
-      'legendary,ultrabeast,mythical,traded&!lucky&!shiny&!4*&!background&!favorite&@3mov&!#'
+      'legendary,ultrabeast&0*,1*,2*&!lucky&!shiny&!4*&!background&!favorite&!fusion&!adventureeffect&!@special&@3mov&2-4attack,0-2defense,0-2hp&!#'
     );
     expect(xferQuery).toContain('&@3mov&');
     expect(xferQuery).not.toContain('!@3mov');
+    expect(xferQuery).not.toContain('mythical');
 
     // op_purify1k uses candykm1
     expect(buildTagHydrationQueries('op_purify1k', defaultMap, realMetaSnapshot)[0].query).toBe(
       'shadow&candykm1&!shiny&!4*&!favorite&!#'
     );
 
-    // pve_megawip uses mega0 for evolved candidates and omits mega0 for family pre-evos
+    // pve_megawip uses mega0 for evolved candidates and strict pre-evo dexes (never evolved dexes) for pre-evos
     const megaWip = buildTagHydrationQueries('pve_megawip', defaultMap, realMetaSnapshot);
     expect(megaWip).toHaveLength(2);
     expect(megaWip[0].query).toContain('!#&!shadow&mega0&3*,4*&4attack&');
     expect(megaWip[1].query).not.toContain('mega0');
     expect(megaWip[1].query).toContain('!#&!shadow&3*,4*&4attack&');
 
-    // op_evocd includes compressed Community Day pre-evo dex IDs + dynamic WIP evolves (including pve_megawip)
+    // op_evocd filters CD pre-evos to 3*,4*,shiny (primary) and PvP IVs (secondary) + dynamic WIP evolves
     const evoCd = buildTagHydrationQueries('op_evocd', defaultMap, realMetaSnapshot);
-    expect(evoCd[0].query).toBe(`evolve&!#&!favorite&${compressIds(ALL_COMMUNITY_DAY_PRE_EVO_IDS)}`);
-    expect(evoCd[1].query).toBe('#pvp-wip,#pve-wip,#pve-megawip&evolve');
+    expect(evoCd[0].query).toBe(`evolve&!#&!favorite&!@special&3*,4*,shiny&${compressIds(ALL_COMMUNITY_DAY_PRE_EVO_IDS)}`);
+    expect(evoCd[2].query).toBe('#pvp-wip,#pve-wip,#pve-megawip&evolve');
 
     // op_powerwip tracks active power-up WIP builds + partially XL-powered projects
     const powerWip = buildTagHydrationQueries('op_powerwip', defaultMap, realMetaSnapshot);
@@ -332,7 +335,7 @@ describe('Initial Tag Hydration queries (all 31 tags, 6-stage walkthrough)', () 
     expect(powerupRenamed[0].query).toBe('#buildpvp,#buildraid,#buildmega,#buildmax,#dustwip&!#dustqueue');
 
     const evoCdRenamed = buildTagHydrationQueries('op_evocd', customRenamedMap, realMetaSnapshot);
-    expect(evoCdRenamed[1].query).toBe('#buildpvp,#buildraid,#buildmega&evolve');
+    expect(evoCdRenamed[2].query).toBe('#buildpvp,#buildraid,#buildmega&evolve');
   });
 
   test('ALL 31 hydration queries achieve full parseSearchString -> generateSearchString round-trip stability', () => {

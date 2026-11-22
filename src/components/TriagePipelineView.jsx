@@ -13,8 +13,6 @@ import {
   persistEventDatabaseState,
   resetStoredEventDatabase,
   computeYearSlicerPlan,
-  GLOBAL_REGIONAL_ROTOM_UNOWN_IDS,
-  GLOBAL_REGIONAL_ROTOM_UNOWN_RANGES,
   TRAVEL_TRIPS,
 } from '../data/eventAndTripRegistry';
 import {
@@ -23,13 +21,8 @@ import {
   computeMetaIdSets,
 } from '../utils/metaSyncService';
 import { compressIdRanges, compileDnfToPogoCnf } from '../utils/searchUtils';
-import { PogoCloseButton, PogoSummaryCard, PogoSearchInput } from './ui/PogoDesignSystem';
-
-const GLOBAL_REGIONAL_NEGATION = GLOBAL_REGIONAL_ROTOM_UNOWN_RANGES
-  .split(',')
-  .filter(Boolean)
-  .map((r) => `!${r}`)
-  .join('&');
+import { createDefaultTagMap, mergeTagMap } from '../utils/tagSystem';
+import { PogoCloseButton, PogoSearchInput } from './ui/PogoDesignSystem';
 
 /**
  * Compact Accessible Copy Chip using Pokémon GO Pill Design Language + mwg `copy-button`.
@@ -175,7 +168,6 @@ function SearchRecipeCard({
 function MajorEventCard({
   ev,
   built,
-  globalBgKeepCap,
   onToggleAttended,
   onEdit,
   onDelete,
@@ -306,10 +298,19 @@ function MajorEventCard({
 
         {built.backgroundKeepString && (
           <CopyChip
-            label={ev.backgroundType === 'locationbackground' ? '🖼️ Location BG' : `🌌 Special BG (≤${globalBgKeepCap})`}
+            label={ev.backgroundType === 'locationbackground' ? '🖼️ Location BG' : '🌌 Special BG'}
             text={built.backgroundKeepString}
             ariaLabel={`Copy Background search string for ${ev.name}`}
             variant="purple"
+          />
+        )}
+
+        {built.backgroundSurplusString && (
+          <CopyChip
+            label="🧹 Surplus BG (!#)"
+            text={built.backgroundSurplusString}
+            ariaLabel={`Copy Surplus Global Background cleanup string for ${ev.name}`}
+            variant="rose"
           />
         )}
 
@@ -420,35 +421,32 @@ const EMPTY_EVENT_FORM = {
 };
 
 const TABS = [
-  { id: 'pipeline', icon: '⚡', label: 'Triage' },
   { id: 'events-db', icon: '🎟️', label: 'Events' },
   { id: 'year-slicer', icon: '🗓️', label: 'Timeline' },
   { id: 'community-days', icon: '✨', label: 'Comm Days' },
   { id: 'meta-sync', icon: '⚔️', label: 'Meta' },
+  { id: 'cnf-combiner', icon: '🔗', label: 'CNF Combiner' },
 ];
 
 function TriagePipelineView({
   pokemonList,
+  customTags,
   onLoadSearchString,
   onSelectSpeciesInGrid,
 }) {
-  const [activeSubTab, setActiveSubTab] = useState('pipeline');
+  const [activeSubTab, setActiveSubTab] = useState('events-db');
   const [untaggedOnly, setUntaggedOnly] = useState(true);
   const [referenceDate, setReferenceDate] = useState(() => getTodayPlainDateString());
-  const [bufferMode, setBufferMode] = useState('exact');
+  const [bufferMode, setBufferMode] = useState('evening-safe');
   const [temporalReady, setTemporalReady] = useState(false);
 
-  // Trade stock caps
-  const [cdShinyKeepCap, setCdShinyKeepCap] = useState(3);
-  const [globalBgKeepCap, setGlobalBgKeepCap] = useState(3);
-  const [costumeKeepCap, setCostumeKeepCap] = useState(2);
+  const tagMap = useMemo(
+    () => (customTags?.tagMap ? mergeTagMap(customTags.tagMap) : createDefaultTagMap()),
+    [customTags?.tagMap]
+  );
 
   // Persistent Event Archive
   const [eventDb, setEventDb] = useState(() => loadStoredEventDatabase());
-
-  // Triage dynamic Background scope selectors (generic defaults — no prompt hardcoding!)
-  const [selectedLocBgScopeId, setSelectedLocBgScopeId] = useState('ALL_ANY_DATE');
-  const [selectedGlobalBgScopeId, setSelectedGlobalBgScopeId] = useState('ALL_ANY_DATE');
 
   // Events Tab filters
   const [eventDbSearch, setEventDbSearch] = useState('');
@@ -507,7 +505,7 @@ function TriagePipelineView({
     'shiny&shadow',
     'shiny&legendary',
     'shiny&mythical',
-    'shiny&ultra beasts',
+    'shiny&ultrabeast',
     'shiny&locationbackground',
   ]);
   const [newBranchInput, setNewBranchInput] = useState('');
@@ -880,32 +878,7 @@ function TriagePipelineView({
     []
   );
 
-  const nonCdShinyNegationTokens = useMemo(() => {
-    if (!selectedCdFamilyRanges) return '';
-    return selectedCdFamilyRanges
-      .split(',')
-      .map((rng) => `!${rng}`)
-      .join('&');
-  }, [selectedCdFamilyRanges]);
-
   const prefix = untaggedOnly ? '!#&' : '';
-
-  const crownJewelsCnfString = useMemo(
-    () =>
-      compileDnfToPogoCnf(
-        [
-          '4*',
-          'gigantamax',
-          'shiny&shadow',
-          'shiny&legendary',
-          'shiny&mythical',
-          'shiny&ultra beasts',
-          'shiny&locationbackground',
-        ],
-        untaggedOnly ? ['!#'] : []
-      ),
-    [untaggedOnly]
-  );
 
   const customCompiledCnfString = useMemo(
     () => compileDnfToPogoCnf(cnfBranches, untaggedOnly ? ['!#'] : []),
@@ -925,7 +898,6 @@ function TriagePipelineView({
         refDateStr: referenceDate,
         bufferMode,
         untaggedOnly,
-        globalBgKeepCap,
         temporalReady,
       }),
     [
@@ -936,63 +908,9 @@ function TriagePipelineView({
       referenceDate,
       bufferMode,
       untaggedOnly,
-      globalBgKeepCap,
       temporalReady,
     ]
   );
-
-  // Location & Global Background dynamic scope options (data-driven from archive)
-  const allLocationBgEvents = useMemo(
-    () => eventDb.events.filter((e) => e.backgroundType === 'locationbackground'),
-    [eventDb.events]
-  );
-  const allGlobalBgEvents = useMemo(
-    () => eventDb.events.filter((e) => e.backgroundType === 'specialbackground'),
-    [eventDb.events]
-  );
-
-  const activeLocBgRecipe = useMemo(() => {
-    if (selectedLocBgScopeId === 'ALL_ANY_DATE') {
-      return {
-        badge: 'Location BG • All Dates',
-        tag: 'TradeLocBG',
-        subtitle: 'Untraded venue Location Backgrounds across all in-person events.',
-        searchString: `${prefix}!traded&locationbackground&!4*`,
-        speciesIds: [],
-      };
-    }
-    const ev = allLocationBgEvents.find((e) => e.id === selectedLocBgScopeId) || allLocationBgEvents[0];
-    const built = buildEventActionStrings(ev, referenceDate, { untaggedOnly, bufferMode, temporalReady });
-    return {
-      badge: `${built.ageCalc.ageToken} • ${ev.start}`,
-      tag: ev.tag,
-      subtitle: `${ev.name} (${ev.location})`,
-      searchString: built.backgroundKeepString,
-      speciesIds: built.allSpecialIds,
-    };
-  }, [selectedLocBgScopeId, allLocationBgEvents, referenceDate, untaggedOnly, bufferMode, prefix, temporalReady]);
-
-  const activeGlobalBgRecipe = useMemo(() => {
-    if (selectedGlobalBgScopeId === 'ALL_ANY_DATE') {
-      return {
-        keepString: `${prefix}!traded&specialbackground&!locationbackground&!shiny&!4*&count-${globalBgKeepCap}`,
-        purgeString: `${prefix}specialbackground&!locationbackground&!shiny&!4*&0*,1*,2*&count${globalBgKeepCap + 1}-&!favorite&!lucky`,
-        subtitle: `Keep 1–${globalBgKeepCap} untraded copies; purge ${globalBgKeepCap + 1}+ low-IV duplicates.`,
-      };
-    }
-    const ev = allGlobalBgEvents.find((e) => e.id === selectedGlobalBgScopeId) || allGlobalBgEvents[0];
-    const built = buildEventActionStrings(ev, referenceDate, {
-      untaggedOnly,
-      bufferMode,
-      globalBgKeepCap,
-      temporalReady,
-    });
-    return {
-      keepString: built.backgroundKeepString,
-      purgeString: built.backgroundSurplusString,
-      subtitle: `${ev.name} (${built.ageCalc.ageToken}, ${ev.start} → ${ev.end}).`,
-    };
-  }, [selectedGlobalBgScopeId, allGlobalBgEvents, referenceDate, untaggedOnly, bufferMode, globalBgKeepCap, prefix, temporalReady]);
 
   // Filtered Major Events for Events Tab
   const filteredEvents = useMemo(() => {
@@ -1088,13 +1006,12 @@ function TriagePipelineView({
     }
   };
 
-  const cdKeepCountToken = `count-${cdShinyKeepCap}`;
-  const cdSurplusCountToken = `count${cdShinyKeepCap + 1}-`;
-  const costumeKeepCountToken = `count-${costumeKeepCap}`;
-  const costumeSurplusCountToken = `count${costumeKeepCap + 1}-`;
-
   const bufferLabel =
-    bufferMode === 'evening-safe' ? '-1d Eve' : bufferMode === 'plus-minus-1' ? '±1d TZ' : 'Exact Age';
+    bufferMode === 'evening-safe'
+      ? '24h Rolling Safe'
+      : bufferMode === 'plus-minus-1'
+        ? '±1d Timezone'
+        : 'Exact Calendar';
 
   return (
     <div className="max-w-7xl mx-auto w-full pb-24">
@@ -1106,7 +1023,7 @@ function TriagePipelineView({
             ref={tablistRef}
             className="mwg-tablist"
             role="tablist"
-            aria-label="Inventory organization tools"
+            aria-label="Events, timeline, and search tools"
             {...{ focusgroup: 'tablist nomemory' }}
           >
             {TABS.map((tab, idx) => {
@@ -1149,7 +1066,7 @@ function TriagePipelineView({
               </button>
 
               <span className="text-[11px] font-bold text-[#1b4d60] truncate">
-                {bufferLabel} • Caps {cdShinyKeepCap}/{globalBgKeepCap}/{costumeKeepCap}
+                {bufferLabel} • Ref {referenceDate}
               </span>
             </div>
 
@@ -1159,7 +1076,7 @@ function TriagePipelineView({
               className="compact-inline-chip pogo-pill min-h-[30px] px-3 py-0.5 text-[11px] uppercase cursor-pointer shrink-0 inline-flex items-center gap-1"
             >
               <span aria-hidden="true">⚙️</span>
-              <span>OPTIONS</span>
+              <span>AGE OPTIONS</span>
             </button>
           </div>
         </div>
@@ -1168,522 +1085,7 @@ function TriagePipelineView({
       {/* Tab Panels Container — NO gap/padding on tabpanel elements themselves so `hidden="until-found"` leaves zero phantom strip (mwg: tabs) */}
       <div className="px-3 sm:px-5">
         {/* ===================================================================
-            PANEL 1: STEP-BY-STEP TRIAGE FUNNEL (!#)
-           =================================================================== */}
-        <div
-          ref={(el) => {
-            panelRefs.current.pipeline = el;
-          }}
-          role="tabpanel"
-          aria-labelledby={`${tabBaseId}-tab-pipeline`}
-          hidden={activeSubTab !== 'pipeline' ? 'until-found' : undefined}
-        >
-          <div className="pt-3.5 space-y-3 mwg-accordion mwg-card-container">
-            {/* Screenshot 2 Frosted Pokédex Summary Card for Inventory Triage */}
-            <PogoSummaryCard
-              title="STORAGE TRIAGE"
-              pillText={untaggedOnly ? '!# UNTAGGED' : 'ALL STORAGE'}
-              stats={[
-                {
-                  label: 'CD SHINY',
-                  value: `≤${cdShinyKeepCap}`,
-                  onClick: () => optionsDialogRef.current?.showModal(),
-                },
-                {
-                  label: 'GLOBAL BG',
-                  value: `≤${globalBgKeepCap}`,
-                  onClick: () => optionsDialogRef.current?.showModal(),
-                },
-                {
-                  label: 'COSTUME',
-                  value: `≤${costumeKeepCap}`,
-                  onClick: () => optionsDialogRef.current?.showModal(),
-                },
-                {
-                  label: 'META SAFE',
-                  value: metaSets.allProtectedMetaIds.length,
-                  onClick: () => setActiveSubTab('meta-sync'),
-                },
-                {
-                  label: 'NON-META',
-                  value: metaSets.strictNonMetaIds.length,
-                  onClick: () => setActiveSubTab('meta-sync'),
-                },
-              ]}
-            />
-
-            {/* Phase 1: Trophies */}
-            <details open className="pogo-summary-card overflow-hidden">
-              <summary className="px-4 py-3 text-xs sm:text-sm font-display font-extrabold text-[#123c4d] select-none">
-                <span className="flex-1 flex items-center justify-between gap-2">
-                  <span>1. Hard Trophies &amp; 0% Nundos</span>
-                  <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-amber-400 text-[#123c4d]">
-                    #Trophy
-                  </span>
-                </span>
-              </summary>
-              <div className="p-3 border-t border-[#0d7da8]/12 mwg-card-grid">
-                <SearchRecipeCard
-                  badge="1A • Crown Jewels (CNF)"
-                  title="4*, Gigantamax, Shiny Shadows, Shiny Legendaries & Shiny Location BGs"
-                  tagSuggestion="Trophy"
-                  subtitle="Distributed CNF (X,Y & X,Z) so PoGO matches any 4*, any G-Max, OR any Shiny Shadow/Legendary/Mythical/UB/Location BG."
-                  searchString={crownJewelsCnfString}
-                  accent="amber"
-                  onLoadToBar={onLoadSearchString}
-                />
-                <SearchRecipeCard
-                  badge="1B • 0/0/0 Collector"
-                  title="True Nundos (0 Attack / 0 Defense / 0 HP)"
-                  tagSuggestion="Nundo"
-                  subtitle="1/4096 unboosted wild odds; rarer than 4* hundos."
-                  searchString={`${prefix}0attack&0defense&0hp`}
-                  accent="amber"
-                  onLoadToBar={onLoadSearchString}
-                />
-              </div>
-            </details>
-
-            {/* Phase 2: High-Demand Tradeables */}
-            <details className="pogo-summary-card overflow-hidden">
-              <summary className="px-4 py-3 text-xs sm:text-sm font-display font-extrabold text-[#123c4d] select-none">
-                <span className="flex-1 flex items-center justify-between gap-2">
-                  <span>2. High-Demand Tradeables (BGs, Regionals, Rotom, Shinies)</span>
-                  <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-[#8d52b5] text-white">
-                    #TradeRare
-                  </span>
-                </span>
-              </summary>
-              <div className="p-3 border-t border-[#0d7da8]/12 mwg-card-grid">
-                <SearchRecipeCard
-                  badge={activeLocBgRecipe.badge}
-                  title="In-Person Venue Location Backgrounds"
-                  tagSuggestion={activeLocBgRecipe.tag}
-                  subtitle={activeLocBgRecipe.subtitle}
-                  searchString={activeLocBgRecipe.searchString}
-                  speciesIds={activeLocBgRecipe.speciesIds}
-                  accent="purple"
-                  onLoadToBar={onLoadSearchString}
-                  onSelectSpeciesInGrid={onSelectSpeciesInGrid}
-                >
-                  <select
-                    aria-label="Scope Location Backgrounds by event date window"
-                    value={selectedLocBgScopeId}
-                    onChange={(e) => setSelectedLocBgScopeId(e.target.value)}
-                    className="w-full pogo-search-pill px-3 py-1.5 text-[11px] font-bold text-[#123c4d]"
-                  >
-                    <option value="ALL_ANY_DATE">All Venue Location Backgrounds (Any Date)</option>
-                    {allLocationBgEvents.map((ev) => (
-                      <option key={ev.id} value={ev.id}>
-                        {ev.name} ({ev.start}) → #{ev.tag}
-                      </option>
-                    ))}
-                  </select>
-                </SearchRecipeCard>
-
-                <SearchRecipeCard
-                  badge="2B • Regionals, Rotom & Unown"
-                  title="Untraded Regionals, Rotom (#479), Unown (#201) & Ticket Exclusives"
-                  tagSuggestion="TradeReg"
-                  subtitle="High trade demand even at 0*–2*: Hawlucha, Klefki, Comfey, Pachirisu, Sigilyph, Relicanth, Tropius, Torkoal, Skiddo, Rotom, Unown."
-                  searchString={`${prefix}!traded&${GLOBAL_REGIONAL_ROTOM_UNOWN_RANGES}&!4*&!shiny`}
-                  speciesIds={GLOBAL_REGIONAL_ROTOM_UNOWN_IDS}
-                  accent="purple"
-                  onLoadToBar={onLoadSearchString}
-                  onSelectSpeciesInGrid={onSelectSpeciesInGrid}
-                />
-
-                <SearchRecipeCard
-                  badge="2C • Shiny Costumes"
-                  title="Untraded Shiny Event Costumes"
-                  tagSuggestion="TradeRare"
-                  subtitle="Time-limited shiny costumes hold top collector value."
-                  searchString={`${prefix}!traded&shiny&costume&!4*`}
-                  accent="purple"
-                  onLoadToBar={onLoadSearchString}
-                />
-
-                <SearchRecipeCard
-                  badge="2D • Full-Odds / Raid Shinies"
-                  title="Untraded Non-Community-Day Shinies"
-                  tagSuggestion="TradeShiny"
-                  subtitle={`Excludes ${selectedCdFamilyIds.length} selected Community Day family IDs.`}
-                  searchString={`${prefix}!traded&shiny${nonCdShinyNegationTokens ? `&${nonCdShinyNegationTokens}` : ''}&!4*`}
-                  accent="purple"
-                  onLoadToBar={onLoadSearchString}
-                />
-              </div>
-            </details>
-
-            {/* Phase 3: Capped Trade Stock vs Excess Purge */}
-            <details className="pogo-summary-card overflow-hidden">
-              <summary className="px-4 py-3 text-xs sm:text-sm font-display font-extrabold text-[#123c4d] select-none">
-                <span className="flex-1 flex items-center justify-between gap-2">
-                  <span>3. Capped Trade Stock vs. Excess Clutter</span>
-                  <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-[#3b6fd4] text-white">
-                    count-{cdShinyKeepCap}
-                  </span>
-                </span>
-              </summary>
-              <div className="p-3 border-t border-[#0d7da8]/12 space-y-2.5">
-                <div className="flex items-center gap-2 bg-white/75 px-3 py-1.5 rounded-full border border-white">
-                  <span className="text-[11px] font-extrabold text-[#123c4d] shrink-0">Global BG Window:</span>
-                  <select
-                    aria-label="Scope Global Special Backgrounds by event window"
-                    value={selectedGlobalBgScopeId}
-                    onChange={(e) => setSelectedGlobalBgScopeId(e.target.value)}
-                    className="flex-1 min-w-0 bg-transparent text-[11px] font-bold text-[#0b698e] focus:outline-none"
-                  >
-                    <option value="ALL_ANY_DATE">All Global Special Backgrounds (Any Date)</option>
-                    {allGlobalBgEvents.map((ev) => (
-                      <option key={ev.id} value={ev.id}>
-                        {ev.name} ({ev.start})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="mwg-card-grid">
-                  <SearchRecipeCard
-                    badge={`3A • Keep 1–${globalBgKeepCap}`}
-                    title="Global Special Backgrounds — Keep Stock"
-                    tagSuggestion="TradeBG"
-                    subtitle={activeGlobalBgRecipe.subtitle}
-                    searchString={activeGlobalBgRecipe.keepString}
-                    accent="indigo"
-                    onLoadToBar={onLoadSearchString}
-                  />
-                  <SearchRecipeCard
-                    badge={`3B • Purge ${globalBgKeepCap + 1}+`}
-                    title="Excess 0*–2* Global Special Backgrounds"
-                    tagSuggestion="Transfer"
-                    subtitle={`Surplus non-shiny 0*–2* Global Backgrounds when holding ${globalBgKeepCap + 1}+ copies.`}
-                    searchString={activeGlobalBgRecipe.purgeString}
-                    accent="rose"
-                    onLoadToBar={onLoadSearchString}
-                  />
-                  <SearchRecipeCard
-                    badge={`3C • Keep 1–${cdShinyKeepCap}`}
-                    title={`Community Day Shinies — Keep (${cdKeepCountToken})`}
-                    tagSuggestion="TradeCD"
-                    subtitle={`Untraded CD shinies with ≤${cdShinyKeepCap} copies.`}
-                    searchString={`${prefix}!traded&shiny&${cdKeepCountToken}&${selectedCdFamilyRanges || '1-9'}`}
-                    speciesIds={selectedCdFamilyIds}
-                    accent="indigo"
-                    onLoadToBar={onLoadSearchString}
-                    onSelectSpeciesInGrid={onSelectSpeciesInGrid}
-                  />
-                  <SearchRecipeCard
-                    badge={`3D • Purge ${cdShinyKeepCap + 1}+`}
-                    title={`Surplus Community Day Shinies (${cdSurplusCountToken})`}
-                    tagSuggestion="HOME / Transfer"
-                    subtitle={`Tag 1–${cdShinyKeepCap} best first, then send excess to HOME or Professor.`}
-                    searchString={`${prefix}shiny&${cdSurplusCountToken}&${selectedCdFamilyRanges || '1-9'}&!4*&!locationbackground&!costume&!shadow&!favorite&!lucky`}
-                    speciesIds={selectedCdFamilyIds}
-                    accent="rose"
-                    onLoadToBar={onLoadSearchString}
-                    onSelectSpeciesInGrid={onSelectSpeciesInGrid}
-                  />
-                  <SearchRecipeCard
-                    badge={`3E • Keep 1–${costumeKeepCap}`}
-                    title={`Non-Shiny Costumes — Keep (${costumeKeepCountToken})`}
-                    tagSuggestion="TradeCostume"
-                    subtitle={`Untraded non-shiny costumes with ≤${costumeKeepCap} copies.`}
-                    searchString={`${prefix}!traded&costume&!shiny&!4*&${costumeKeepCountToken}`}
-                    accent="indigo"
-                    onLoadToBar={onLoadSearchString}
-                  />
-                  <SearchRecipeCard
-                    badge={`3F • Purge ${costumeKeepCap + 1}+`}
-                    title={`Excess 0*–2* Non-Shiny Costumes (${costumeSurplusCountToken})`}
-                    tagSuggestion="Transfer"
-                    subtitle={`Low-IV costume duplicates beyond ${costumeKeepCap} copies.`}
-                    searchString={`${prefix}costume&!shiny&!4*&0*,1*,2*&${costumeSurplusCountToken}&!locationbackground&!favorite&!lucky`}
-                    accent="rose"
-                    onLoadToBar={onLoadSearchString}
-                  />
-                </div>
-              </div>
-            </details>
-
-            {/* Phase 4: Mirror Rerolls */}
-            <details className="pogo-summary-card overflow-hidden">
-              <summary className="px-4 py-3 text-xs sm:text-sm font-display font-extrabold text-[#123c4d] select-none">
-                <span className="flex-1 flex items-center justify-between gap-2">
-                  <span>4. Mirror &amp; Special Trade Rerolls</span>
-                  <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-[#0d7da8] text-white">
-                    #TradeMirror
-                  </span>
-                </span>
-              </summary>
-              <div className="p-3 border-t border-[#0d7da8]/12 mwg-card-grid">
-                <SearchRecipeCard
-                  badge="4A • Pseudo & 10km Eggs"
-                  title="Low-IV Rare Spawns for Mirror / Distance XL Trades"
-                  tagSuggestion="TradeMirror"
-                  subtitle="Frigibax, Larvesta, Dreepy, Jangmo-o, Charcadet, Tinkatink, Varoom, Duraludon, Gimmighoul, Beldum, Gible, Riolu."
-                  searchString={`${prefix}!traded&${metaSets.ranges.rareTradeReroll}&0*,1*,2*&!shiny&!shadow`}
-                  speciesIds={metaSets.rareTradeRerollFamilyIds}
-                  accent="teal"
-                  onLoadToBar={onLoadSearchString}
-                  onSelectSpeciesInGrid={onSelectSpeciesInGrid}
-                />
-                <SearchRecipeCard
-                  badge="4B • Special Trade Stock"
-                  title="0*–2* Legendaries & Ultra Beasts (Up to 6 Copies)"
-                  tagSuggestion="TradeSpecial"
-                  subtitle="Save for daily Special Trades or Lucky Friend rerolls."
-                  searchString={`${prefix}!traded&legendary,ultra beasts&0*,1*,2*&count-6&!shiny&!shadow&!locationbackground`}
-                  accent="teal"
-                  onLoadToBar={onLoadSearchString}
-                />
-              </div>
-            </details>
-
-            {/* Phase 5: PvP & PvE Meta */}
-            <details className="pogo-summary-card overflow-hidden">
-              <summary className="px-4 py-3 text-xs sm:text-sm font-display font-extrabold text-[#123c4d] select-none">
-                <span className="flex-1 flex items-center justify-between gap-2">
-                  <span>5. PvPoke Top 100 (GL/UL/ML) &amp; DialgaDex Raiders</span>
-                  <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-[#2b9e66] text-white">
-                    #PvP / #PvE
-                  </span>
-                </span>
-              </summary>
-              <div className="p-3 border-t border-[#0d7da8]/12 mwg-card-grid">
-                <SearchRecipeCard
-                  badge="5A • GL & UL Bulk"
-                  title={`Top 100 GL/UL Low-Attack IVs (${metaSets.glUlFamilyIds.length} IDs)`}
-                  tagSuggestion="PvP Check"
-                  subtitle="0–1 Attack & 3–4 Def/HP across Top 100 Great & Ultra League families."
-                  searchString={`${prefix}${metaSets.ranges.glUl}&0-1attack&3-4defense&3-4hp&cp-2500`}
-                  speciesIds={metaSets.glUlFamilyIds}
-                  accent="emerald"
-                  onLoadToBar={onLoadSearchString}
-                  onSelectSpeciesInGrid={onSelectSpeciesInGrid}
-                />
-                <SearchRecipeCard
-                  badge="5B • L50 XL Max-Outs"
-                  title="GL & UL XL Max-Out Species (3*, 4*)"
-                  tagSuggestion="PvP XL"
-                  subtitle="Medicham, Bastiodon, Sableye, Carbink, Lickitung, Diggersby, Talonflame, Umbreon, Mandibuzz."
-                  searchString={`${prefix}${metaSets.ranges.pvpMaxOutXl}&3*,4*&cp-2500`}
-                  speciesIds={metaSets.pvpMaxOutXlFamilyIds}
-                  accent="emerald"
-                  onLoadToBar={onLoadSearchString}
-                  onSelectSpeciesInGrid={onSelectSpeciesInGrid}
-                />
-                <SearchRecipeCard
-                  badge="5C • ML & Raid Meta"
-                  title={`Top 100 Master League & DialgaDex PvE — 3*, 4* (${metaSets.mlAndPveFamilyIds.length} IDs)`}
-                  tagSuggestion="PvE / ML"
-                  subtitle="High-IV raiders and uncapped Master League contenders."
-                  searchString={`${prefix}${metaSets.ranges.mlAndPve}&3*,4*`}
-                  speciesIds={metaSets.mlAndPveFamilyIds}
-                  accent="emerald"
-                  onLoadToBar={onLoadSearchString}
-                  onSelectSpeciesInGrid={onSelectSpeciesInGrid}
-                />
-                <SearchRecipeCard
-                  badge="5D • Shadow DPS & CD Hold"
-                  title="3–4 Attack Shadow Raiders"
-                  tagSuggestion="ShadowPvE"
-                  subtitle={`CD pre-evo hold query: ${prefix}${allCdPreEvoRanges}&3*,4*&!@special`}
-                  searchString={`${prefix}${metaSets.ranges.mlAndPve}&shadow&3-4attack`}
-                  speciesIds={metaSets.mlAndPveFamilyIds}
-                  accent="emerald"
-                  onLoadToBar={onLoadSearchString}
-                  onSelectSpeciesInGrid={onSelectSpeciesInGrid}
-                />
-              </div>
-            </details>
-
-            {/* Phase 6: Safe Mass Transfer */}
-            <details className="pogo-summary-card overflow-hidden">
-              <summary className="px-4 py-3 text-xs sm:text-sm font-display font-extrabold text-[#123c4d] select-none">
-                <span className="flex-1 flex items-center justify-between gap-2">
-                  <span>6. Safe Mass Transfer (Zero Meta / Regional Conflict)</span>
-                  <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-rose-600 text-white">
-                    #Transfer
-                  </span>
-                </span>
-              </summary>
-              <div className="p-3 border-t border-[#0d7da8]/12 mwg-card-grid">
-                <SearchRecipeCard
-                  badge={`6A • 0*–3* Non-Meta (${metaSets.strictNonMetaIds.length} IDs)`}
-                  title="All 0*, 1*, 2*, 3* Strictly Non-Meta Species"
-                  tagSuggestion="Transfer"
-                  subtitle="Zero overlap with PvPoke Top 100 (GL/UL/ML), DialgaDex PvE, or Regionals/Rotom/Unown. Does not hold XXL/XXS."
-                  searchString={`${prefix}${metaSets.ranges.strictNonMeta}&0*,1*,2*,3*&!shiny&!background&!locationbackground&!specialbackground&!costume&!shadow&!purified&!dynamax&!gigantamax&!favorite&!lucky&!4*&!legendary&!mythical&!ultra beasts&!@special`}
-                  speciesIds={metaSets.strictNonMetaIds}
-                  accent="rose"
-                  onLoadToBar={onLoadSearchString}
-                  onSelectSpeciesInGrid={onSelectSpeciesInGrid}
-                />
-
-                <SearchRecipeCard
-                  badge="6B • 0*–2* High-Attack"
-                  title="0*, 1*, 2* With 2–4 Attack (Bad Raid & Bad PvP Bulk)"
-                  tagSuggestion="Transfer"
-                  subtitle="Too weak for Raids/ML and too attack-heavy for GL/UL. Excludes Regionals, Rotom & Unown."
-                  searchString={`${prefix}0*,1*,2*&2-4attack&${GLOBAL_REGIONAL_NEGATION}&!shiny&!background&!locationbackground&!specialbackground&!costume&!shadow&!purified&!dynamax&!gigantamax&!favorite&!lucky&!4*&!legendary&!mythical&!ultra beasts&!@special`}
-                  accent="rose"
-                  onLoadToBar={onLoadSearchString}
-                />
-
-                <SearchRecipeCard
-                  badge={`6C • Pure GL/UL 3* (${metaSets.pureCappedPvpFamilyIds.length} IDs)`}
-                  title="3* With 2–4 Attack on Pure GL/UL Bulk Species"
-                  tagSuggestion="Transfer"
-                  subtitle="Species only viable in CP-capped leagues (never ML, PvE, or L50 XL hundos)."
-                  searchString={`${prefix}${metaSets.ranges.pureCappedPvp}&3*&2-4attack&!shiny&!background&!locationbackground&!specialbackground&!costume&!shadow&!purified&!dynamax&!gigantamax&!favorite&!lucky&!4*&!@special`}
-                  speciesIds={metaSets.pureCappedPvpFamilyIds}
-                  accent="rose"
-                  onLoadToBar={onLoadSearchString}
-                  onSelectSpeciesInGrid={onSelectSpeciesInGrid}
-                />
-
-                <SearchRecipeCard
-                  badge="6D • D-Max & Dead-End Males"
-                  title="4th+ 0*–2* Dynamax & Male Combee/Salandit"
-                  tagSuggestion="Transfer"
-                  subtitle={`Max Battles cap at 3 per team. Male Combee/Salandit: ${prefix}415,757&male&!shiny&!4*&!favorite`}
-                  searchString={`${prefix}dynamax&!gigantamax&count4-&0*,1*,2*&!shiny&!background&!costume&!favorite&!lucky`}
-                  accent="rose"
-                  onLoadToBar={onLoadSearchString}
-                />
-              </div>
-            </details>
-
-            {/* Phase 7: Interactive AND (&) / OR (,) Rule Combiner (PoGO CNF Compiler) */}
-            <details className="pogo-summary-card overflow-hidden">
-              <summary className="px-4 py-3 text-xs sm:text-sm font-display font-extrabold text-[#123c4d] select-none">
-                <span className="flex-1 flex items-center justify-between gap-2">
-                  <span>🔗 AND (&amp;) / OR (,) Rule Combiner (PoGO CNF Compiler)</span>
-                  <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-[#0d7da8] text-white">
-                    (X,Y)&amp;(X,Z)
-                  </span>
-                </span>
-              </summary>
-              <div className="p-3.5 border-t border-[#0d7da8]/12 space-y-2.5 text-xs">
-                <p className="text-[11px] text-[#285d72] leading-snug">
-                  In Pokémon GO, <code className="font-mono font-bold text-[#123c4d]">,</code> (OR) has <strong>higher precedence</strong> than <code className="font-mono font-bold text-[#123c4d]">&amp;</code> (AND). Writing <code className="font-mono text-rose-700">A,B&amp;C</code> is parsed as <code className="font-mono text-rose-700">(A OR B) AND C</code>. This compiler distributes <code className="font-mono font-bold">OR</code> over <code className="font-mono font-bold">AND</code> (<code className="font-mono font-bold text-[#0b698e]">A,B &amp; A,C</code>) so every branch works properly.
-                </p>
-
-                {/* Quick Presets */}
-                <div className="flex flex-wrap gap-1.5">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setCnfBranches([
-                        '4*',
-                        'gigantamax',
-                        'shiny&shadow',
-                        'shiny&legendary',
-                        'shiny&mythical',
-                        'shiny&ultra beasts',
-                        'shiny&locationbackground',
-                      ])
-                    }
-                    className="compact-inline-chip pogo-pill min-h-[28px] px-3 py-0.5 text-[10px] cursor-pointer"
-                  >
-                    Preset: Crown Jewels
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setCnfBranches([
-                        'shiny&legendary',
-                        '4*&legendary',
-                        'locationbackground&legendary',
-                      ])
-                    }
-                    className="compact-inline-chip pogo-pill min-h-[28px] px-3 py-0.5 text-[10px] cursor-pointer"
-                  >
-                    Preset: Trophy Legendaries
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setCnfBranches([
-                        '3*,4*&shadow',
-                        '0-1attack&3-4defense&3-4hp&cp-2500',
-                      ])
-                    }
-                    className="compact-inline-chip pogo-pill min-h-[28px] px-3 py-0.5 text-[10px] cursor-pointer"
-                  >
-                    Preset: Shadow 3*-4* OR PvP Bulk
-                  </button>
-                </div>
-
-                {/* Active OR Branches */}
-                <div className="flex flex-wrap items-center gap-1.5 bg-white/80 p-2.5 rounded-2xl border border-white">
-                  {cnfBranches.map((br, idx) => (
-                    <React.Fragment key={`${br}-${idx}`}>
-                      {idx > 0 && (
-                        <span className="text-[10px] font-black text-[#0b698e] px-0.5">OR</span>
-                      )}
-                      <span className="inline-flex items-center gap-1 bg-[#dff4fb] border border-[#0d7da8]/30 rounded-full px-2.5 py-0.5 font-mono text-[11px] font-bold text-[#123c4d]">
-                        <span>({br})</span>
-                        <button
-                          type="button"
-                          onClick={() => setCnfBranches((prev) => prev.filter((_, i) => i !== idx))}
-                          aria-label={`Remove branch ${br}`}
-                          className="compact-inline-chip text-rose-600 hover:text-rose-800 font-black ml-0.5 cursor-pointer"
-                        >
-                          ✕
-                        </button>
-                      </span>
-                    </React.Fragment>
-                  ))}
-                </div>
-
-                {/* Add New AND-Branch Input */}
-                <div className="flex items-center gap-2">
-                  <input
-                    type="text"
-                    value={newBranchInput}
-                    onChange={(e) => setNewBranchInput(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' && newBranchInput.trim()) {
-                        e.preventDefault();
-                        setCnfBranches((prev) => [...prev, newBranchInput.trim()]);
-                        setNewBranchInput('');
-                      }
-                    }}
-                    placeholder="Add branch (e.g. shiny&costume or 4*)"
-                    aria-label="Add OR branch with AND conditions"
-                    className="flex-1 min-w-0 px-4 py-2 pogo-search-pill text-base sm:text-xs font-mono font-bold text-[#123c4d] focus:outline-none"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (newBranchInput.trim()) {
-                        setCnfBranches((prev) => [...prev, newBranchInput.trim()]);
-                        setNewBranchInput('');
-                      }
-                    }}
-                    className="compact-inline-chip pogo-pill-active min-h-[36px] px-4 py-1.5 text-xs uppercase cursor-pointer shrink-0"
-                  >
-                    + OR Branch
-                  </button>
-                </div>
-
-                <SearchRecipeCard
-                  badge={`${customCompiledCnfString.split('&').filter(Boolean).length} CNF AND-Clauses`}
-                  title="Compiled Pokémon GO CNF Search String"
-                  subtitle="Distributes OR (,) over AND (&) and absorbs redundant supersets."
-                  searchString={customCompiledCnfString}
-                  accent="teal"
-                  onLoadToBar={onLoadSearchString}
-                />
-              </div>
-            </details>
-          </div>
-        </div>
-
-        {/* ===================================================================
-            PANEL 2: MAJOR EVENTS & SPECIAL POKÉMON ARCHIVE (POKÉ DAXI / LUCKYBUNZ)
+            PANEL 1: MAJOR EVENTS & SPECIAL POKÉMON ARCHIVE
            =================================================================== */}
         <div
           ref={(el) => {
@@ -1756,14 +1158,12 @@ function TriagePipelineView({
                 const built = buildEventActionStrings(ev, referenceDate, {
                   untaggedOnly,
                   bufferMode,
-                  globalBgKeepCap,
                 });
                 return (
                   <MajorEventCard
                     key={ev.id}
                     ev={ev}
                     built={built}
-                    globalBgKeepCap={globalBgKeepCap}
                     onToggleAttended={handleToggleEventAttended}
                     onEdit={openEditEventModal}
                     onDelete={handleDeleteCustomEvent}
@@ -1983,7 +1383,7 @@ function TriagePipelineView({
                   badge={`year${slicerYear} • Everyday Trash`}
                   title="Non-Event 0*–2* Wild Clutter"
                   tagSuggestion="Transfer"
-                  subtitle={`Skips ${yearSlicerPlan.mergedProtectedWindowsCount} merged event/trip/CD age ranges AND protects Regionals, Rotom & Unown.`}
+                  subtitle={`Skips ${yearSlicerPlan.mergedProtectedWindowsCount} merged event/trip/CD age ranges + full PvP-IV, Nundo, @3mov, 100km+ & Regional/Rare shields.`}
                   searchString={yearSlicerPlan.strings.everydayNonEventTrash0to2}
                   accent="rose"
                   onLoadToBar={onLoadSearchString}
@@ -1991,7 +1391,7 @@ function TriagePipelineView({
                 <SearchRecipeCard
                   badge={`year${slicerYear} • Venue BGs`}
                   title="Attended In-Person Location Backgrounds"
-                  tagSuggestion="TradeLocBG"
+                  tagSuggestion={tagMap.ev_locbg.name}
                   subtitle={`Combined age union across played ${slicerYear} in-person events.`}
                   searchString={yearSlicerPlan.strings.inPersonBgCombined}
                   accent="purple"
@@ -1999,9 +1399,9 @@ function TriagePipelineView({
                 />
                 <SearchRecipeCard
                   badge={`year${slicerYear} • Global BGs`}
-                  title={`Attended Global Special Backgrounds (Keep 1–${globalBgKeepCap})`}
-                  tagSuggestion="TradeBG"
-                  subtitle={`Combined age union across played ${slicerYear} global events.`}
+                  title="Attended Global Special Backgrounds (Tag Keepers)"
+                  tagSuggestion={tagMap.ev_global.name}
+                  subtitle={`Sort by # → tag keepers (${tagMap.ev_global.name}/${tagMap.tr_spec.name}) first; never rely on count-N (which counts non-BG copies).`}
                   searchString={yearSlicerPlan.strings.globalBgKeepCombined}
                   accent="indigo"
                   onLoadToBar={onLoadSearchString}
@@ -2009,7 +1409,7 @@ function TriagePipelineView({
                 <SearchRecipeCard
                   badge={`year${slicerYear} • BG Audit`}
                   title="Unmapped Date Backgrounds"
-                  tagSuggestion="TradeBG"
+                  tagSuggestion={tagMap.ev_global.name}
                   subtitle="Finds Location or Special Backgrounds caught outside listed event windows."
                   searchString={yearSlicerPlan.strings.unmappedBgAudit}
                   accent="amber"
@@ -2091,24 +1491,35 @@ function TriagePipelineView({
           <div className="pt-3.5 space-y-3 mwg-card-container">
             <div className="mwg-card-grid">
               <SearchRecipeCard
-                badge={`Keep 1–${cdShinyKeepCap}`}
-                title={`Community Day Shinies — Keep (${selectedCdFamilyIds.length} IDs)`}
-                tagSuggestion="TradeCD"
-                subtitle={`Untraded shinies from ${selectedCdEventIds.size} selected CDs with ≤${cdShinyKeepCap} copies.`}
-                searchString={`${prefix}!traded&shiny&${cdKeepCountToken}&${selectedCdFamilyRanges || '1-9'}`}
+                badge="Step 1 • Review & Tag Keepers"
+                title={`Community Day Shinies — Tag Keepers (${selectedCdFamilyIds.length} IDs)`}
+                tagSuggestion={tagMap.tr_spec.name}
+                subtitle={`Sort by Number (#) in Pokémon GO so each CD family groups together. Favorite (★) + tag your best keepers (${tagMap.keep_trophy.name}) and 1–3 trade spares (${tagMap.tr_spec.name}).`}
+                searchString={`${prefix}shiny&${selectedCdFamilyRanges || '1-9'}`}
                 speciesIds={selectedCdFamilyIds}
                 accent="indigo"
                 onLoadToBar={onLoadSearchString}
                 onSelectSpeciesInGrid={onSelectSpeciesInGrid}
               />
               <SearchRecipeCard
-                badge={`Purge ${cdShinyKeepCap + 1}+`}
-                title={`Community Day Shinies — Surplus (${cdSurplusCountToken})`}
+                badge="Step 2 • True Surplus (!#)"
+                title="Untagged Surplus CD Shinies (HOME / Transfer)"
                 tagSuggestion="HOME / Transfer"
-                subtitle="Surplus CD shinies excluding 4*, Location Backgrounds & Costumes."
-                searchString={`${prefix}shiny&${cdSurplusCountToken}&${selectedCdFamilyRanges || '1-9'}&!4*&!locationbackground&!costume&!shadow&!favorite&!lucky`}
+                subtitle="Run AFTER Step 1: !# isolates ONLY genuine surplus CD shinies (avoids count4- falsely flagging 1-of-1 shinies when you own non-shiny copies!)."
+                searchString={`!#&!favorite&shiny&!4*&!background&!costume&!shadow&!lucky&@3mov&${selectedCdFamilyRanges || '1-9'}`}
                 speciesIds={selectedCdFamilyIds}
                 accent="rose"
+                onLoadToBar={onLoadSearchString}
+                onSelectSpeciesInGrid={onSelectSpeciesInGrid}
+              />
+              <SearchRecipeCard
+                badge="Step 3 • Legacy Move Hold"
+                title="High-IV CD Pre-Evos Missing Exclusive Move"
+                tagSuggestion={tagMap.op_evocd.name}
+                subtitle={`Un-evolved 3★/4★ Community Day pre-evolutions ready to hold for December CD recap moves.`}
+                searchString={`${prefix}evolve&!@special&3*,4*&${allCdPreEvoRanges}`}
+                speciesIds={ALL_COMMUNITY_DAY_PRE_EVO_IDS}
+                accent="emerald"
                 onLoadToBar={onLoadSearchString}
                 onSelectSpeciesInGrid={onSelectSpeciesInGrid}
               />
@@ -2391,10 +1802,147 @@ function TriagePipelineView({
             </div>
           </div>
         </div>
+
+        {/* ===================================================================
+            PANEL 5: INTERACTIVE AND (&) / OR (,) RULE COMBINER (POGO CNF COMPILER)
+           =================================================================== */}
+        <div
+          ref={(el) => {
+            panelRefs.current['cnf-combiner'] = el;
+          }}
+          role="tabpanel"
+          aria-labelledby={`${tabBaseId}-tab-cnf-combiner`}
+          hidden={activeSubTab !== 'cnf-combiner' ? 'until-found' : undefined}
+        >
+          <div className="pt-3.5 space-y-3 mwg-card-container">
+            <div className="pogo-summary-card p-4 space-y-3 text-xs">
+              <div>
+                <h3 className="font-display text-sm sm:text-base font-extrabold uppercase tracking-wider text-[#0c6c91]">
+                  🔗 AND (&amp;) / OR (,) Rule Combiner (PoGO CNF Compiler)
+                </h3>
+                <p className="text-[11px] text-[#285d72] leading-snug mt-0.5 font-medium">
+                  In Pokémon GO, <code className="font-mono font-bold text-[#123c4d]">,</code> (OR) has{' '}
+                  <strong>higher precedence</strong> than{' '}
+                  <code className="font-mono font-bold text-[#123c4d]">&amp;</code> (AND) — writing{' '}
+                  <code className="font-mono text-rose-700">A,B&amp;C</code> evaluates as{' '}
+                  <code className="font-mono text-rose-700">(A OR B) AND C</code>. Add independent
+                  AND-branches below and this compiler distributes OR over AND (
+                  <code className="font-mono font-bold text-[#0b698e]">A,B &amp; A,C</code>) with
+                  superset absorption so every branch surfaces accurately.
+                </p>
+              </div>
+
+              <div className="flex flex-wrap gap-1.5">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setCnfBranches([
+                      '4*',
+                      'gigantamax',
+                      'shiny&shadow',
+                      'shiny&legendary',
+                      'shiny&mythical',
+                      'shiny&ultrabeast',
+                      'shiny&locationbackground',
+                    ])
+                  }
+                  className="compact-inline-chip pogo-pill min-h-[28px] px-3 py-0.5 text-[10px] cursor-pointer"
+                >
+                  Preset: Crown Jewels
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setCnfBranches([
+                      'shiny&legendary',
+                      '4*&legendary',
+                      'locationbackground&legendary',
+                    ])
+                  }
+                  className="compact-inline-chip pogo-pill min-h-[28px] px-3 py-0.5 text-[10px] cursor-pointer"
+                >
+                  Preset: Trophy Legendaries
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setCnfBranches([
+                      '3*,4*&shadow',
+                      '0-1attack&3-4defense&3-4hp&cp-2500',
+                    ])
+                  }
+                  className="compact-inline-chip pogo-pill min-h-[28px] px-3 py-0.5 text-[10px] cursor-pointer"
+                >
+                  Preset: Shadow 3*-4* OR PvP Bulk
+                </button>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-1.5 bg-white/80 p-2.5 rounded-2xl border border-white">
+                {cnfBranches.map((br, idx) => (
+                  <React.Fragment key={`${br}-${idx}`}>
+                    {idx > 0 && (
+                      <span className="text-[10px] font-black text-[#0b698e] px-0.5">OR</span>
+                    )}
+                    <span className="inline-flex items-center gap-1 bg-[#dff4fb] border border-[#0d7da8]/30 rounded-full px-2.5 py-0.5 font-mono text-[11px] font-bold text-[#123c4d]">
+                      <span>({br})</span>
+                      <button
+                        type="button"
+                        onClick={() => setCnfBranches((prev) => prev.filter((_, i) => i !== idx))}
+                        aria-label={`Remove branch ${br}`}
+                        className="compact-inline-chip text-rose-600 hover:text-rose-800 font-black ml-0.5 cursor-pointer"
+                      >
+                        ✕
+                      </button>
+                    </span>
+                  </React.Fragment>
+                ))}
+              </div>
+
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={newBranchInput}
+                  onChange={(e) => setNewBranchInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && newBranchInput.trim()) {
+                      e.preventDefault();
+                      setCnfBranches((prev) => [...prev, newBranchInput.trim()]);
+                      setNewBranchInput('');
+                    }
+                  }}
+                  placeholder="Add branch (e.g. shiny&costume or 4*)"
+                  aria-label="Add OR branch with AND conditions"
+                  className="flex-1 min-w-0 px-4 py-2 pogo-search-pill text-base sm:text-xs font-mono font-bold text-[#123c4d] focus:outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (newBranchInput.trim()) {
+                      setCnfBranches((prev) => [...prev, newBranchInput.trim()]);
+                      setNewBranchInput('');
+                    }
+                  }}
+                  className="compact-inline-chip pogo-pill-active min-h-[36px] px-4 py-1.5 text-xs uppercase cursor-pointer shrink-0"
+                >
+                  + OR Branch
+                </button>
+              </div>
+
+              <SearchRecipeCard
+                badge={`${customCompiledCnfString.split('&').filter(Boolean).length} CNF AND-Clauses`}
+                title="Compiled Pokémon GO CNF Search String"
+                subtitle="Distributes OR (,) over AND (&) and absorbs redundant supersets."
+                searchString={customCompiledCnfString}
+                accent="teal"
+                onLoadToBar={onLoadSearchString}
+              />
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* =====================================================================
-          OPTIONS DIALOG (Reference Date, 24h Rolling Age Precision, Trade Caps)
+          OPTIONS DIALOG (Reference Date & 24h Rolling Age Precision)
          ===================================================================== */}
       <dialog
         ref={optionsDialogRef}
@@ -2402,9 +1950,9 @@ function TriagePipelineView({
         {...{ closedby: 'any' }}
         className="pogo-summary-card p-0 max-w-md w-[calc(100%-1.5rem)] text-[#123c4d] shadow-2xl"
       >
-        <div className="p-4 border-b border-[#0d7da8]/15 flex items-center justify-between bg-[#d5f2fc]/70 rounded-t-[1.25rem]">
+        <div className="pogo-summary-card-header p-4 border-b border-[#0d7da8]/15 flex items-center justify-between bg-[#d5f2fc]/70 rounded-t-[1.25rem]">
           <h2 id={optionsHeadingId} className="font-display text-sm font-extrabold text-[#0b698e] uppercase tracking-wider">
-            ⚙️ Triage &amp; Age Options
+            ⚙️ Event &amp; Age Options
           </h2>
           <form method="dialog">
             <PogoCloseButton type="submit" value="close" ariaLabel="Close options dialog" size="sm" />
@@ -2449,67 +1997,16 @@ function TriagePipelineView({
                 onChange={(e) => setBufferMode(e.target.value)}
                 className="w-full text-base sm:text-xs font-extrabold text-[#123c4d] bg-transparent focus:outline-none mt-0.5"
               >
+                <option value="evening-safe">24h Rolling Safe (Recommended)</option>
                 <option value="exact">Exact Calendar Day</option>
-                <option value="evening-safe">-1d Evening Catch Safe</option>
-                <option value="plus-minus-1">±1d Timezone Buffer</option>
+                <option value="plus-minus-1">±1d International TZ Buffer</option>
               </select>
             </div>
           </div>
 
-          <div className="space-y-2 pt-1">
-            <div className="text-[10px] font-extrabold uppercase tracking-wider text-[#0b698e]">
-              Trade Stockpile Keep Caps
-            </div>
-            <div className="grid grid-cols-3 gap-2">
-              <div className="bg-white/85 p-2.5 rounded-2xl border border-white text-center space-y-1">
-                <label htmlFor="cap-cd" className="text-[10px] font-extrabold text-[#1b4d60] block">
-                  CD Shinies
-                </label>
-                <select
-                  id="cap-cd"
-                  value={cdShinyKeepCap}
-                  onChange={(e) => setCdShinyKeepCap(Number(e.target.value))}
-                  className="bg-[#eef9fd] border border-[#0d7da8]/30 rounded-full px-2.5 py-1 text-xs font-extrabold text-[#123c4d]"
-                >
-                  {[1, 2, 3, 4].map((n) => (
-                    <option key={n} value={n}>1–{n}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="bg-white/85 p-2.5 rounded-2xl border border-white text-center space-y-1">
-                <label htmlFor="cap-bg" className="text-[10px] font-extrabold text-[#1b4d60] block">
-                  Global BGs
-                </label>
-                <select
-                  id="cap-bg"
-                  value={globalBgKeepCap}
-                  onChange={(e) => setGlobalBgKeepCap(Number(e.target.value))}
-                  className="bg-[#eef9fd] border border-[#0d7da8]/30 rounded-full px-2.5 py-1 text-xs font-extrabold text-[#123c4d]"
-                >
-                  {[1, 2, 3].map((n) => (
-                    <option key={n} value={n}>1–{n}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="bg-white/85 p-2.5 rounded-2xl border border-white text-center space-y-1">
-                <label htmlFor="cap-costume" className="text-[10px] font-extrabold text-[#1b4d60] block">
-                  Costumes
-                </label>
-                <select
-                  id="cap-costume"
-                  value={costumeKeepCap}
-                  onChange={(e) => setCostumeKeepCap(Number(e.target.value))}
-                  className="bg-[#eef9fd] border border-[#0d7da8]/30 rounded-full px-2.5 py-1 text-xs font-extrabold text-[#123c4d]"
-                >
-                  {[1, 2, 3].map((n) => (
-                    <option key={n} value={n}>1–{n}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-          </div>
+          <p className="text-[11px] text-[#285d72] bg-white/75 p-2.5 rounded-2xl border border-white leading-relaxed">
+            <strong>Why 24h Rolling Safe?</strong> Pokémon GO increments <code className="font-mono font-bold text-[#0b698e]">age</code> strictly 24 hours after catch (not at midnight), so afternoon catches on an event&apos;s final day stay at <code className="font-mono font-bold text-[#0b698e]">age(N−1)</code> until the following afternoon.
+          </p>
 
           <form method="dialog" className="pt-2">
             <button

@@ -31,6 +31,7 @@ const MEGA_LEVEL_OPTIONS = [
   { value: 'mega1-2', label: 'mega1-2 (Leveling to Lv3)' },
   { value: 'mega1-3', label: 'mega1-3 (Leveling to Lv4)' },
   { value: 'mega3-', label: 'mega3- (Maxed Lv3+)' },
+  { value: 'mega4', label: 'mega4 (Super Max Lv4)' },
 ];
 
 const IV_BUCKET_OPTIONS = [

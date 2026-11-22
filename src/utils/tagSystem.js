@@ -1,4 +1,10 @@
-import { REGION_KEYWORDS, TYPES, compressIds } from './searchUtils';
+import {
+  REGION_KEYWORDS,
+  TYPES,
+  compressIds,
+  SCARCE_RARE_SPECIES_IDS,
+  PVP_IV_EXCLUDE_CLAUSE,
+} from './searchUtils';
 import { ALL_COMMUNITY_DAY_PRE_EVO_IDS } from '../data/communityDayRegistry';
 
 // Complete 30-tag, 7-namespace opinionated taxonomy (+ optional 31st OP-Purify1k)
@@ -705,9 +711,15 @@ export function buildTagHydrationQueries(tagId, tagMap = null, metaSnapshot = nu
       return [
         {
           id: 'ev_inperson_primary',
-          label: 'Event Souvenirs',
-          query: 'costume,unown,shiny&!#',
-          note: 'Combine with exact trip ageX-Y dates from the Events & Trips tab.',
+          label: 'Travel & Live Event Souvenirs (100km+)',
+          query: 'distance100-&shiny,costume,201,479&!traded&!#',
+          note: 'Surfaces untraded travel/venue shinies, costumes, Unowns (#201), and Rotoms (#479) caught 100km+ from home. For local live events, copy the exact ageX-Y window from Events & Trips.',
+        },
+        {
+          id: 'ev_inperson_unown_rotom',
+          label: 'Untraded Unown & Rotom',
+          query: '201,479&!traded&!#',
+          isSecondary: true,
         },
       ];
 
@@ -721,13 +733,21 @@ export function buildTagHydrationQueries(tagId, tagMap = null, metaSnapshot = nu
         },
         {
           id: 'keep_trophy_singletons',
-          label: 'Singletons',
+          label: 'True 1-of-1 Singletons',
           query: 'count1&!#',
+          note: 'count1 matches species where you own literally 1 copy in your entire storage.',
         },
         {
-          id: 'keep_trophy_costumes_legacy',
-          label: 'Costumes & Legacy',
-          query: 'costume,@special&!#',
+          id: 'keep_trophy_legacy',
+          label: 'Singleton True Legacy Moves',
+          query: '@special&!@frustration&!@return&!shadow&!purified&count1&!#',
+          note: 'Excludes Shadow Frustration and Purified Return (which PoGO counts as @special) so combat shadows and raid squads stay free for Stages 3–6.',
+        },
+        {
+          id: 'keep_trophy_vintage',
+          label: 'Vintage 2016–2019 Catches',
+          query: 'year2016-2019&!#',
+          isSecondary: true,
         },
       ];
 
@@ -774,7 +794,31 @@ export function buildTagHydrationQueries(tagId, tagMap = null, metaSnapshot = nu
         },
       ];
 
-    case 'pve_raid':
+    case 'pve_raid': {
+      const byTypeFlat = pve.byType ? Object.values(pve.byType).flat() : [];
+      const allPveIds = [
+        ...(Array.isArray(pve.top30Overall) ? pve.top30Overall : []),
+        ...(Array.isArray(pve.topShadow) ? pve.topShadow : []),
+        ...(Array.isArray(pve.topMegaEvolved) ? pve.topMegaEvolved : []),
+        ...byTypeFlat,
+      ];
+      const allPveDex = compressIds(allPveIds);
+      if (allPveDex) {
+        return [
+          {
+            id: 'pve_raid_primary',
+            label: 'Powered-Up Meta Raiders',
+            query: `cp2500-,candyxl,mega3-&3*,4*,shadow&!#&${allPveDex}`,
+            note: 'Scoped to verified PvE raid families so high-CP non-raiders (Slaking, Blissey, Regigigas) are filtered out.',
+          },
+          {
+            id: 'pve_raid_broad',
+            label: 'Broad High-CP / XL Raiders',
+            query: 'cp3000-,candyxl,mega3-&3*,4*,shadow&!#',
+            isSecondary: true,
+          },
+        ];
+      }
       return [
         {
           id: 'pve_raid_primary',
@@ -782,13 +826,15 @@ export function buildTagHydrationQueries(tagId, tagMap = null, metaSnapshot = nu
           query: 'cp3000-,candyxl,mega3-&3*,4*,shadow&!#',
         },
       ];
+    }
 
     case 'max_atk':
       return [
         {
           id: 'max_atk_primary',
-          label: 'Max Attack Lv2–3',
-          query: 'maxmove2-&!#',
+          label: 'Max Attack Lv2–3 (Dedicated Attackers)',
+          query: 'maxmove2-&!maxguard2-&!maxspirit2-&!#',
+          note: 'Skips upgraded Max Guard / Max Spirit builds so dedicated Tanks and Healers cascade cleanly to MAX-Tank and MAX-Heal.',
         },
         {
           id: 'max_atk_gmax',
@@ -826,19 +872,42 @@ export function buildTagHydrationQueries(tagId, tagMap = null, metaSnapshot = nu
     case 'pvp_wip': {
       const glLow = Array.isArray(pvp.gl?.top100?.lowAtk) ? pvp.gl.top100.lowAtk : [];
       const ulLow = Array.isArray(pvp.ul?.top100?.lowAtk) ? pvp.ul.top100.lowAtk : [];
+      const glHigh = Array.isArray(pvp.gl?.top100?.highAtk) ? pvp.gl.top100.highAtk : [];
+      const ulHigh = Array.isArray(pvp.ul?.top100?.highAtk) ? pvp.ul.top100.highAtk : [];
+      const mlAll = Array.isArray(pvp.ml?.top100?.all) ? pvp.ml.top100.all : [];
+
       const glUlLowAtkDex = compressIds([...glLow, ...ulLow]);
+      const glUlHighAtkDex = compressIds([...glHigh, ...ulHigh]);
+      const mlAllDex = compressIds(mlAll);
       const queries = [];
+
       if (glUlLowAtkDex) {
         queries.push({
           id: 'pvp_wip_meta',
           label: 'Meta GL/UL Low-Atk',
-          query: `!#&0-1attack&3-4defense&3-4hp&${glUlLowAtkDex}`,
+          query: `!#&0-1attack&3-4defense&3-4hp&cp-2500&${glUlLowAtkDex}`,
+        });
+      }
+      if (glUlHighAtkDex) {
+        queries.push({
+          id: 'pvp_wip_xl',
+          label: 'Meta GL/UL XL High-Atk',
+          query: `!#&2-4attack&3-4defense&3-4hp&cp-2500&${glUlHighAtkDex}`,
+          note: 'Catches XL/hundo-cap GL & UL staples (Lickitung, Medicham, Corsola, Tinkaton, Talonflame, Umbreon).',
+        });
+      }
+      if (mlAllDex) {
+        queries.push({
+          id: 'pvp_wip_ml',
+          label: 'Meta Master League (15-Atk)',
+          query: `!#&3*,4*&4attack&${mlAllDex}`,
+          isSecondary: true,
         });
       }
       queries.push({
         id: 'pvp_wip_broad',
-        label: glUlLowAtkDex ? 'Broad Fallback' : 'Low-Atk PvP IVs',
-        query: '0-1attack&3-4defense&3-4hp&!#',
+        label: glUlLowAtkDex ? 'Broad Spicy Low-Atk' : 'Low-Atk PvP IVs',
+        query: '0-1attack&3-4defense&3-4hp&cp-2500&!#',
         isSecondary: Boolean(glUlLowAtkDex),
       });
       return queries;
@@ -864,29 +933,30 @@ export function buildTagHydrationQueries(tagId, tagMap = null, metaSnapshot = nu
     }
 
     case 'pve_megawip': {
-      const pveMegaEvolvedDex = compressIds(
-        Array.isArray(pve.topMegaEvolved) ? pve.topMegaEvolved : []
-      );
-      const pveMegaFamDex = compressIds(
-        Array.isArray(pve.topMegaFamily) ? pve.topMegaFamily : []
-      );
+      const evolvedList = Array.isArray(pve.topMegaEvolved) ? pve.topMegaEvolved : [];
+      const evolvedSet = new Set(evolvedList);
+      const familyList = Array.isArray(pve.topMegaFamily) ? pve.topMegaFamily : [];
+      const preEvoList = familyList.filter((id) => !evolvedSet.has(id));
+
+      const pveMegaEvolvedDex = compressIds(evolvedList);
+      const pveMegaPreEvoDex = compressIds(preEvoList);
       return [
         {
           id: 'pve_megawip_candidates',
-          label: "Un-Mega'd Meta Candidates",
+          label: "Un-Mega'd Evolved Candidates",
           query: pveMegaEvolvedDex
             ? `!#&!shadow&mega0&3*,4*&4attack&${pveMegaEvolvedDex}`
             : '!#&!shadow&mega0&3*,4*&4attack',
-          note: 'mega0 matches fully evolved Mega-capable species that have not been Mega Evolved yet.',
+          note: 'mega0 matches fully evolved Mega-capable species that have never been Mega Evolved.',
         },
         {
-          id: 'pve_megawip_families',
-          label: 'Pre-Evos & Mega Families',
-          query: pveMegaFamDex
-            ? `!#&!shadow&3*,4*&4attack&${pveMegaFamDex}`
+          id: 'pve_megawip_preevos',
+          label: 'Mega Pre-Evolutions Only',
+          query: pveMegaPreEvoDex
+            ? `!#&!shadow&3*,4*&4attack&${pveMegaPreEvoDex}`
             : '!#&!shadow&evolve&3*,4*&4attack',
           isSecondary: true,
-          note: 'Catches pre-evolutions (e.g. Charmander, Beldum, Ralts) since mega0 excludes unevolved forms.',
+          note: 'Uses strict pre-evolution Dex IDs (topMegaFamily minus topMegaEvolved) so already-Mega-Evolved mega1–3 forms never leak into PVE-MegaWIP before Stage 6 OP-Mega.',
         },
       ];
     }
@@ -928,14 +998,33 @@ export function buildTagHydrationQueries(tagId, tagMap = null, metaSnapshot = nu
         },
       ];
 
-    case 'tr_mirror':
+    case 'tr_mirror': {
+      const mirrorIds = [
+        ...SCARCE_RARE_SPECIES_IDS,
+        ...ALL_COMMUNITY_DAY_PRE_EVO_IDS,
+        ...(Array.isArray(pve.top30Overall) ? pve.top30Overall : []),
+        ...(Array.isArray(pvp.gl?.top100?.highAtk) ? pvp.gl.top100.highAtk : []),
+        ...(Array.isArray(pvp.ul?.top100?.highAtk) ? pvp.ul.top100.highAtk : []),
+        ...(Array.isArray(pvp.ml?.top100?.all) ? pvp.ml.top100.all : []),
+      ];
+      const mirrorDex = compressIds(mirrorIds);
       return [
         {
           id: 'tr_mirror_primary',
-          label: 'Duplicate Mirror Tradeables',
-          query: '!traded&!favorite&!shiny&!4*&count2-&!#',
+          label: 'Meta, Pseudo & CD Mirror Spares',
+          query: mirrorDex
+            ? `!traded&!favorite&!shiny&!4*&!background&0*,1*,2*&!#&${mirrorDex}`
+            : '!traded&!favorite&!shiny&!4*&!background&0*,1*,2*&count2-&!#',
+          note: 'Scoped to PvE/PvP meta, pseudo-legendaries, egg rares, and CD pre-evos so common wild fodder does not flood TR-Mirror.',
+        },
+        {
+          id: 'tr_mirror_max',
+          label: 'Untraded Low-IV Max Spares',
+          query: 'maxmove1-&!traded&!favorite&!shiny&!4*&!background&0*,1*,2*&!#',
+          isSecondary: true,
         },
       ];
+    }
 
     // --- Stage 6: Operational Queues ---
     case 'op_mega':
@@ -994,8 +1083,15 @@ export function buildTagHydrationQueries(tagId, tagMap = null, metaSnapshot = nu
       return [
         {
           id: 'op_evocd_cd',
-          label: 'Community Day Pre-Evos',
-          query: `evolve&!#&!favorite&${COMPRESSED_CD_PRE_EVO_DEX}`,
+          label: 'High-IV & Shiny CD Pre-Evos',
+          query: `evolve&!#&!favorite&!@special&3*,4*,shiny&${COMPRESSED_CD_PRE_EVO_DEX}`,
+          note: 'Filters out 0★–2★ non-shiny common clutter so only worthy Community Day pre-evolutions enter OP-EvoCD.',
+        },
+        {
+          id: 'op_evocd_pvp',
+          label: 'PvP-IV CD Pre-Evos',
+          query: `evolve&!#&!favorite&!@special&0-1attack&3-4defense&3-4hp&cp-2500&${COMPRESSED_CD_PRE_EVO_DEX}`,
+          isSecondary: true,
         },
         {
           id: 'op_evocd_wip',
@@ -1096,9 +1192,15 @@ export function buildTagHydrationQueries(tagId, tagMap = null, metaSnapshot = nu
       return [
         {
           id: 'op_2xxfer_primary',
-          label: '2x Transfer Queue',
-          query: 'legendary,ultrabeast,mythical,traded&!lucky&!shiny&!4*&!background&!favorite&@3mov&!#',
-          note: 'Shielded with @3mov (single-move only) so double-moved builds are protected.',
+          label: '0★–2★ Excess Legendaries & UBs',
+          query: `legendary,ultrabeast&0*,1*,2*&!lucky&!shiny&!4*&!background&!favorite&!fusion&!adventureeffect&!@special&@3mov&${PVP_IV_EXCLUDE_CLAUSE}&!#`,
+          note: 'Protects Mythicals, 3★–4★s, Fusions, Adventure Effects, Legacy Moves, PvP-IV rerolls, and double-moved builds (@3mov).',
+        },
+        {
+          id: 'op_2xxfer_dup3star',
+          label: 'Duplicate Non-15-Atk 3★ Legendaries',
+          query: 'legendary,ultrabeast&3*&0-3attack&count2-&!lucky&!shiny&!4*&!background&!favorite&!fusion&!adventureeffect&!@special&@3mov&!#',
+          isSecondary: true,
         },
       ];
 

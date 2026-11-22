@@ -380,6 +380,7 @@ function App() {
         <main className="flex-1 w-full">
           <TriagePipelineView
             pokemonList={pokemonData}
+            customTags={customTags}
             onLoadSearchString={handleLoadEventString}
             onSelectSpeciesInGrid={handleSelectSpeciesInGrid}
           />
