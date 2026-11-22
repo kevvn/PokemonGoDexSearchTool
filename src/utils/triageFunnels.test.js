@@ -100,13 +100,14 @@ describe('triageFunnels exhaustive syntax & safety validation', () => {
     expect(a6.query).toContain('1-4attack,1-4defense,1-4hp');
   });
 
-  test('Mode C2 mega0 query uses evolved-only dexes while family sub-query omits mega0', () => {
+  test('Mode C2 mega0 query uses evolved-only dexes while family sub-query omits mega0 and includes PVE-MegaWIP lookup', () => {
     const funnels = buildTriageFunnels(SAMPLE_META);
     const megaStep = funnels.modes.modeC.sections.pve.steps.find((s) => s.id === 'C2_mega_candidates');
     expect(megaStep.query).toContain('mega0');
     expect(megaStep.query).toContain('6,384,448');
     expect(megaStep.subQueries[0].query).not.toContain('mega0');
     expect(megaStep.subQueries[0].query).toContain('4-6,384,447-448');
+    expect(megaStep.subQueries[1].query).toBe('#pve-megawip');
   });
 
   test('Mode B8 low-IV shadow query intentionally omits !@special (Frustration) and includes @3mov & nundo shield', () => {
@@ -143,11 +144,23 @@ describe('triageFunnels exhaustive syntax & safety validation', () => {
     const customMap = createDefaultTagMap();
     customMap.op_2xxfer = { name: 'Transfer2x', enabled: true };
     customMap.op_xxl = { name: 'ShowcaseXXL', enabled: true };
+    customMap.pve_megawip = { name: 'MegaBuild', enabled: true };
+    customMap.op_powerwip = { name: 'DustBuild', enabled: true };
     customMap.max_heal = { name: 'MAX-Heal', enabled: false };
 
     const funnels = buildTriageFunnels(SAMPLE_META, customMap);
     const d1 = funnels.modes.modeD.steps.find((s) => s.id === 'D1_2xxfer');
     expect(d1.query).toBe('#transfer2x&!favorite');
+
+    const d2 = funnels.modes.modeD.steps.find((s) => s.id === 'D2_bad_trades');
+    expect(d2.query).toContain('!#dustbuild');
+
+    const d11 = funnels.modes.modeD.steps.find((s) => s.id === 'D11_powerwip');
+    expect(d11.query).toBe('#dustbuild');
+    expect(d11.subQueries[0].query).toBe('#dustbuild&countcandyxl296-');
+
+    const megaStep = funnels.modes.modeC.sections.pve.steps.find((s) => s.id === 'C2_mega_candidates');
+    expect(megaStep.subQueries[1].query).toBe('#megabuild');
 
     const b5 = funnels.modes.modeB.steps.find((s) => s.id === 'B5');
     expect(b5.query).toContain('!#showcasexxl');

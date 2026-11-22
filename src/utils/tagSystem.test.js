@@ -24,23 +24,23 @@ import {
 import { ALL_COMMUNITY_DAY_PRE_EVO_IDS } from '../data/communityDayRegistry';
 import realMetaSnapshot from '../data/meta_snapshot.json';
 
-describe('28-tag, 7-namespace blueprint', () => {
-  test('defines exactly 28 core tags across 7 namespaces + optional 29th OP-Purify1k', () => {
+describe('30-tag, 7-namespace blueprint', () => {
+  test('defines exactly 30 core tags across 7 namespaces + optional 31st OP-Purify1k', () => {
     expect(TAG_NAMESPACES).toHaveLength(7);
-    expect(CORE_TAGS).toHaveLength(28);
+    expect(CORE_TAGS).toHaveLength(30);
     expect(OPTIONAL_TAGS).toHaveLength(1);
-    expect(ALL_TAG_DEFINITIONS).toHaveLength(29);
+    expect(ALL_TAG_DEFINITIONS).toHaveLength(31);
     expect(OPTIONAL_TAGS[0].id).toBe('op_purify1k');
   });
 
-  test('all default 28 core tags (and optional 29th enabled) pass lintTagMap with ZERO errors and ZERO warnings', () => {
+  test('all default 30 core tags (and optional 31st enabled) pass lintTagMap with ZERO errors and ZERO warnings', () => {
     const defaultMap = createDefaultTagMap();
     const res = lintTagMap(defaultMap);
     expect(res.valid).toBe(true);
     expect(res.errorCount).toBe(0);
     expect(res.warningCount).toBe(0);
 
-    // Enable optional 29th tag too
+    // Enable optional 31st tag too
     const allEnabled = { ...defaultMap, op_purify1k: { ...defaultMap.op_purify1k, enabled: true } };
     const resAll = lintTagMap(allEnabled);
     expect(resAll.valid).toBe(true);
@@ -48,7 +48,7 @@ describe('28-tag, 7-namespace blueprint', () => {
     expect(resAll.warningCount).toBe(0);
   });
 
-  test('recommended drag order starts with OP-2xXfer, TR-Mirror, TR-Dist, TR-Spec, EV-ShBG', () => {
+  test('recommended drag order starts with OP-2xXfer, TR-Mirror, TR-Dist, TR-Spec, EV-ShBG and has unique 1..31 slots', () => {
     const ordered = getRecommendedDragOrder();
     expect(ordered.slice(0, 5).map((t) => t.id)).toEqual([
       'op_2xxfer',
@@ -57,6 +57,9 @@ describe('28-tag, 7-namespace blueprint', () => {
       'tr_spec',
       'ev_shbg',
     ]);
+    expect(ordered.map((t) => t.dragOrder)).toEqual(
+      Array.from({ length: ALL_TAG_DEFINITIONS.length }, (_, idx) => idx + 1)
+    );
   });
 });
 
@@ -122,28 +125,30 @@ describe('tag hash & smart namespace umbrella resolution', () => {
   });
 });
 
-describe('Initial Tag Hydration queries (all 29 tags, 6-stage walkthrough)', () => {
+describe('Initial Tag Hydration queries (all 31 tags, 6-stage walkthrough)', () => {
   const defaultMap = createDefaultTagMap();
   const customRenamedMap = {
     ...createDefaultTagMap(),
     pvp_wip: { name: 'BuildPvP', enabled: true },
     pve_wip: { name: 'BuildRaid', enabled: true },
+    pve_megawip: { name: 'BuildMega', enabled: true },
     max_wip: { name: 'BuildMax', enabled: true },
+    op_powerwip: { name: 'DustWIP', enabled: true },
     op_powerup: { name: 'DustQueue', enabled: true },
     op_purify1k: { name: 'PurifyCheap', enabled: true },
   };
 
-  test('covers all 29 tags (28 core + optional op_purify1k) in exact Stage 1 -> Stage 6 order', () => {
+  test('covers all 31 tags (30 core + optional op_purify1k) in exact Stage 1 -> Stage 6 order', () => {
     expect(HYDRATION_STAGES).toHaveLength(6);
     expect(HYDRATION_STAGES.map((s) => s.stageNumber)).toEqual([1, 2, 3, 4, 5, 6]);
 
     const steps = getAllTagHydrationSteps(defaultMap, realMetaSnapshot);
-    expect(steps).toHaveLength(29);
+    expect(steps).toHaveLength(31);
 
     // Every defined tag appears exactly once
     const stepTagIds = steps.map((s) => s.tagId);
     const uniqueIds = new Set(stepTagIds);
-    expect(uniqueIds.size).toBe(29);
+    expect(uniqueIds.size).toBe(31);
     for (const def of ALL_TAG_DEFINITIONS) {
       expect(uniqueIds.has(def.id), `Missing hydration step for ${def.id}`).toBe(true);
     }
@@ -174,31 +179,33 @@ describe('Initial Tag Hydration queries (all 29 tags, 6-stage walkthrough)', () 
       'max_tank',
       'max_heal',
     ]);
-    expect(steps.slice(13, 17).map((s) => s.tagId)).toEqual([
+    expect(steps.slice(13, 18).map((s) => s.tagId)).toEqual([
       'pvp_wip',
       'pve_wip',
+      'pve_megawip',
       'max_wip',
       'max_candy',
     ]);
-    expect(steps.slice(17, 20).map((s) => s.tagId)).toEqual([
+    expect(steps.slice(18, 21).map((s) => s.tagId)).toEqual([
       'tr_spec',
       'tr_dist',
       'tr_mirror',
     ]);
-    expect(steps.slice(20).map((s) => s.tagId)).toEqual([
+    expect(steps.slice(21).map((s) => s.tagId)).toEqual([
       'op_mega',
       'op_xxl',
       'op_tmfrust',
       'op_buddy',
       'op_evocd',
       'op_evoxp',
+      'op_powerwip',
       'op_powerup',
       'op_2xxfer',
       'op_purify1k',
     ]);
   });
 
-  test('ALL 29 tags produce valid non-empty queries with 0 validateSearchString errors/warnings, 0 banned patterns, and < 4000 chars', () => {
+  test('ALL 31 tags produce valid non-empty queries with 0 validateSearchString errors/warnings, 0 banned patterns, and < 4000 chars', () => {
     const configs = [
       { label: 'default + realMetaSnapshot', map: defaultMap, meta: realMetaSnapshot },
       { label: 'default + empty metaSnapshot', map: defaultMap, meta: {} },
@@ -207,7 +214,7 @@ describe('Initial Tag Hydration queries (all 29 tags, 6-stage walkthrough)', () 
 
     for (const { label, map, meta } of configs) {
       const steps = getAllTagHydrationSteps(map, meta);
-      expect(steps).toHaveLength(29);
+      expect(steps).toHaveLength(31);
 
       for (const step of steps) {
         const direct = buildTagHydrationQueries(step.tagId, map, meta);
@@ -286,29 +293,49 @@ describe('Initial Tag Hydration queries (all 29 tags, 6-stage walkthrough)', () 
       'shadow&candykm1&!shiny&!4*&!favorite&!#'
     );
 
-    // op_evocd includes compressed Community Day pre-evo dex IDs + dynamic WIP evolves
+    // pve_megawip uses mega0 for evolved candidates and omits mega0 for family pre-evos
+    const megaWip = buildTagHydrationQueries('pve_megawip', defaultMap, realMetaSnapshot);
+    expect(megaWip).toHaveLength(2);
+    expect(megaWip[0].query).toContain('!#&!shadow&mega0&3*,4*&4attack&');
+    expect(megaWip[1].query).not.toContain('mega0');
+    expect(megaWip[1].query).toContain('!#&!shadow&3*,4*&4attack&');
+
+    // op_evocd includes compressed Community Day pre-evo dex IDs + dynamic WIP evolves (including pve_megawip)
     const evoCd = buildTagHydrationQueries('op_evocd', defaultMap, realMetaSnapshot);
     expect(evoCd[0].query).toBe(`evolve&!#&!favorite&${compressIds(ALL_COMMUNITY_DAY_PRE_EVO_IDS)}`);
-    expect(evoCd[1].query).toBe('#pvp-wip,#pve-wip&evolve');
+    expect(evoCd[1].query).toBe('#pvp-wip,#pve-wip,#pve-megawip&evolve');
 
-    // op_powerup uses dynamic WIP tags & !#op-powerup
+    // op_powerwip tracks active power-up WIP builds + partially XL-powered projects
+    const powerWip = buildTagHydrationQueries('op_powerwip', defaultMap, realMetaSnapshot);
+    expect(powerWip.map((q) => q.query)).toEqual([
+      '#pvp-wip,#pve-wip,#pve-megawip,#max-wip&!#op-powerwip',
+      'candyxl&3*,4*&!#op-powerwip',
+    ]);
+
+    // op_powerup uses dynamic WIP tags (including pve_megawip & op_powerwip) & !#op-powerup
     expect(buildTagHydrationQueries('op_powerup', defaultMap, realMetaSnapshot)[0].query).toBe(
-      '#pvp-wip,#pve-wip,#max-wip&!#op-powerup'
+      '#pvp-wip,#pve-wip,#pve-megawip,#max-wip,#op-powerwip&!#op-powerup'
     );
 
     // Unknown tag returns empty array
     expect(buildTagHydrationQueries('nonexistent_tag', defaultMap, realMetaSnapshot)).toEqual([]);
   });
 
-  test('dynamically updates op_powerup and op_evocd queries when user renames tags in tagMap', () => {
+  test('dynamically updates op_powerwip, op_powerup, and op_evocd queries when user renames tags in tagMap', () => {
+    const powerWipRenamed = buildTagHydrationQueries('op_powerwip', customRenamedMap, realMetaSnapshot);
+    expect(powerWipRenamed.map((q) => q.query)).toEqual([
+      '#buildpvp,#buildraid,#buildmega,#buildmax&!#dustwip',
+      'candyxl&3*,4*&!#dustwip',
+    ]);
+
     const powerupRenamed = buildTagHydrationQueries('op_powerup', customRenamedMap, realMetaSnapshot);
-    expect(powerupRenamed[0].query).toBe('#buildpvp,#buildraid,#buildmax&!#dustqueue');
+    expect(powerupRenamed[0].query).toBe('#buildpvp,#buildraid,#buildmega,#buildmax,#dustwip&!#dustqueue');
 
     const evoCdRenamed = buildTagHydrationQueries('op_evocd', customRenamedMap, realMetaSnapshot);
-    expect(evoCdRenamed[1].query).toBe('#buildpvp,#buildraid&evolve');
+    expect(evoCdRenamed[1].query).toBe('#buildpvp,#buildraid,#buildmega&evolve');
   });
 
-  test('ALL 29 hydration queries achieve full parseSearchString -> generateSearchString round-trip stability', () => {
+  test('ALL 31 hydration queries achieve full parseSearchString -> generateSearchString round-trip stability', () => {
     for (const map of [defaultMap, customRenamedMap]) {
       const steps = getAllTagHydrationSteps(map, realMetaSnapshot);
 

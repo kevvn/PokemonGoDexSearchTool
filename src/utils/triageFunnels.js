@@ -216,7 +216,7 @@ export function buildTriageFunnels(metaSnapshot = {}, customTagMap = null, optio
     subQueries: [
       { label: 'New Pokédex Evolutions', query: joinClauses(ageScope, '!#', 'evolvenew') },
     ],
-    action: `Tag meta 15-Atk / 93–98% mons → ${tagMap.pve_wip.name}, ${tagMap.pvp_wip.name}, ${tagMap.op_powerup.name}, or ${tagMap.op_evocd.name}.`,
+    action: `Tag meta 15-Atk / 93–98% mons → ${tagMap.pve_wip.name}, ${tagMap.pve_megawip.name}, ${tagMap.pvp_wip.name}, ${tagMap.op_powerwip.name}, or ${tagMap.op_evocd.name}.`,
     isTrash: false,
   };
 
@@ -494,8 +494,12 @@ export function buildTriageFunnels(metaSnapshot = {}, customTagMap = null, optio
           label: 'Pre-Evos & Evolved Mega Families (no mega0)',
           query: joinClauses('!#', '!shadow', '3*,4*', '4attack', pveMegaFamDex),
         },
+        {
+          label: 'Tagged WIP Megas',
+          query: t('pve_megawip') || '#pve-megawip',
+        },
       ],
-      action: 'mega0 only matches fully evolved Mega-capable forms — use the Pre-Evos & Evolved sub-query to catch Charmander/Beldum/etc.',
+      action: `mega0 only matches fully evolved Mega-capable forms — use the Pre-Evos & Evolved sub-query to catch Charmander/Beldum/etc. Tag candidates → ${tagMap.pve_megawip.name} until Mega Evolved (then move to ${tagMap.op_mega.name}).`,
       isTrash: false,
     },
     {
@@ -584,9 +588,9 @@ export function buildTriageFunnels(metaSnapshot = {}, customTagMap = null, optio
       query: joinClauses(
         'traded', '!lucky', '!4*', '!shiny', '!background', '!favorite', '!@special', '@3mov',
         ...nsExc('pvp'), ...nsExc('pve'), ...nsExc('max'), ...nsExc('keep'), ...nsExc('ev'),
-        notT('op_xxl'), notT('op_mega'), notT('op_evocd'), notT('op_evoxp')
+        notT('op_xxl'), notT('op_mega'), notT('op_evocd'), notT('op_evoxp'), notT('op_powerwip'), notT('op_powerup')
       ),
-      action: `Flush post-trade failures straight to ${tagMap.op_2xxfer.name} or transfer immediately (shields event, XXL, Mega, legacy-move, double-moved, and evolution-queued trades).`,
+      action: `Flush post-trade failures straight to ${tagMap.op_2xxfer.name} or transfer immediately (shields event, XXL, Mega, Power-Up WIP, legacy-move, double-moved, and evolution-queued trades).`,
       isTrash: true,
     },
     {
@@ -655,6 +659,23 @@ export function buildTriageFunnels(metaSnapshot = {}, customTagMap = null, optio
       title: 'Party Play Catches Review',
       query: 'party&!#',
       action: 'Uses verified `party` keyword (never `partyplay`).',
+      isTrash: false,
+    },
+    {
+      id: 'D11_powerwip',
+      title: 'Active Power-Up WIP Roster',
+      query: t('op_powerwip') || '#op-powerwip',
+      subQueries: [
+        {
+          label: 'XL-Ready Power-Up WIPs (296+ XL)',
+          query: joinClauses(t('op_powerwip') || '#op-powerwip', 'countcandyxl296-'),
+        },
+        {
+          label: 'Field Research Power-Up Queue',
+          query: t('op_powerup') || '#op-powerup',
+        },
+      ],
+      action: `Track active Stardust/Candy builds in ${tagMap.op_powerwip.name} (remove once they hit target CP/Lv40/Lv50); keep ${tagMap.op_powerup.name} for "Power up X times" Field Research.`,
       isTrash: false,
     },
   ];

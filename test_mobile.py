@@ -46,7 +46,7 @@ def test():
         page.wait_for_selector('[aria-label="Tag system summary and actions"]')
 
         # Verify Quick-Hydrate walkthrough drawer opens and displays Stage 1..6
-        walkthrough_section = page.locator('[aria-label="Quick-Hydrate Your Box (28-Tag Walkthrough)"]')
+        walkthrough_section = page.locator('[aria-label="Quick-Hydrate Your Box (30-Tag Walkthrough)"]')
         walkthrough_section.wait_for(state="visible", timeout=5000)
         walkthrough_section.get_by_role("button", name="Quick-Hydrate Your Box", exact=False).click()
         page.wait_for_timeout(150)

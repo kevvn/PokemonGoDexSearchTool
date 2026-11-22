@@ -1,17 +1,17 @@
 import { REGION_KEYWORDS, TYPES, compressIds } from './searchUtils';
 import { ALL_COMMUNITY_DAY_PRE_EVO_IDS } from '../data/communityDayRegistry';
 
-// Complete 28-tag, 7-namespace opinionated taxonomy (+ optional 29th OP-Purify1k)
+// Complete 30-tag, 7-namespace opinionated taxonomy (+ optional 31st OP-Purify1k)
 // Verified collision-free against Leidwesen/SearchPhrases v0.435.1.
 
 export const TAG_NAMESPACES = [
   { id: 'ev', label: 'Events & Backgrounds', defaultPrefix: 'EV-', color: 'purple', description: 'In-person events, location backgrounds, global events, and shiny backgrounds.' },
   { id: 'keep', label: 'Collection & Trophies', defaultPrefix: 'KEEP-', color: 'yellow', description: 'Permanent non-combat keepers: nundos, Level 1s, Living Dex, museum pieces.' },
   { id: 'pvp', label: 'PvP / GO Battle League', defaultPrefix: 'PVP-', color: 'blue', description: 'Built league rosters (GL, UL, ML, Cups) and unbuilt PvP IV candidates.' },
-  { id: 'pve', label: 'PvE Raid Attackers', defaultPrefix: 'PVE-', color: 'red', description: 'Built raid attackers and high-IV/Shadow PvE investment projects.' },
+  { id: 'pve', label: 'PvE Raid Attackers', defaultPrefix: 'PVE-', color: 'red', description: 'Built raid attackers, high-IV/Shadow PvE investment projects, and work-in-progress Mega candidates.' },
   { id: 'max', label: 'Max Battles (D-Max / G-Max)', defaultPrefix: 'MAX-', color: 'pink', description: 'Max Battle attackers, 0.5s-move tanks, healers, WIPs, and Power Spot candy mules.' },
   { id: 'tr', label: 'Trading Queues', defaultPrefix: 'TR-', color: 'green', description: 'Mirror trades, 100km+ distance trades, and Special/Lucky trade showcases.' },
-  { id: 'op', label: 'Operational Queues', defaultPrefix: 'OP-', color: 'orange', description: 'Actionable housekeeping queues flushed on Spotlight Hours, Rocket Takeovers, and daily loops.' },
+  { id: 'op', label: 'Operational Queues', defaultPrefix: 'OP-', color: 'orange', description: 'Actionable housekeeping & investment queues (Power-Up WIPs, Mega grind, Spotlight Hours, Rocket Takeovers, daily loops).' },
 ];
 
 export const CORE_TAGS = [
@@ -59,7 +59,7 @@ export const CORE_TAGS = [
     namespace: 'keep',
     defaultName: 'KEEP-Trophy',
     color: 'yellow',
-    dragOrder: 13,
+    dragOrder: 15,
     purpose: 'Permanent non-combat keepers: 0% Nundos, Level 1s, Living Dex anchors, sentimental catches, museum @special / costume / regional 1-ofs.',
     nativeSearchSynergy: '0attack&0defense&0hp, count1, @special',
   },
@@ -70,7 +70,7 @@ export const CORE_TAGS = [
     namespace: 'pvp',
     defaultName: 'PVP-GL',
     color: 'blue',
-    dragOrder: 14,
+    dragOrder: 16,
     purpose: 'Built Great League (≤1500 CP, double-moved, battle-ready).',
     nativeSearchSynergy: '#pvp-gl&cp-1500',
   },
@@ -79,7 +79,7 @@ export const CORE_TAGS = [
     namespace: 'pvp',
     defaultName: 'PVP-UL',
     color: 'yellow',
-    dragOrder: 15,
+    dragOrder: 17,
     purpose: 'Built Ultra League (≤2500 CP, double-moved, battle-ready).',
     nativeSearchSynergy: '#pvp-ul&cp-2500',
   },
@@ -88,7 +88,7 @@ export const CORE_TAGS = [
     namespace: 'pvp',
     defaultName: 'PVP-ML',
     color: 'purple',
-    dragOrder: 16,
+    dragOrder: 18,
     purpose: 'Built Master League (L50 / hundo or functional 15-Atk hundo, double-moved).',
     nativeSearchSynergy: '#pvp-ml&4attack',
   },
@@ -97,7 +97,7 @@ export const CORE_TAGS = [
     namespace: 'pvp',
     defaultName: 'PVP-Cup',
     color: 'blue',
-    dragOrder: 17,
+    dragOrder: 19,
     purpose: 'Built Little Cup (≤500 CP) & Themed/Limited Cup specialists kept outside Open GL/UL.',
     nativeSearchSynergy: '#pvp-cup&cp-500',
   },
@@ -117,7 +117,7 @@ export const CORE_TAGS = [
     namespace: 'pve',
     defaultName: 'PVE-Raid',
     color: 'red',
-    dragOrder: 18,
+    dragOrder: 20,
     purpose: 'Built PvE Raid Attackers (powered-up Shadows, Legendaries, Fusions, Megas ready for lobbies). Filter by move type (#pve-raid&@ice) instead of 18 type tags.',
     nativeSearchSynergy: '#pve-raid&@fire, #pve-raid&shadow',
   },
@@ -127,8 +127,17 @@ export const CORE_TAGS = [
     defaultName: 'PVE-WIP',
     color: 'red',
     dragOrder: 10,
-    purpose: 'Unbuilt PvE Projects (15-Atk 3★/4★ regulars, S/A-tier Shadows, un-Mega\'d candidates awaiting investment).',
+    purpose: 'Unbuilt PvE Projects (15-Atk 3★/4★ regulars, S/A-tier Shadows, Legendaries & Fusions awaiting investment).',
     nativeSearchSynergy: '#pve-wip&countcandyxl296-',
+  },
+  {
+    id: 'pve_megawip',
+    namespace: 'pve',
+    defaultName: 'PVE-MegaWIP',
+    color: 'blue',
+    dragOrder: 13,
+    purpose: 'Work-in-Progress Megas — un-Mega\'d high-IV candidates & pre-evos awaiting Mega Energy, evolution, or stardust before joining the OP-Mega cooldown grind.',
+    nativeSearchSynergy: '#pve-megawip&mega0, #pve-megawip&evolve',
   },
 
   // Namespace 5: Max Battles (#max)
@@ -137,7 +146,7 @@ export const CORE_TAGS = [
     namespace: 'max',
     defaultName: 'MAX-Atk',
     color: 'pink',
-    dragOrder: 19,
+    dragOrder: 21,
     purpose: 'Built Max Attackers (G-Max, Eternatus, Crowned Zacian, top D-Max with Max Attack Lv2–3).',
     nativeSearchSynergy: '#max-atk&maxmove3',
   },
@@ -146,7 +155,7 @@ export const CORE_TAGS = [
     namespace: 'max',
     defaultName: 'MAX-Tank',
     color: 'green',
-    dragOrder: 20,
+    dragOrder: 22,
     purpose: 'Built Max Tanks / Chargers (Zamazenta, Blissey, Metagross, Corviknight, Excadrill, Lapras w/ 0.5s Fast Move + Max Guard Lv2–3).',
     nativeSearchSynergy: '#max-tank&maxguard2-',
   },
@@ -155,7 +164,7 @@ export const CORE_TAGS = [
     namespace: 'max',
     defaultName: 'MAX-Heal',
     color: 'green',
-    dragOrder: 21,
+    dragOrder: 23,
     purpose: 'Dedicated Max Healers (Blissey, Chansey w/ Max Spirit Lv3). Casual players may fold into MAX-Tank.',
     nativeSearchSynergy: '#max-heal&maxspirit3',
   },
@@ -173,7 +182,7 @@ export const CORE_TAGS = [
     namespace: 'max',
     defaultName: 'MAX-Candy',
     color: 'grey',
-    dragOrder: 22,
+    dragOrder: 24,
     purpose: 'Power Spot Candy Mules — disposable Lv1 D-Max of scarce families kept solely to drop in Power Spots for passive candy.',
     nativeSearchSynergy: '#max-candy&dynamax',
   },
@@ -222,7 +231,7 @@ export const CORE_TAGS = [
     namespace: 'op',
     defaultName: 'OP-EvoCD',
     color: 'orange',
-    dragOrder: 23,
+    dragOrder: 25,
     purpose: 'Wait-for-Move Evolution Queue — PvP/PvE pre-evolutions waiting for Comm Day / Legacy Move event (saves Elite TMs).',
     nativeSearchSynergy: '#op-evocd&evolve',
   },
@@ -231,7 +240,7 @@ export const CORE_TAGS = [
     namespace: 'op',
     defaultName: 'OP-EvoXP',
     color: 'orange',
-    dragOrder: 24,
+    dragOrder: 26,
     purpose: 'Mass-Evolve XP Queue — 12-candy fodder, traded trade-evolutions, spare XXLs for 2x Evolution XP Spotlight Hour + Lucky Egg.',
     nativeSearchSynergy: '#op-evoxp&evolve',
   },
@@ -240,7 +249,7 @@ export const CORE_TAGS = [
     namespace: 'op',
     defaultName: 'OP-Mega',
     color: 'blue',
-    dragOrder: 25,
+    dragOrder: 27,
     purpose: 'Mega Leveling Grind — active mega1-2 (or mega1-3 for Lv4 Super Max) mons cycling free cooldown evolves; remove tag once maxed.',
     nativeSearchSynergy: '#op-mega&megaevolve',
   },
@@ -254,12 +263,21 @@ export const CORE_TAGS = [
     nativeSearchSynergy: '#op-xxl&xxl',
   },
   {
+    id: 'op_powerwip',
+    namespace: 'op',
+    defaultName: 'OP-PowerWIP',
+    color: 'orange',
+    dragOrder: 14,
+    purpose: 'Work-in-Progress Power-Up Projects — active builds currently receiving Stardust & Candy/XL toward target CP/Lv40/Lv50 (remove once finished; distinct from the OP-PowerUp research queue).',
+    nativeSearchSynergy: '#op-powerwip&countcandyxl296-, #op-powerwip&candyxl',
+  },
+  {
     id: 'op_powerup',
     namespace: 'op',
     defaultName: 'OP-PowerUp',
     color: 'orange',
-    dragOrder: 26,
-    purpose: 'Power-Up Priority Queue — pre-selected mons for "Power up X times" Field Research so dust is never wasted.',
+    dragOrder: 28,
+    purpose: 'Power-Up Research Queue — pre-selected mons for "Power up X times" Field Research so dust is never wasted.',
     nativeSearchSynergy: '#op-powerup',
   },
   {
@@ -267,7 +285,7 @@ export const CORE_TAGS = [
     namespace: 'op',
     defaultName: 'OP-TMFrust',
     color: 'red',
-    dragOrder: 27,
+    dragOrder: 29,
     purpose: 'Remove Frustration Queue — viable Shadows waiting for Team GO Rocket Takeover.',
     nativeSearchSynergy: '#op-tmfrust&@frustration',
   },
@@ -276,7 +294,7 @@ export const CORE_TAGS = [
     namespace: 'op',
     defaultName: 'OP-Buddy',
     color: 'yellow',
-    dragOrder: 28,
+    dragOrder: 30,
     purpose: 'Best Buddy Rotation — 5–20 active buddy projects; remove once buddy5.',
     nativeSearchSynergy: '#op-buddy&!buddy5',
   },
@@ -288,7 +306,7 @@ export const OPTIONAL_TAGS = [
     namespace: 'op',
     defaultName: 'OP-Purify1k',
     color: 'grey',
-    dragOrder: 29,
+    dragOrder: 31,
     optional: true,
     purpose: '1,000-stardust shadow catches held exclusively for "Purify X Shadow Pokémon" research tasks.',
     nativeSearchSynergy: '#op-purify1k&shadow',
@@ -331,7 +349,7 @@ export const FORBIDDEN_TAG_CHAR_REGEX = /[&|,;:!@#<>=+]/;
 
 /**
  * Create the default custom tag map keyed by stable tag ID.
- * Core 28 tags enabled by default; optional OP-Purify1k enabled=false by default.
+ * Core 30 tags enabled by default; optional OP-Purify1k enabled=false by default.
  */
 export function createDefaultTagMap() {
   const map = {};
@@ -588,8 +606,8 @@ const DEFAULT_TRADE_EVOLVE_IDS = [64, 67, 75, 93, 525, 533, 588, 616, 708, 710];
 const COMPRESSED_CD_PRE_EVO_DEX = compressIds(ALL_COMMUNITY_DAY_PRE_EVO_IDS);
 
 /**
- * 6-stage top-to-bottom initial box hydration walkthrough order covering all 29 tags
- * (28 core + optional OP-Purify1k). Running in this order ensures `!#` cascades cleanly
+ * 6-stage top-to-bottom initial box hydration walkthrough order covering all 31 tags
+ * (30 core + optional OP-Purify1k). Running in this order ensures `!#` cascades cleanly
  * from highest-priority grails & built rosters down to WIPs, trade queues, and daily ops.
  */
 export const HYDRATION_STAGES = [
@@ -618,8 +636,8 @@ export const HYDRATION_STAGES = [
     id: 'stage_4_wip',
     stageNumber: 4,
     title: 'Stage 4: Unbuilt WIP & Candy Mules',
-    subtitle: 'Sweep untagged meta PvP spreads, 15-Atk/Shadow PvE projects, Max WIPs, and disposable Power Spot mules.',
-    tagIds: ['pvp_wip', 'pve_wip', 'max_wip', 'max_candy'],
+    subtitle: 'Sweep untagged meta PvP spreads, 15-Atk/Shadow PvE projects, un-Mega\'d Mega candidates, Max WIPs, and Power Spot mules.',
+    tagIds: ['pvp_wip', 'pve_wip', 'pve_megawip', 'max_wip', 'max_candy'],
   },
   {
     id: 'stage_5_trading',
@@ -632,8 +650,8 @@ export const HYDRATION_STAGES = [
     id: 'stage_6_ops',
     stageNumber: 6,
     title: 'Stage 6: Operational Queues',
-    subtitle: 'Populate daily & event housekeeping queues (Mega grind, XXLs, Rocket TM, Buddy, CD/XP Evos, Power-Up, 2x Xfer).',
-    tagIds: ['op_mega', 'op_xxl', 'op_tmfrust', 'op_buddy', 'op_evocd', 'op_evoxp', 'op_powerup', 'op_2xxfer', 'op_purify1k'],
+    subtitle: 'Populate daily & event housekeeping queues (Mega grind, XXLs, Rocket TM, Buddy, CD/XP Evos, Power-Up WIPs & Research, 2x Xfer).',
+    tagIds: ['op_mega', 'op_xxl', 'op_tmfrust', 'op_buddy', 'op_evocd', 'op_evoxp', 'op_powerwip', 'op_powerup', 'op_2xxfer', 'op_purify1k'],
   },
 ];
 
@@ -845,6 +863,34 @@ export function buildTagHydrationQueries(tagId, tagMap = null, metaSnapshot = nu
       ];
     }
 
+    case 'pve_megawip': {
+      const pveMegaEvolvedDex = compressIds(
+        Array.isArray(pve.topMegaEvolved) ? pve.topMegaEvolved : []
+      );
+      const pveMegaFamDex = compressIds(
+        Array.isArray(pve.topMegaFamily) ? pve.topMegaFamily : []
+      );
+      return [
+        {
+          id: 'pve_megawip_candidates',
+          label: "Un-Mega'd Meta Candidates",
+          query: pveMegaEvolvedDex
+            ? `!#&!shadow&mega0&3*,4*&4attack&${pveMegaEvolvedDex}`
+            : '!#&!shadow&mega0&3*,4*&4attack',
+          note: 'mega0 matches fully evolved Mega-capable species that have not been Mega Evolved yet.',
+        },
+        {
+          id: 'pve_megawip_families',
+          label: 'Pre-Evos & Mega Families',
+          query: pveMegaFamDex
+            ? `!#&!shadow&3*,4*&4attack&${pveMegaFamDex}`
+            : '!#&!shadow&evolve&3*,4*&4attack',
+          isSecondary: true,
+          note: 'Catches pre-evolutions (e.g. Charmander, Beldum, Ralts) since mega0 excludes unevolved forms.',
+        },
+      ];
+    }
+
     case 'max_wip':
       return [
         {
@@ -943,6 +989,7 @@ export function buildTagHydrationQueries(tagId, tagMap = null, metaSnapshot = nu
       const wipEvoHashes = [
         getTagHash('pvp_wip', merged),
         getTagHash('pve_wip', merged),
+        getTagHash('pve_megawip', merged),
       ].filter(Boolean);
       return [
         {
@@ -981,11 +1028,48 @@ export function buildTagHydrationQueries(tagId, tagMap = null, metaSnapshot = nu
       ];
     }
 
+    case 'op_powerwip': {
+      const wipHashes = [
+        getTagHash('pvp_wip', merged),
+        getTagHash('pve_wip', merged),
+        getTagHash('pve_megawip', merged),
+        getTagHash('max_wip', merged),
+      ].filter(Boolean);
+      const opPowerWipHash = getTagHash('op_powerwip', merged);
+      let primaryQuery;
+      if (wipHashes.length > 0 && opPowerWipHash) {
+        primaryQuery = `${wipHashes.join(',')}&!${opPowerWipHash}`;
+      } else if (wipHashes.length > 0) {
+        primaryQuery = wipHashes.join(',');
+      } else if (opPowerWipHash) {
+        primaryQuery = `3*,4*&!${opPowerWipHash}`;
+      } else {
+        primaryQuery = '3*,4*&!#';
+      }
+      return [
+        {
+          id: 'op_powerwip_wips',
+          label: 'Tagged WIP Builds',
+          query: primaryQuery,
+          note: 'Pick the WIP builds you are actively spending Stardust/Candy on right now; remove once they reach target CP/Lv40/Lv50.',
+        },
+        {
+          id: 'op_powerwip_xl',
+          label: 'Partially XL-Powered (Lv41–49)',
+          query: opPowerWipHash ? `candyxl&3*,4*&!${opPowerWipHash}` : 'candyxl&3*,4*&!#',
+          isSecondary: true,
+          note: 'Surfaces Pokémon you already started investing XL Candy into so half-finished projects stay tracked.',
+        },
+      ];
+    }
+
     case 'op_powerup': {
       const wipHashes = [
         getTagHash('pvp_wip', merged),
         getTagHash('pve_wip', merged),
+        getTagHash('pve_megawip', merged),
         getTagHash('max_wip', merged),
+        getTagHash('op_powerwip', merged),
       ].filter(Boolean);
       const opPowerupHash = getTagHash('op_powerup', merged);
       let query;
@@ -1003,7 +1087,7 @@ export function buildTagHydrationQueries(tagId, tagMap = null, metaSnapshot = nu
           id: 'op_powerup_primary',
           label: 'Tagged WIPs Not Yet Queued',
           query,
-          note: 'Run after Stage 4 WIP tags are populated so only genuine build projects enter your Power-Up queue.',
+          note: 'Run after Stage 4 WIP tags (and OP-PowerWIP) are populated so only genuine build projects enter your Field Research Power-Up queue.',
         },
       ];
     }
@@ -1033,7 +1117,7 @@ export function buildTagHydrationQueries(tagId, tagMap = null, metaSnapshot = nu
 }
 
 /**
- * Returns all 29 tag hydration steps (28 core + optional OP-Purify1k) in the exact
+ * Returns all 31 tag hydration steps (30 core + optional OP-Purify1k) in the exact
  * recommended top-to-bottom 6-stage hydration order.
  */
 export function getAllTagHydrationSteps(tagMap = null, metaSnapshot = null) {

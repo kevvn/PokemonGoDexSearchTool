@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import {
   TAG_NAMESPACES,
+  CORE_TAGS,
   HYDRATION_STAGES,
   getNamespaceHashes,
   getRecommendedDragOrder,
@@ -406,9 +407,9 @@ export function TagSystemTab({ customTags, metaSnapshot, onLoadQuery }) {
         </div>
       </section>
 
-      {/* Collapsible Quick-Hydrate Your Box (28-Tag Walkthrough) */}
+      {/* Collapsible Quick-Hydrate Your Box Walkthrough */}
       <section
-        aria-label="Quick-Hydrate Your Box (28-Tag Walkthrough)"
+        aria-label={`Quick-Hydrate Your Box (${CORE_TAGS.length}-Tag Walkthrough)`}
         className="pogo-summary-card overflow-hidden border border-[#0d7da8]/25"
       >
         <button
@@ -420,7 +421,7 @@ export function TagSystemTab({ customTags, metaSnapshot, onLoadQuery }) {
           <div className="min-w-0 flex-1 space-y-1">
             <div className="flex flex-wrap items-center gap-2">
               <span className="font-display text-sm sm:text-base font-extrabold text-[#0b698e] uppercase tracking-wide">
-                Quick-Hydrate Your Box (28-Tag Walkthrough)
+                Quick-Hydrate Your Box ({CORE_TAGS.length}-Tag Walkthrough)
               </span>
               <span className="px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-white/95 text-[#1d7a4d] border border-[#2b9e66]/35 shadow-2xs">
                 {completedHydrationCount} / {enabledHydrationSteps.length} Done ({hydrationPct}%)
