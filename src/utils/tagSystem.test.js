@@ -267,19 +267,27 @@ describe('Initial Tag Hydration queries (all 31 tags, 6-stage walkthrough)', () 
       'year2016-2019&!#',
     ]);
 
-    // Built PvP rosters use !@3mov (double-moved)
-    expect(buildTagHydrationQueries('pvp_gl', defaultMap, realMetaSnapshot)[0].query).toBe(
-      'cp1300-1500&!@3mov&!#'
-    );
-    expect(buildTagHydrationQueries('pvp_ul', defaultMap, realMetaSnapshot)[0].query).toBe(
-      'cp2300-2500&!@3mov&!#'
-    );
-    expect(buildTagHydrationQueries('pvp_ml', defaultMap, realMetaSnapshot).map((q) => q.query)).toEqual([
-      'cp3000-&!@3mov&3*,4*&4attack&!#',
-      'candyxl&!@3mov&3*,4*&!#',
-    ]);
+    // PvP league tags embed Top-100 species with non-naive cp-1500 / cp-2500 / any-CP bounds + built !@3mov + @3mov,evolve audits
+    const glQueries = buildTagHydrationQueries('pvp_gl', defaultMap, realMetaSnapshot).map((q) => q.query);
+    expect(glQueries[0]).toContain('!#&0-1attack&3-4defense&3-4hp&cp-1500&');
+    expect(glQueries[1]).toContain('!#&2-4attack&3-4defense&3-4hp&cp-1500&');
+    expect(glQueries[2]).toBe('cp-1500&!@3mov&!#');
+    expect(glQueries[3]).toBe('#pvp-gl&@3mov,evolve');
+
+    const ulQueries = buildTagHydrationQueries('pvp_ul', defaultMap, realMetaSnapshot).map((q) => q.query);
+    expect(ulQueries[0]).toContain('!#&0-1attack&3-4defense&3-4hp&cp-2500&');
+    expect(ulQueries[1]).toContain('!#&3*,4*&cp-2500&');
+    expect(ulQueries[2]).toBe('cp1501-2500&!@3mov&!#');
+    expect(ulQueries[3]).toBe('#pvp-ul&@3mov,evolve');
+
+    const mlQueries = buildTagHydrationQueries('pvp_ml', defaultMap, realMetaSnapshot).map((q) => q.query);
+    expect(mlQueries[0]).toContain('!#&3*,4*&4attack&3-4defense&3-4hp&');
+    expect(mlQueries[1]).toContain('!#&4*&');
+    expect(mlQueries[2]).toBe('cp3000-&!@3mov&3*,4*&4attack&!#');
+    expect(mlQueries[3]).toBe('#pvp-ml&@3mov,evolve');
+
     expect(buildTagHydrationQueries('pvp_cup', defaultMap, realMetaSnapshot)[0].query).toBe(
-      'cp400-500&!@3mov&!#'
+      'cp-500&!@3mov&!#'
     );
 
     // op_2xxfer uses @3mov single-move shield, protects Mythicals/Fusions/Adventure Effects/PvP IVs (NEVER !@3mov)
