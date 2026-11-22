@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useCallback, useRef, useEffect } from 'react';
-import { areRegionPropsEqual } from '../utils/gridUtils';
-import { getFamilyIds } from '../utils/familyUtils';
+import { areRegionPropsEqual, getFamilyIds } from '../utils/gridUtils';
+import { TYPES } from '../utils/searchUtils';
 import {
   PogoSummaryCard,
   PogoRegionBanner,
@@ -14,19 +14,30 @@ const FALLBACK_SPRITE =
   "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%23ff385c'/%3E%3Cpath d='M5 50h90A45 45 0 0 1 5 50' fill='%23f8fafc'/%3E%3Cpath d='M5 50h90' stroke='%230b4f6c' stroke-width='8'/%3E%3Ccircle cx='50' cy='50' r='16' fill='%230b4f6c'/%3E%3Ccircle cx='50' cy='50' r='10' fill='%23f8fafc'/%3E%3C/svg%3E";
 
 /**
- * Screenshot 2 Frosted Ice-Glass Pokédex Tile (0494, 0495, 0496...)
+ * Frosted Ice-Glass Pokédex Tile with True Evolution Family Support
  */
-const PokemonCard = React.memo(({ pokemon, selected, toggle, onSelectFamily }) => {
+const PokemonCard = React.memo(({ pokemon, selected, toggle, onSelectFamily, familyMode }) => {
+  const hasMultiFamily = Array.isArray(pokemon.familyDexes) && pokemon.familyDexes.length > 1;
+
   const handleFamilyClick = (e) => {
     e.stopPropagation();
-    const familyIds = getFamilyIds(pokemon.id);
-    onSelectFamily(familyIds);
+    const familyIds = getFamilyIds(pokemon);
+    onSelectFamily(familyIds, true);
+  };
+
+  const handleCardClick = (e) => {
+    if (familyMode) {
+      const familyIds = getFamilyIds(pokemon);
+      onSelectFamily(familyIds, !selected);
+      return;
+    }
+    toggle(pokemon.id, e);
   };
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
-      toggle(pokemon.id, e);
+      handleCardClick(e);
     }
   };
 
@@ -44,13 +55,13 @@ const PokemonCard = React.memo(({ pokemon, selected, toggle, onSelectFamily }) =
       aria-pressed={selected}
       aria-label={`#${formattedId} ${pokemon.name}, ${pokemon.types.join(', ')}`}
       tabIndex={0}
-      onClick={(e) => toggle(pokemon.id, e)}
+      onClick={handleCardClick}
       onKeyDown={handleKeyDown}
       className={`pogo-dex-tile cursor-pointer pt-2 pb-2 px-1.5 flex flex-col items-center justify-between select-none group/card min-h-[122px] sm:min-h-[132px] ${
         selected ? 'pogo-dex-tile-selected' : ''
       }`}
     >
-      {/* Top Row: Mini Circular Type Dots + Family Action */}
+      {/* Top Row: Mini Circular Type Dots + Evolution Family Action */}
       <div className="w-full flex items-center justify-between gap-1 px-0.5 z-10 min-h-[18px]">
         <div className="flex items-center gap-1">
           {pokemon.types.map((t) => (
@@ -64,15 +75,17 @@ const PokemonCard = React.memo(({ pokemon, selected, toggle, onSelectFamily }) =
           ))}
         </div>
 
-        <button
-          type="button"
-          onClick={handleFamilyClick}
-          title={`Select evolution family for ${pokemon.name}`}
-          aria-label={`Select evolution family for ${pokemon.name}`}
-          className="pogo-tile-actions compact-inline-chip text-[9px] bg-white/95 hover:bg-[#0d7da8] text-[#0b698e] hover:text-white font-extrabold px-1.5 py-0.5 rounded-full border border-[#0d7da8]/30 cursor-pointer shadow-2xs leading-none"
-        >
-          +Fam
-        </button>
+        {hasMultiFamily && (
+          <button
+            type="button"
+            onClick={handleFamilyClick}
+            title={`Select full evolution family (${pokemon.familyDexes.length} species)`}
+            aria-label={`Select evolution family for ${pokemon.name}`}
+            className="pogo-tile-actions compact-inline-chip text-[9px] bg-white/95 hover:bg-[#0d7da8] text-[#0b698e] hover:text-white font-extrabold px-1.5 py-0.5 rounded-full border border-[#0d7da8]/30 cursor-pointer shadow-2xs leading-none"
+          >
+            + Fam
+          </button>
+        )}
       </div>
 
       {/* Center Sprite Stage */}
@@ -88,7 +101,7 @@ const PokemonCard = React.memo(({ pokemon, selected, toggle, onSelectFamily }) =
         />
       </div>
 
-      {/* Bottom Name + Authentic 4-Digit Dex Number (0494) */}
+      {/* Bottom Name + Authentic 4-Digit Dex Number */}
       <div className="w-full text-center px-0.5 leading-tight">
         <div className="text-[10px] sm:text-[11px] font-bold capitalize text-[#194a5d] truncate w-full">
           {pokemon.name.replace(/-/g, ' ')}
@@ -98,7 +111,7 @@ const PokemonCard = React.memo(({ pokemon, selected, toggle, onSelectFamily }) =
         </div>
       </div>
 
-      {/* Selected Badge (Non-color state indicator + Pokéball) */}
+      {/* Selected Badge */}
       {selected && (
         <div
           aria-hidden="true"
@@ -121,6 +134,7 @@ const RegionSection = React.memo(
     isCollapsed,
     toggleCollapse,
     onSelectFamily,
+    familyMode,
   }) => {
     const selectedCount = pokemons.filter((p) => selectedIds.has(p.id)).length;
     const totalCount = pokemons.length;
@@ -134,7 +148,7 @@ const RegionSection = React.memo(
         className="scroll-mt-44 mb-7 region-section-optimized space-y-3"
         style={{ contentVisibility: 'auto', containIntrinsicSize: '0 520px' }}
       >
-        {/* Screenshot 3 Regional Banner Card */}
+        {/* Regional Banner Card */}
         <PogoRegionBanner
           region={region}
           selectedCount={selectedCount}
@@ -145,7 +159,7 @@ const RegionSection = React.memo(
           onDeselectAll={() => handleRegionSelection(pokemons.map((p) => p.id), false)}
         />
 
-        {/* Screenshot 2 Uppercase Section Label + Dense Frosted Ice-Glass Grid */}
+        {/* Dense Frosted Ice-Glass Grid */}
         {!isCollapsed && (
           <div className="space-y-2 pt-0.5">
             <div className="flex items-center justify-between px-1">
@@ -168,6 +182,7 @@ const RegionSection = React.memo(
                   selected={selectedIds.has(p.id)}
                   toggle={togglePokemon}
                   onSelectFamily={onSelectFamily}
+                  familyMode={familyMode}
                 />
               ))}
             </div>
@@ -176,14 +191,25 @@ const RegionSection = React.memo(
       </section>
     );
   },
-  areRegionPropsEqual
+  (prev, next) => prev.familyMode === next.familyMode && areRegionPropsEqual(prev, next)
 );
+
+const META_TONE_CLASSES = {
+  teal: 'bg-white/90 hover:bg-[#0d7da8] text-[#0b698e] hover:text-white border-[#0d7da8]/30',
+  amber: 'bg-amber-50/95 hover:bg-amber-500 text-amber-900 hover:text-white border-amber-300/80',
+  purple: 'bg-purple-50/95 hover:bg-[#7c52b5] text-[#5c3791] hover:text-white border-purple-300/80',
+  rose: 'bg-rose-50/95 hover:bg-rose-600 text-rose-800 hover:text-white border-rose-300/80',
+  emerald: 'bg-emerald-50/95 hover:bg-[#2b9e66] text-emerald-900 hover:text-white border-emerald-300/80',
+  slate: 'bg-white/85 hover:bg-[#1b4d60] text-[#1b4d60] hover:text-white border-[#0d7da8]/20',
+};
 
 function PokemonGrid({
   pokemonList,
+  metaSnapshot,
   selectedIds,
   togglePokemon,
   handleRegionSelection,
+  onReplaceSelection,
   searchQuery,
   setSearchQuery,
   selectedOnly,
@@ -194,6 +220,9 @@ function PokemonGrid({
   onOpenFilters,
 }) {
   const [collapsedRegions, setCollapsedRegions] = useState({});
+  const [familyMode, setFamilyMode] = useState(false);
+  const [pveType, setPveType] = useState('dragon');
+  const [activeMetaLabel, setActiveMetaLabel] = useState('');
   const lastClickedId = useRef(null);
 
   const visibleListRef = useRef([]);
@@ -247,8 +276,8 @@ function PokemonGrid({
   }, []);
 
   const handleSelectFamily = useCallback(
-    (familyIds) => {
-      handleRegionSelection(familyIds, true);
+    (familyIds, shouldSelect = true) => {
+      handleRegionSelection(familyIds, shouldSelect);
     },
     [handleRegionSelection]
   );
@@ -310,7 +339,7 @@ function PokemonGrid({
     return () => observer.disconnect();
   }, [groupedRegions, onRegionVisible]);
 
-  // Quick Modifier Toggles matching Screenshot 2's SHINY / LUCKY / XXL / XXS / ★ 100% strip
+  // Quick Modifier Toggles
   const toggleQuickAttr = useCallback(
     (attr) => {
       if (!setFilters) return;
@@ -331,6 +360,19 @@ function PokemonGrid({
         : [...prev.appraisal, '4*'],
     }));
   }, [setFilters]);
+
+  const applyMetaQuickSelect = useCallback(
+    (label, ids) => {
+      if (!Array.isArray(ids) || ids.length === 0) return;
+      setActiveMetaLabel(label);
+      if (onReplaceSelection) {
+        onReplaceSelection(ids);
+      } else {
+        handleRegionSelection(ids, true);
+      }
+    },
+    [onReplaceSelection, handleRegionSelection]
+  );
 
   const is4StarActive = Boolean(filters?.appraisal?.includes('4*'));
   const shinyFilter = filters?.shiny;
@@ -378,24 +420,150 @@ function PokemonGrid({
     if (!filters) return 0;
     let c = (filters.appraisal?.length || 0) + (filters.types?.length || 0);
     if (filters.ageMin !== '' || filters.ageMax !== '') c += 1;
+    if (filters.distanceMin || filters.distanceMax) c += 1;
+    if (filters.cpMin || filters.cpMax) c += 1;
+    if (filters.megaLevel) c += 1;
+    if (filters.ivStats) {
+      const iv = filters.ivStats;
+      if (iv.attackMin || iv.attackMax) c += 1;
+      if (iv.defenseMin || iv.defenseMax) c += 1;
+      if (iv.hpMin || iv.hpMax) c += 1;
+      if (iv.excludePvpIv) c += 1;
+      if (iv.excludeNundo) c += 1;
+    }
+    if (Array.isArray(filters.rawClauses)) c += filters.rawClauses.length;
+
+    const skipKeys = new Set([
+      'appraisal',
+      'ageMin',
+      'ageMax',
+      'distanceMin',
+      'distanceMax',
+      'cpMin',
+      'cpMax',
+      'megaLevel',
+      'ivStats',
+      'rawClauses',
+      'types',
+      'attributeLogic',
+    ]);
     Object.keys(filters).forEach((k) => {
-      if (!['appraisal', 'ageMin', 'ageMax', 'types', 'attributeLogic'].includes(k) && filters[k] !== null) {
+      if (!skipKeys.has(k) && filters[k] !== null && filters[k] !== undefined) {
         c += 1;
       }
     });
     return c;
   }, [filters]);
 
+  const pvp = metaSnapshot?.pvp || {};
+  const pve = metaSnapshot?.pve || {};
+  const max = metaSnapshot?.maxBattles || {};
+  const special = metaSnapshot?.specialLists || {};
+
+  const metaPresets = [
+    { label: 'GL Top 100', ids: pvp.gl?.top100?.all, tone: 'teal' },
+    { label: 'UL Top 100', ids: pvp.ul?.top100?.all, tone: 'amber' },
+    { label: 'ML Top 100', ids: pvp.ml?.top100?.all, tone: 'purple' },
+    { label: 'Max Attackers', ids: max.attackers, tone: 'rose' },
+    { label: 'Max Tanks/Healers', ids: max.tanksAndHealers, tone: 'emerald' },
+    { label: '12-Candy Fodder', ids: special.candy12Fodder, tone: 'slate' },
+    { label: 'Trade Evos', ids: special.tradeEvolve, tone: 'slate' },
+  ];
+
   return (
     <div className="space-y-4 pb-36 px-3 sm:px-5 max-w-7xl mx-auto pt-4">
-      {/* Screenshot 2 Frosted Pokédex Summary Card */}
+      {/* Frosted Pokédex Summary Card */}
       <PogoSummaryCard
         title="POKÉDEX OVERVIEW"
         pillText={`${selectedIds.size} / ${pokemonList.length}`}
         stats={summaryStats}
       />
 
-      {/* Screenshot 1 Pure White Pill Search + Screenshot 2/3 Frosted Pill Controls */}
+      {/* Meta Quick-Select Bar (Family-Expanded PvP / PvE / Max / Fodder) */}
+      {metaSnapshot && (
+        <section
+          aria-label="Meta quick-select bar"
+          className="pogo-summary-card px-4 py-3 space-y-2.5"
+        >
+          <div className="flex items-center justify-between gap-2 flex-wrap">
+            <span className="font-display text-[11px] font-extrabold uppercase tracking-wider text-[#0b698e] flex items-center gap-1.5">
+              <span aria-hidden="true">⚡</span>
+              <span>Meta Quick-Select (Family-Expanded)</span>
+            </span>
+            <div className="flex items-center gap-2">
+              {activeMetaLabel && selectedIds.size > 0 && (
+                <span className="text-[11px] font-extrabold text-[#0d7da8]">
+                  Loaded: {activeMetaLabel} ({selectedIds.size})
+                </span>
+              )}
+              {selectedIds.size > 0 && onReplaceSelection && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveMetaLabel('');
+                    onReplaceSelection([]);
+                  }}
+                  className="compact-inline-chip text-[10px] font-extrabold text-rose-700 bg-white/95 hover:bg-rose-50 px-2.5 py-0.5 rounded-full border border-rose-200 cursor-pointer"
+                >
+                  Clear Selection
+                </button>
+              )}
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-1.5">
+            {metaPresets.map((preset) => (
+              <button
+                key={preset.label}
+                type="button"
+                onClick={() => applyMetaQuickSelect(preset.label, preset.ids)}
+                className={`compact-inline-chip px-3 py-1 rounded-full text-[11px] font-extrabold border shadow-2xs transition-colors cursor-pointer ${
+                  META_TONE_CLASSES[preset.tone]
+                }`}
+              >
+                {preset.label}
+              </button>
+            ))}
+
+            {/* PvE Top 10 by Type selector */}
+            <div className="inline-flex items-center rounded-full border border-rose-300/80 bg-rose-50/95 overflow-hidden shadow-2xs">
+              <button
+                type="button"
+                onClick={() =>
+                  applyMetaQuickSelect(
+                    `PvE Top 10 ${pveType.charAt(0).toUpperCase() + pveType.slice(1)}`,
+                    pve.byType?.[pveType]
+                  )
+                }
+                className="compact-inline-chip px-3 py-1 text-[11px] font-extrabold text-rose-800 hover:bg-rose-100 cursor-pointer"
+              >
+                PvE Top 10:
+              </button>
+              <select
+                value={pveType}
+                onChange={(e) => {
+                  const nextType = e.target.value;
+                  setPveType(nextType);
+                  applyMetaQuickSelect(
+                    `PvE Top 10 ${nextType.charAt(0).toUpperCase() + nextType.slice(1)}`,
+                    pve.byType?.[nextType]
+                  );
+                }}
+                aria-label="Select PvE attacker type"
+                className="bg-white text-[#123c4d] text-[11px] font-extrabold px-2.5 py-1 capitalize focus:outline-none cursor-pointer border-l border-rose-200"
+              >
+                {TYPES.map((typeName) => (
+                  <option key={typeName} value={typeName}>
+                    {typeName}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Search Bar & Pill Controls */}
       <div className="space-y-2.5">
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
           <PogoSearchInput
@@ -408,7 +576,7 @@ function PokemonGrid({
           />
 
           <div className="flex items-center gap-2 shrink-0">
-            {/* Mobile / Tablet Filter Trigger with Screenshot 1 Funnel Icon */}
+            {/* Mobile / Tablet Filter Trigger */}
             <button
               type="button"
               onClick={onOpenFilters}
@@ -437,8 +605,21 @@ function PokemonGrid({
           </div>
         </div>
 
-        {/* Screenshot 2 & 3 Floating Horizontal Category Pill Strip (POKÉMON, SHINY, LUCKY, XXL, XXS, ★ 100%) */}
+        {/* Floating Horizontal Category Pill Strip + Touch-Friendly Family Tap Toggle */}
         <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5 select-none">
+          <button
+            type="button"
+            onClick={() => setFamilyMode((prev) => !prev)}
+            aria-pressed={familyMode}
+            title="When ON, tapping any Pokémon selects or deselects its entire evolution family"
+            className={`px-3.5 py-1.5 text-xs uppercase shrink-0 cursor-pointer inline-flex items-center gap-1.5 ${
+              familyMode ? 'pogo-pill-active' : 'pogo-pill'
+            }`}
+          >
+            <span aria-hidden="true">🧬</span>
+            <span>FAMILY TAP {familyMode ? 'ON' : 'OFF'}</span>
+          </button>
+
           <button
             type="button"
             onClick={() => setSelectedOnly(false)}
@@ -546,6 +727,7 @@ function PokemonGrid({
             isCollapsed={collapsedRegions[region]}
             toggleCollapse={toggleCollapse}
             onSelectFamily={handleSelectFamily}
+            familyMode={familyMode}
           />
         ))}
       </div>

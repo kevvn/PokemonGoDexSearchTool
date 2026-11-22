@@ -1,0 +1,65 @@
+name: Update Pokédex & Meta Snapshots
+
+on:
+  schedule:
+    # Every Monday at 06:00 UTC
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: update-data-snapshots
+  cancel-in-progress: true
+
+jobs:
+  update-snapshots:
+    name: Refresh Static Data & Verify Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Update Pokédex snapshot (pokemon-go-api)
+        run: npm run update:data
+
+      - name: Update Competitive Meta snapshot (PvPoke, Pokebattler, PokéChespin)
+        run: npm run update:meta
+
+      - name: Run unit & data pipeline tests
+        run: npm run test:run
+
+      - name: Verify production build
+        run: npm run build
+
+      - name: Create Pull Request if snapshots changed
+        uses: peter-evans/create-pull-request@v7
+        with:
+          commit-message: 'chore(data): update weekly pokedex and meta snapshots'
+          branch: chore/update-data-snapshots
+          delete-branch: true
+          title: 'chore(data): weekly Pokédex & competitive meta snapshot update'
+          body: |
+            Automated weekly refresh of static build-time data snapshots:
+            - `src/data/pokedex.json` (sourced from `pokemon-go-api`, uniform PokeAPI pixel sprites, 10 regions, true evolution families)
+            - `src/data/meta_snapshot.json` (PvPoke Top 100 GL/UL/ML, clean-room PvE Top 10/type from Pokebattler, PokéChespin Max Battle roster & 0.5s fast moves)
+
+            Verified with `npm run test:run` and `npm run build` prior to opening this PR.
+          labels: |
+            automated
+            data-update
+          add-paths: |
+            src/data/pokedex.json
+            src/data/meta_snapshot.json

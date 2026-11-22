@@ -1,7 +1,23 @@
 import React, { useMemo, useEffect, useRef, useCallback } from 'react';
+import { REGIONS } from '../utils/searchUtils';
 
-function RegionSelector({ regions, selectedIds, pokemonList, activeRegion, handleRegionSelection }) {
+function RegionSelector({
+  regions = REGIONS,
+  selectedIds,
+  pokemonList,
+  activeRegion,
+  handleRegionSelection,
+}) {
   const scrollContainerRef = useRef(null);
+
+  const orderedRegions = useMemo(() => {
+    const present = new Set(regions);
+    const ordered = REGIONS.filter((r) => present.has(r));
+    regions.forEach((r) => {
+      if (!ordered.includes(r)) ordered.push(r);
+    });
+    return ordered;
+  }, [regions]);
 
   // Auto-scroll the region selector to keep active region in view
   useEffect(() => {
@@ -18,7 +34,7 @@ function RegionSelector({ regions, selectedIds, pokemonList, activeRegion, handl
   // Calculate selection stats per region
   const regionStats = useMemo(() => {
     const stats = {};
-    regions.forEach((r) => {
+    orderedRegions.forEach((r) => {
       stats[r] = { total: 0, selected: 0 };
     });
 
@@ -31,12 +47,12 @@ function RegionSelector({ regions, selectedIds, pokemonList, activeRegion, handl
       }
     });
     return stats;
-  }, [regions, selectedIds, pokemonList]);
+  }, [orderedRegions, selectedIds, pokemonList]);
 
   const scrollToRegion = (region) => {
     const el = document.getElementById(`region-${region}`);
     if (el) {
-      const offset = 165;
+      const offset = 175;
       const elementPosition = el.getBoundingClientRect().top;
       const offsetPosition = elementPosition + window.pageYOffset - offset;
       window.scrollTo({
@@ -87,7 +103,7 @@ function RegionSelector({ regions, selectedIds, pokemonList, activeRegion, handl
         ref={scrollContainerRef}
         className="flex overflow-x-auto py-1 gap-2 no-scrollbar max-w-7xl mx-auto md:px-6 scroll-smooth"
       >
-        {regions.map((region) => {
+        {orderedRegions.map((region) => {
           const stats = regionStats[region] || { total: 0, selected: 0 };
           const hasSelected = stats.selected > 0;
           const isAllSelected = stats.selected === stats.total && stats.total > 0;
@@ -111,7 +127,7 @@ function RegionSelector({ regions, selectedIds, pokemonList, activeRegion, handl
                     isActive
                       ? 'bg-white/22 text-white'
                       : isAllSelected
-                        ? 'bg-[#0d7da8] text-white'
+                        ? 'bg-[#2b9e66] text-white'
                         : hasSelected
                           ? 'bg-[#d5effa] text-[#0b698e]'
                           : 'bg-[#e6f6fc] text-[#285d72]'

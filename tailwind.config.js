@@ -30,6 +30,15 @@ export default {
             muted: 'var(--pogo-ink-muted)',
           },
         },
+        slate: {
+          350: '#b0becf',
+          650: '#3c4a5e',
+          750: '#273549',
+          850: '#162032',
+        },
+        rose: {
+          350: '#fc8d9d',
+        },
       },
       fontFamily: {
         sans: ['"Plus Jakarta Sans"', '"Outfit"', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'sans-serif'],
@@ -41,6 +50,9 @@ export default {
         'pogo-pill-active': '0 4px 14px rgba(9, 112, 152, 0.30)',
         'pogo-glass': '0 6px 22px rgba(10, 88, 122, 0.10)',
         'pogo-fab': '0 4px 14px rgba(12, 82, 110, 0.22)',
+      },
+      spacing: {
+        'safe-area-inset-bottom': 'env(safe-area-inset-bottom)',
       },
     },
   },
