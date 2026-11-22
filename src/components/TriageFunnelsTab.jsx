@@ -9,10 +9,10 @@ import { TYPES, validateSearchString } from '../utils/searchUtils';
 import { PogoTypeIcon } from './ui/PogoDesignSystem';
 
 const MODE_TABS = [
-  { id: 'modeA', shortLabel: 'Mode A', label: 'Event-Day Rapid', badge: '8 steps' },
+  { id: 'modeA', shortLabel: 'Mode A', label: 'Post-Catch Triage', badge: '7 steps' },
   { id: 'modeB', shortLabel: 'Mode B', label: 'Deep Cleanout', badge: '10 steps' },
   { id: 'modeC', shortLabel: 'Mode C', label: 'Competitive Meta', badge: 'PvP · PvE · Max' },
-  { id: 'modeD', shortLabel: 'Mode D', label: 'Event & Trade Ops', badge: '10 routines' },
+  { id: 'modeD', shortLabel: 'Mode D', label: 'Event & Trade Ops', badge: '11 routines' },
 ];
 
 const SHIELD_CATEGORIES = [
@@ -401,23 +401,33 @@ function StepCard({ step, resolvedTags, copiedKey, onCopy, onLoadQuery, compact 
           <div className="text-[11px] font-extrabold uppercase tracking-wider text-[#0c6c91]">
             Companion Queries
           </div>
-          {step.subQueries.map((sub, index) => (
-            <div
-              key={`${step.id}-sub-${index}`}
-              className="rounded-2xl bg-[#eef9fd]/90 border border-white p-3 space-y-2 shadow-2xs"
-            >
-              <div className="text-xs font-extrabold text-[#123c4d]">{sub.label}</div>
-              <QueryActionRow
-                copyKey={`${step.id}-sub-${index}`}
-                query={sub.query}
-                isTrash={step.isTrash}
-                copiedKey={copiedKey}
-                onCopy={onCopy}
-                onLoadQuery={onLoadQuery}
-                compact
-              />
-            </div>
-          ))}
+          {step.subQueries.map((sub, index) => {
+            const subIsTrash = sub.isTrash !== undefined ? sub.isTrash : step.isTrash;
+            return (
+              <div
+                key={`${step.id}-sub-${index}`}
+                className="rounded-2xl bg-[#eef9fd]/90 border border-white p-3 space-y-2 shadow-2xs"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <div className="text-xs font-extrabold text-[#123c4d]">{sub.label}</div>
+                  {subIsTrash && (
+                    <span className="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-400 text-[#123c4d]">
+                      Purge
+                    </span>
+                  )}
+                </div>
+                <QueryActionRow
+                  copyKey={`${step.id}-sub-${index}`}
+                  query={sub.query}
+                  isTrash={subIsTrash}
+                  copiedKey={copiedKey}
+                  onCopy={onCopy}
+                  onLoadQuery={onLoadQuery}
+                  compact
+                />
+              </div>
+            );
+          })}
         </div>
       )}
     </article>
@@ -646,7 +656,7 @@ export function TriageFunnelsTab({ metaSnapshot, customTags, onLoadQuery }) {
           >
             <strong>Warning:</strong> Disabling <code className="font-mono font-black">!#</code>{' '}
             (Untagged) or <code className="font-mono font-black">!favorite</code> removes Dual-Lock
-            protection from A6/A6b/B3/B4 trash queries!
+            protection from E1/A6/A7/B3/B4 trash queries!
           </div>
         )}
 
@@ -655,7 +665,7 @@ export function TriageFunnelsTab({ metaSnapshot, customTags, onLoadQuery }) {
           <div className="pt-3 border-t border-[#0d7da8]/15 space-y-3">
             <p className="text-xs text-[#285d72] font-medium">
               Toggle shields to live-update{' '}
-              <strong className="text-[#123c4d]">A6, A6b, B3, and B4</strong> mass-transfer strings.
+              <strong className="text-[#123c4d]">E1, A6, A7, B3, and B4</strong> mass-transfer strings.
               Double-moved protection uses{' '}
               <code className="font-mono font-bold text-[#0b698e]">@3mov</code> (never inverted{' '}
               <code className="font-mono font-bold text-rose-700">!@3mov</code>).

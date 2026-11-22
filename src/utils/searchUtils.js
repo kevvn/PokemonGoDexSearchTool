@@ -257,6 +257,71 @@ export function compressIds(selectedIds) {
 export const compressIdRanges = compressIds;
 
 /**
+ * Convert a compressed Dex range string (e.g. "83,115,313-314") into &-joined `!` clauses ("!83&!115&!313-314").
+ */
+export function negateCompressedRanges(rangeString) {
+  if (!rangeString || typeof rangeString !== 'string') return '';
+  return rangeString
+    .split(',')
+    .map((r) => r.trim())
+    .filter(Boolean)
+    .map((r) => `!${r}`)
+    .join('&');
+}
+
+// Scarce Regional Exclusives, Unown (#201), Rotom (#479), Spinda (#327), Kecleon (#352),
+// Coin Bag Gimmighoul (#999-1000), and scarce 10km/12km Egg & Pseudo-Legendary trade-gold families.
+// Intentionally excludes high-frequency hemisphere/biome fillers (Tauros, Flabébé, Furfrou, Oricorio,
+// Illumise/Volbeat, Throh/Sawk, Solrock/Lunatone, Zangoose/Seviper, Durant/Heatmor, Pan-monkeys, Basculin)
+// so local biome catches can still be purged cleanly while foreign travel catches are shielded by `!distance100-`.
+export const SCARCE_RARE_SPECIES_IDS = [
+  83, 865, // Farfetch'd, Sirfetch'd
+  115, // Kangaskhan
+  122, 439, 866, // Mr. Mime, Mime Jr., Mr. Rime
+  201, // Unown
+  214, // Heracross
+  222, 864, // Corsola, Cursola
+  324, // Torkoal
+  327, // Spinda
+  352, // Kecleon
+  357, // Tropius
+  369, // Relicanth
+  417, // Pachirisu
+  441, // Chatot
+  447, 448, // Riolu, Lucario
+  455, // Carnivine
+  479, // Rotom
+  551, 552, 553, // Sandile, Krokorok, Krookodile
+  556, // Maractus
+  561, // Sigilyph
+  624, 625, 983, // Pawniard, Bisharp, Kingambit
+  626, // Bouffalant
+  636, 637, // Larvesta, Volcarona
+  672, 673, // Skiddo, Gogoat
+  701, // Hawlucha
+  707, // Klefki
+  757, 758, // Salandit, Salazzle
+  764, // Comfey
+  776, // Turtonator
+  780, // Drampa
+  782, 783, 784, // Jangmo-o, Hakamo-o, Kommo-o
+  840, 841, 842, 1011, 1019, // Applin family
+  848, 849, // Toxel, Toxtricity
+  874, // Stonjourner
+  884, 1018, // Duraludon, Archaludon
+  885, 886, 887, // Dreepy, Drakloak, Dragapult
+  935, 936, 937, // Charcadet, Armarouge, Ceruledge
+  957, 958, 959, // Tinkatink, Tinkatuff, Tinkaton
+  965, 966, // Varoom, Revavroom
+  978, // Tatsugiri
+  996, 997, 998, // Frigibax, Arctibax, Baxcalibur
+  999, 1000, // Gimmighoul, Gholdengo
+];
+
+export const SCARCE_RARE_SPECIES_RANGES = compressIds(SCARCE_RARE_SPECIES_IDS);
+export const RARE_SPECIES_EXCLUDE_CLAUSE = negateCompressedRanges(SCARCE_RARE_SPECIES_RANGES);
+
+/**
  * Expand a Dex ID / range string (e.g., "1-3,25-26,172") into a Set<number>.
  */
 export function expandIds(rangeString) {
@@ -879,6 +944,51 @@ export function validateSearchString(searchString, options = {}) {
           code: 'INVERTED_3MOV_IN_TRASH',
           message: `\`!@3mov\` matches Pokémon WITH a 2nd charged move! Use \`@3mov\` in trash strings to shield double-moved builds.`,
           token: full,
+        });
+      }
+    }
+  }
+
+  // 9. Specimen-variant + `count` trap (`shiny&count4-`, `specialbackground&count-3`, `costume&count3-`, `dynamax&count4-`)
+  // In Pokémon GO, `count` counts ALL copies of that National Dex # across storage (ignoring shiny, background, costume, shadow, or Dynamax).
+  const specimenVariants = new Set([
+    'shiny', 'background', 'locationbackground', 'specialbackground', 'profilebackground',
+    'costume', 'shadow', 'purified', 'dynamax', 'gigantamax', 'lucky',
+  ]);
+  const positiveSingleAtoms = ast.clauses
+    .filter((c) => c.atoms.length === 1 && !c.atoms[0].negated)
+    .map((c) => c.atoms[0].value);
+
+  const variantHit = positiveSingleAtoms.find((v) => specimenVariants.has(v));
+  const countRangeHit = positiveSingleAtoms.find(
+    (v) => (v === 'count' || /^count(?:\d*-\d*|\d+)$/.test(v)) && v !== 'count1'
+  );
+  if (variantHit && countRangeHit) {
+    warnings.push({
+      code: 'VARIANT_COUNT_TRAP',
+      message: `\`${countRangeHit}\` counts ALL copies of that National Dex # in your box, NOT just \`${variantHit}\` copies — this can hide 1-of-1 \`${variantHit}\` keepers or flag your only \`${variantHit}\` as surplus! Tag keepers sorted by \`#\` first, then filter by \`!#\`.`,
+      token: `${variantHit}&${countRangeHit}`,
+    });
+  }
+
+  // 10. Unscoped negated Max Move level (`!maxguard3`, `!maxspirit1-`, `!maxmove2-` without `maxmove1-`, `dynamax`, `gigantamax`, or `#tag`)
+  if (!inferredTrash) {
+    const hasPositiveMaxOrTagScope = ast.clauses.some((c) =>
+      c.atoms.some(
+        (a) =>
+          !a.negated &&
+          (/^(?:maxmove|maxguard|maxspirit|dynamax|gigantamax)/.test(a.value) || a.value.startsWith('#'))
+      )
+    );
+    if (!hasPositiveMaxOrTagScope) {
+      const unscopedNegMax = ast.clauses
+        .flatMap((c) => c.atoms)
+        .find((a) => a.negated && /^(?:maxguard|maxspirit|maxmove[23])/.test(a.value));
+      if (unscopedNegMax) {
+        warnings.push({
+          code: 'UNSCOPED_NEGATED_MAX',
+          message: `\`!${unscopedNegMax.value}\` returns every non-Max Pokémon in your storage too. Scope with \`maxmove1-&\` or a \`#max\` tag first.`,
+          token: `!${unscopedNegMax.value}`,
         });
       }
     }

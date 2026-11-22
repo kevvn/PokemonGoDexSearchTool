@@ -1,9 +1,14 @@
 import {
   compressIds,
+  negateCompressedRanges,
   PVP_IV_EXCLUDE_CLAUSE,
   NUNDO_EXCLUDE_CLAUSE,
+  SCARCE_RARE_SPECIES_IDS,
+  SCARCE_RARE_SPECIES_RANGES,
+  RARE_SPECIES_EXCLUDE_CLAUSE,
   TYPES,
 } from './searchUtils';
+import { ALL_COMMUNITY_DAY_PRE_EVO_IDS } from '../data/communityDayRegistry';
 import {
   createDefaultTagMap,
   mergeTagMap,
@@ -22,8 +27,31 @@ export const DEFAULT_FAST_MOVES_500MS = [
 export const DEFAULT_CANDY_12_FODDER = [10, 13, 16, 265, 293, 519];
 export const DEFAULT_TRADE_EVOLVE_DEX = [64, 67, 75, 93, 525, 533, 588, 616, 708, 710];
 
+// XL / Egg-Floor / Research-Floor GL staples whose optimal or egg-floor builds use 2–4 Atk bars (6–15 Atk)
+const CLASSIC_GL_XL_FLOOR_IDS = [
+  108, 463, // Lickitung, Lickilicky
+  222, 864, // Corsola (Galarian 7km Egg floor 10/15/15 & traded XL), Cursola
+  302,      // Sableye (Purified Return / XL)
+  307, 308, // Meditite, Medicham
+  410, 411, // Shieldon, Bastiodon
+  417,      // Pachirisu
+  659, 660, // Bunnelby, Diggersby
+  703,      // Carbink (Research/Egg floor & XL)
+];
+
+// S-Tier Per-Type Raid Specialist Shadow Families (Ice, Rock, Ground, Electric, Ghost/Fire)
+const CLASSIC_PVE_TYPE_SHADOW_IDS = [
+  81, 82, 462,   // Magnemite, Magneton, Magnezone
+  111, 112, 464, // Rhyhorn, Rhydon, Rhyperior
+  220, 221, 473, // Swinub, Piloswine, Mamoswine
+  408, 409,      // Cranidos, Rampardos
+  529, 530,      // Drilbur, Excadrill
+  607, 608, 609, // Litwick, Lampent, Chandelure
+];
+
 export const AGE_SCOPES = [
   { id: 'age0', label: 'Today (24h)', token: 'age0' },
+  { id: 'age0-1', label: 'Last 48h (age0-1)', token: 'age0-1' },
   { id: 'age0-2', label: 'Weekend (0–2d)', token: 'age0-2' },
   { id: 'age0-7', label: 'Last 7 Days', token: 'age0-7' },
   { id: 'all', label: 'All Time', token: '' },
@@ -38,14 +66,17 @@ export const SAFETY_SHIELD_DEFINITIONS = [
   { id: 'legendary', label: 'Protect Legendaries (!legendary)', token: '!legendary', defaultEnabled: true, category: 'rarity' },
   { id: 'mythical', label: 'Protect Mythicals (!mythical)', token: '!mythical', defaultEnabled: true, category: 'rarity' },
   { id: 'ultrabeast', label: 'Protect Ultra Beasts (!ultrabeast)', token: '!ultrabeast', defaultEnabled: true, category: 'rarity' },
+  { id: 'lucky', label: 'Protect Luckies (!lucky)', token: '!lucky', defaultEnabled: true, category: 'rarity' },
+  { id: 'eggsonly', label: 'Protect Babies (!eggsonly)', token: '!eggsonly', defaultEnabled: true, category: 'rarity' },
+  { id: 'distance100', label: 'Protect 100km+ Distance (!distance100-)', token: '!distance100-', defaultEnabled: true, category: 'rarity' },
+  { id: 'rareSpecies', label: 'Protect Unown, Rotom, Regionals & Pseudos', token: RARE_SPECIES_EXCLUDE_CLAUSE, defaultEnabled: true, category: 'rarity' },
   { id: 'shadow', label: 'Protect Shadows (!shadow)', token: '!shadow', defaultEnabled: true, category: 'mechanics' },
   { id: 'max', label: 'Protect All Max Battle (!maxmove1-)', token: '!maxmove1-', defaultEnabled: true, category: 'mechanics' },
+  { id: 'fusion', label: 'Protect Fusions (!fusion)', token: '!fusion', defaultEnabled: true, category: 'mechanics' },
+  { id: 'adventureEffect', label: 'Protect Adventure Effects (!adventureeffect)', token: '!adventureeffect', defaultEnabled: true, category: 'mechanics' },
   { id: 'xxl', label: 'Protect XXL (!xxl)', token: '!xxl', defaultEnabled: true, category: 'size' },
   { id: 'xxs', label: 'Protect XXS (!xxs)', token: '!xxs', defaultEnabled: true, category: 'size' },
   { id: 'specialMove', label: 'Protect Legacy/Elite (@special)', token: '!@special', defaultEnabled: true, category: 'investment' },
-  { id: 'lucky', label: 'Protect Luckies (!lucky)', token: '!lucky', defaultEnabled: true, category: 'rarity' },
-  { id: 'fusion', label: 'Protect Fusions (!fusion)', token: '!fusion', defaultEnabled: true, category: 'mechanics' },
-  { id: 'adventureEffect', label: 'Protect Adventure Effects (!adventureeffect)', token: '!adventureeffect', defaultEnabled: true, category: 'mechanics' },
   { id: 'singleMoveOnly', label: 'Protect 2nd-Moved (@3mov)', token: '@3mov', defaultEnabled: true, category: 'investment' },
   { id: 'pvpIv', label: 'Protect PvP IVs (2-4atk,0-2def,0-2hp)', token: PVP_IV_EXCLUDE_CLAUSE, defaultEnabled: true, category: 'iv' },
   { id: 'nundo', label: 'Protect 0% Nundos (1-4atk,1-4def,1-4hp)', token: NUNDO_EXCLUDE_CLAUSE, defaultEnabled: true, category: 'iv' },
@@ -87,7 +118,8 @@ function joinOr(...atoms) {
 
 /**
  * Build a safe trash/mass-transfer query honoring age scope, star scope, and customizable safety shields.
- * NEVER emits `!@3mov` (uses `@3mov` for single-move protection) and NEVER emits `!mega{N}`.
+ * NEVER emits `!@3mov` (uses `@3mov` for single-move protection), NEVER emits `!mega{N}`,
+ * and NEVER uses `count` combined with specimen variants.
  */
 export function buildSafeTrashQuery({
   ageScope = 'age0',
@@ -95,9 +127,14 @@ export function buildSafeTrashQuery({
   countDuplicate = false,
   excludeTraded = false,
   includeIvShields = true,
+  includePvpIvShield,
+  includeNundoShield,
+  extraExclusions = [],
   safetyShields = {},
 } = {}) {
   const shields = { ...createDefaultSafetyShields(), ...safetyShields };
+  const usePvpIv = includePvpIvShield !== undefined ? includePvpIvShield : includeIvShields;
+  const useNundo = includeNundoShield !== undefined ? includeNundoShield : includeIvShields;
   const parts = [];
 
   if (ageScope) parts.push(ageScope);
@@ -118,22 +155,74 @@ export function buildSafeTrashQuery({
   if (shields.xxs) parts.push('!xxs');
   if (shields.specialMove) parts.push('!@special');
   if (shields.lucky) parts.push('!lucky');
+  if (shields.eggsonly) parts.push('!eggsonly');
+  if (shields.distance100) parts.push('!distance100-');
   if (excludeTraded) parts.push('!traded');
   if (shields.fusion) parts.push('!fusion');
   if (shields.adventureEffect) parts.push('!adventureeffect');
+  if (shields.rareSpecies && RARE_SPECIES_EXCLUDE_CLAUSE) {
+    parts.push(RARE_SPECIES_EXCLUDE_CLAUSE);
+  }
+  if (Array.isArray(extraExclusions)) {
+    for (const ex of extraExclusions) {
+      if (ex) parts.push(ex);
+    }
+  }
   // Single-move-only shield (`@3mov` matches empty 2nd charged move slot -> protects double-moved builds!)
   if (shields.singleMoveOnly) parts.push('@3mov');
 
-  if (includeIvShields) {
-    if (shields.pvpIv) parts.push(PVP_IV_EXCLUDE_CLAUSE);
-    if (shields.nundo) parts.push(NUNDO_EXCLUDE_CLAUSE);
-  }
+  if (usePvpIv && shields.pvpIv) parts.push(PVP_IV_EXCLUDE_CLAUSE);
+  if (useNundo && shields.nundo) parts.push(NUNDO_EXCLUDE_CLAUSE);
 
   return joinClauses(...parts);
 }
 
 /**
- * Build all 4 triage funnel modes + pinned 30-second Mid-Event Emergency Dump
+ * Compute strictly non-meta National Dex IDs (1..1025) that have ZERO overlap with:
+ * - PvP Top 100 (GL, UL, ML — family-expanded)
+ * - PvE Top 30 Overall, Top 10 per Type (all 18 types), Top Shadows, Top Mega Families
+ * - Max Battles Attackers, Tanks & Healers
+ * - Scarce Regionals, Unown, Rotom, Egg Rares, Pseudo-Legendaries, and Trade-Evolve species
+ */
+export function computeStrictNonMetaIdsFromSnapshot(metaSnapshot = {}, maxDexId = 1025) {
+  const pvp = metaSnapshot?.pvp || {};
+  const pve = metaSnapshot?.pve || {};
+  const max = metaSnapshot?.maxBattles || {};
+  const special = metaSnapshot?.specialLists || {};
+
+  const byTypeFlat = pve.byType ? Object.values(pve.byType).flat() : [];
+  const protectedSet = new Set([
+    ...(pvp.gl?.top100?.all || []),
+    ...(pvp.gl?.top100?.lowAtk || []),
+    ...(pvp.gl?.top100?.highAtk || []),
+    ...(pvp.ul?.top100?.all || []),
+    ...(pvp.ul?.top100?.lowAtk || []),
+    ...(pvp.ul?.top100?.highAtk || []),
+    ...(pvp.ml?.top100?.all || []),
+    ...(pvp.allShadow || []),
+    ...(pvp.allTradeReroll || []),
+    ...(pve.top30Overall || []),
+    ...(pve.topShadow || []),
+    ...(pve.topMegaEvolved || []),
+    ...(pve.topMegaFamily || []),
+    ...byTypeFlat,
+    ...(max.attackers || []),
+    ...(max.tanksAndHealers || []),
+    ...(special.tradeEvolve || DEFAULT_TRADE_EVOLVE_DEX),
+    ...CLASSIC_GL_XL_FLOOR_IDS,
+    ...CLASSIC_PVE_TYPE_SHADOW_IDS,
+    ...SCARCE_RARE_SPECIES_IDS,
+  ]);
+
+  const nonMeta = [];
+  for (let id = 1; id <= maxDexId; id++) {
+    if (!protectedSet.has(id)) nonMeta.push(id);
+  }
+  return nonMeta;
+}
+
+/**
+ * Build all 4 triage funnel modes + pinned 1-Tap Mid-Event Emergency Dump
  * dynamically from `(metaSnapshot, customTagMap, options)`.
  */
 export function buildTriageFunnels(metaSnapshot = {}, customTagMap = null, options = {}) {
@@ -166,119 +255,296 @@ export function buildTriageFunnels(metaSnapshot = {}, customTagMap = null, optio
       ? special.candy12Fodder
       : DEFAULT_CANDY_12_FODDER
   );
-  const tradeEvoDex = dexClause(
+  const tradeEvoIds =
     Array.isArray(special.tradeEvolve) && special.tradeEvolve.length > 0
       ? special.tradeEvolve
-      : DEFAULT_TRADE_EVOLVE_DEX
-  );
+      : DEFAULT_TRADE_EVOLVE_DEX;
+  const tradeEvoDex = dexClause(tradeEvoIds);
+  const tradeEvoNegation = negateCompressedRanges(tradeEvoDex);
 
-  // --- Mode A: Quick Post-Catch / Event-Day Rapid Triage ---
+  // Derived Meta Dex Unions
+  const glLowList = Array.isArray(pvp.gl?.top100?.lowAtk) ? pvp.gl.top100.lowAtk : [];
+  const rawGlHighList = Array.isArray(pvp.gl?.top100?.highAtk) ? pvp.gl.top100.highAtk : [];
+  const glHighList =
+    rawGlHighList.length > 0 ? [...rawGlHighList, ...CLASSIC_GL_XL_FLOOR_IDS] : rawGlHighList;
+  const ulLowList = Array.isArray(pvp.ul?.top100?.lowAtk) ? pvp.ul.top100.lowAtk : [];
+  const ulHighList = Array.isArray(pvp.ul?.top100?.highAtk) ? pvp.ul.top100.highAtk : [];
+  const mlAllList = Array.isArray(pvp.ml?.top100?.all) ? pvp.ml.top100.all : [];
+
+  const glLowDex = dexClause(glLowList);
+  const glHighDex = dexClause(glHighList);
+  const ulLowDex = dexClause(ulLowList);
+  const ulHighDex = dexClause(ulHighList);
+  const mlAllDex = dexClause(mlAllList);
+  const pvpShadowList = Array.isArray(pvp.allShadow) ? pvp.allShadow : [];
+  const pvpShadowDex = dexClause(pvpShadowList);
+  const pvpTradeDex = dexClause(pvp.allTradeReroll);
+
+  const glUlLowDex = dexClause([...glLowList, ...ulLowList]);
+  const glUlHighDex = dexClause([...glHighList, ...ulHighList]);
+  const glUlHighNegation = negateCompressedRanges(glUlHighDex);
+
+  const pveTopList = Array.isArray(pve.top30Overall) ? pve.top30Overall : [];
+  const rawPveShadowList = Array.isArray(pve.topShadow) ? pve.topShadow : [];
+  const pveShadowList =
+    rawPveShadowList.length > 0
+      ? [...rawPveShadowList, ...CLASSIC_PVE_TYPE_SHADOW_IDS]
+      : rawPveShadowList;
+  const pveMegaEvolvedList = Array.isArray(pve.topMegaEvolved) ? pve.topMegaEvolved : [];
+  const pveMegaFamList = Array.isArray(pve.topMegaFamily) ? pve.topMegaFamily : [];
+  const pveMegaEvolvedSet = new Set(pveMegaEvolvedList);
+  const pveMegaPreEvoList = pveMegaFamList.filter((id) => !pveMegaEvolvedSet.has(id));
+  const pveByTypeFlat = pve.byType ? Object.values(pve.byType).flat() : [];
+
+  const pveTopDex = dexClause(pveTopList);
+  const pveTypeDex = dexClause(pve.byType?.[pveType]);
+  const pveShadowDex = dexClause(pveShadowList);
+  const allMetaShadowDex = dexClause([...pveShadowList, ...pvpShadowList]);
+  const pveShadowNegation = negateCompressedRanges(allMetaShadowDex || pveShadowDex);
+  const pveMegaEvolvedDex = dexClause(pveMegaEvolvedList);
+  const pveMegaPreEvoDex = dexClause(pveMegaPreEvoList);
+
+  const maxAtkList = Array.isArray(max.attackers) ? max.attackers : [];
+  const maxTankHealList = Array.isArray(max.tanksAndHealers) ? max.tanksAndHealers : [];
+  const maxAtkDex = dexClause(maxAtkList);
+  const maxTankHealDex = dexClause(maxTankHealList);
+
+  const highIvMetaDex = dexClause([
+    ...pveTopList,
+    ...pveMegaFamList,
+    ...pveByTypeFlat,
+    ...mlAllList,
+    ...maxAtkList,
+    ...maxTankHealList,
+  ]);
+
+  const mirrorMetaDex = dexClause([
+    ...SCARCE_RARE_SPECIES_IDS,
+    ...ALL_COMMUNITY_DAY_PRE_EVO_IDS,
+    ...pveTopList,
+    ...glHighList,
+    ...ulHighList,
+    ...mlAllList,
+  ]);
+
+  const hasMetaLists =
+    glUlLowDex.length > 0 || pveTopDex.length > 0 || maxAtkDex.length > 0;
+  const strictNonMetaDex = hasMetaLists
+    ? dexClause(computeStrictNonMetaIdsFromSnapshot(metaSnapshot))
+    : '';
+
+  // --- Mode A: Post-Catch & Event-Day Inbox-Zero Triage ---
   const stepA1 = {
     id: 'A1',
-    title: 'Lock Grails, Hundos & Backgrounds',
+    title: 'Lock Grails, 4★ Hundos, Shinies & Backgrounds',
     query: joinClauses(ageScope, '!#', '4*,shiny,background'),
-    action: `Favorite (★) all keepers. Tag ${tagMap.ev_shbg.name} (shiny&background), ${tagMap.ev_locbg.name} (locationbackground), ${tagMap.ev_global.name} (specialbackground), ${tagMap.ev_inperson.name}, or ${tagMap.keep_trophy.name}. Move spare shinies/BGs to ${tagMap.tr_spec.name}.`,
-    isTrash: false,
-  };
-
-  const stepA1b = {
-    id: 'A1b',
-    title: 'Lock 0% Nundos',
-    query: joinClauses(ageScope, '!#', '0attack', '0defense', '0hp'),
-    action: `Favorite (★) and tag ${tagMap.keep_trophy.name}.`,
+    subQueries: [
+      {
+        label: 'Lock 0% Collector Nundos (0/0/0)',
+        query: joinClauses(ageScope, '!#', '0attack', '0defense', '0hp'),
+        isTrash: false,
+      },
+    ],
+    action: `Favorite (★) all keepers. Route combat 4★ Hundos → ${tagMap.pve_wip.name} / ${tagMap.pve_megawip.name} / ${tagMap.pvp_ml.name} / ${tagMap.max_wip.name} (not just ${tagMap.keep_trophy.name}!). Tag ${tagMap.ev_shbg.name} (shiny&background), ${tagMap.ev_locbg.name} (locationbackground), or ${tagMap.ev_global.name} (specialbackground); sort by # and tag spare shinies/BGs → ${tagMap.tr_spec.name}.`,
     isTrash: false,
   };
 
   const stepA2 = {
     id: 'A2',
-    title: 'Screen Special Mechanics & Legacy Moves',
+    title: 'Screen Raid Bosses, Shadows, Max Pokémon & Legacy Moves',
     query: joinClauses(
       ageScope,
       '!#',
-      'costume,maxmove1-,legendary,mythical,ultrabeast,shadow,@special,fusion,adventureeffect'
+      'legendary,mythical,ultrabeast,maxmove1-,shadow,fusion,adventureeffect,costume'
     ),
-    action: `Tag viable Max mons (${tagMap.max_wip.name}/${tagMap.max_atk.name}/${tagMap.max_tank.name}/${tagMap.max_candy.name}), Shadows (${tagMap.pve_wip.name}/${tagMap.pvp_wip.name}/${tagMap.op_tmfrust.name}), extra Legendaries (${tagMap.tr_spec.name}/${tagMap.op_2xxfer.name}), and Costumes.`,
+    subQueries: [
+      {
+        label: 'True Legacy / Event Moves (Excludes Frustration & Return)',
+        query: joinClauses(ageScope, '!#', '@special', '!@frustration', '!@return'),
+        isTrash: false,
+      },
+      {
+        label: 'Max Battles Only (D-Max / G-Max / Crowned)',
+        query: joinClauses(ageScope, '!#', 'maxmove1-'),
+        isTrash: false,
+      },
+      {
+        label: 'Shadows Only',
+        query: joinClauses(ageScope, '!#', 'shadow'),
+        isTrash: false,
+      },
+    ],
+    action: `Tag viable Max mons (${tagMap.max_wip.name}/${tagMap.max_candy.name}), Shadows (${tagMap.pve_wip.name}/${tagMap.pvp_wip.name}/${tagMap.op_tmfrust.name}), spare Legendaries (${tagMap.tr_spec.name}/${tagMap.op_2xxfer.name}), and keeper Costumes (${tagMap.keep_trophy.name}/${tagMap.tr_spec.name}). Sort leftover 0★–2★ non-meta Shadows/D-Max/Costumes by # and transfer excess now so !# stays clean.`,
     isTrash: false,
   };
 
   const stepA3 = {
     id: 'A3',
-    title: 'PvP IV Sweep (Low-Atk High-Bulk)',
-    query: joinClauses(ageScope, '!#', '0-1attack', '3-4defense', '3-4hp'),
-    action: `Quick-check species relevance (or pair with Mode C meta dex list). Tag keepers → ${tagMap.pvp_wip.name} (or ${tagMap.op_evocd.name}). Leave non-meta commons untagged.`,
+    title: 'Meta PvP IV Sweep (Top-100 GL & UL — Low-Atk + XL High-Atk)',
+    query: joinClauses(ageScope, '!#', '0-1attack', '3-4defense', '3-4hp', 'cp-2500', glUlLowDex),
+    subQueries: [
+      ...(glUlHighDex
+        ? [
+            {
+              label: 'GL & UL XL / High-Atk Meta Families (Lickitung, Medicham, Corsola, Tinkaton)',
+              query: joinClauses(ageScope, '!#', '2-4attack', '3-4defense', '3-4hp', 'cp-2500', glUlHighDex),
+              isTrash: false,
+            },
+          ]
+        : []),
+      {
+        label: 'All-Species Broad Low-Atk Spread (Limited Cup Spice)',
+        query: joinClauses(ageScope, '!#', '0-1attack', '3-4defense', '3-4hp', 'cp-2500'),
+        isTrash: false,
+      },
+    ],
+    action: `Primary query surfaces ONLY verified Top-100 GL/UL evolutionary families (zero common rodent/bug noise), while the XL companion query catches 2–4 Atk 3★ spreads like 8/14/15 Lickitung or 7/15/15 Corsola before 3★ cleanup. Tag keepers → ${tagMap.pvp_wip.name} (or ${tagMap.op_evocd.name}).`,
     isTrash: false,
   };
 
   const stepA4 = {
     id: 'A4',
-    title: 'High-IV 3★ (PvE / ML) & New Dex',
-    query: joinClauses(ageScope, '!#', '3*', '3-4attack', '3-4defense', '3-4hp'),
+    title: 'Meta PvE Raid, Mega & Master League 3★ (11–15 Atk)',
+    query: highIvMetaDex
+      ? joinClauses(ageScope, '!#', '3*', '3-4attack', highIvMetaDex)
+      : joinClauses(ageScope, '!#', '3*', '3-4attack', '3-4defense', '3-4hp'),
     subQueries: [
-      { label: 'New Pokédex Evolutions', query: joinClauses(ageScope, '!#', 'evolvenew') },
+      {
+        label: 'All-Species 91–98% High 3★ (Living Dex / Trophy Check)',
+        query: joinClauses(ageScope, '!#', '3*', '3-4attack', '3-4defense', '3-4hp'),
+        isTrash: false,
+      },
+      {
+        label: 'New Pokédex Evolutions',
+        query: joinClauses(ageScope, '!#', 'evolvenew'),
+        isTrash: false,
+      },
     ],
-    action: `Tag meta 15-Atk / 93–98% mons → ${tagMap.pve_wip.name}, ${tagMap.pvp_wip.name}, ${tagMap.op_powerup.name}, or ${tagMap.op_evocd.name}.`,
+    action: `Scoped to Raid, Mega, Max, and Master League families without requiring 3-4defense/hp — catches 15/10/15 glass-cannon raiders while skipping 3★ Raticates. Tag keepers → ${tagMap.pve_wip.name}, ${tagMap.pve_megawip.name}, ${tagMap.pvp_wip.name}, or ${tagMap.op_evocd.name}.`,
     isTrash: false,
   };
 
   const stepA5 = {
     id: 'A5',
-    title: 'Route Size (XXL) & Distance Trade Queues',
-    query: joinClauses(ageScope, '!#', 'xxl'),
+    title: 'Route Rare Spawns, 100km+ Distance, Mirror XL & XXL Showcases',
+    query: joinClauses(ageScope, '!#', '!traded', joinOr('eggsonly', SCARCE_RARE_SPECIES_RANGES)),
     subQueries: [
-      { label: 'Distance Trades (100km+)', query: joinClauses(ageScope, '!#', 'distance100-', '!traded') },
+      {
+        label: 'Distance Trades (100km+ → 3 Candy + Guaranteed XL)',
+        query: joinClauses(ageScope, '!#', 'distance100-', '!traded'),
+        isTrash: false,
+      },
+      ...(mirrorMetaDex
+        ? [
+            {
+              label: 'Meta, Pseudo & CD Mirror Spares (0★–2★)',
+              query: joinClauses(ageScope, '!#', '!traded', '0*,1*,2*', mirrorMetaDex),
+              isTrash: false,
+            },
+          ]
+        : []),
+      {
+        label: 'XXL & XXS Showcase / Size Medal Check',
+        query: joinClauses(ageScope, '!#', 'xxl,xxs'),
+        isTrash: false,
+      },
     ],
-    action: `Tag best 1–2 XXL/species → ${tagMap.op_xxl.name}; 100km+ fodder → ${tagMap.tr_dist.name}; meta species → ${tagMap.tr_mirror.name} or ${tagMap.op_2xxfer.name}.`,
+    action: `Tag Unown/Rotom/Regionals → ${tagMap.tr_spec.name} (keep 1 anchor in ${tagMap.keep_trophy.name}), 100km+ catches & foreign 7km hatches → ${tagMap.tr_dist.name}, meta/pseudo spares → ${tagMap.tr_mirror.name}, and ONLY your largest 1–2 XXL/species → ${tagMap.op_xxl.name}.`,
     isTrash: false,
   };
 
   const stepA6 = {
     id: 'A6',
-    title: 'Ultra-Safe Rapid Trash Purge (0★–2★)',
+    title: 'Ultra-Safe Shielded Trash Purge (0★–2★)',
     query: buildSafeTrashQuery({
       ageScope,
       starScope: '0*,1*,2*',
       includeIvShields: true,
       safetyShields,
     }),
-    action: 'Glance over results → Select All in 50–100 batches → Transfer. Shielded with De Morgan PvP-IV, Nundo, and @3mov single-move protections.',
+    action: 'Safe even if you skipped Steps A3–A5: shields Shinies, Backgrounds, Costumes, Legendaries/Mythicals/UBs, Shadows, Max, Babies, Unown/Rotom/Regionals/Pseudos, 100km+ Distance, XXL/XXS, @special, 2nd-moved (@3mov), PvP IVs, and 0% Nundos.',
     isTrash: true,
   };
 
-  const stepA6b = {
-    id: 'A6b',
-    title: 'Optional Non-Keeper 3★ Purge (Run After A4)',
+  const stepA7 = {
+    id: 'A7',
+    title: 'Post-Screening Final Sweep (Clear Rejected 0★–3★ Commons → Inbox Zero)',
     query: buildSafeTrashQuery({
       ageScope,
-      starScope: '3*',
-      includeIvShields: false,
-      safetyShields,
+      starScope: '0*,1*,2*,3*',
+      includePvpIvShield: false,
+      includeNundoShield: true,
+      extraExclusions: glUlHighNegation ? [glUlHighNegation] : [],
+      safetyShields: {
+        ...safetyShields,
+        xxl: false,
+        xxs: false,
+      },
     }),
-    action: 'Clears junk 82–89% common 3★ spawns after you already tagged meta 3★ keepers in Step A4.',
+    subQueries: [
+      {
+        label: 'Verify !# Inbox Zero (Inspect Any Remaining Untagged)',
+        query: joinClauses(ageScope, '!#', '!favorite'),
+        isTrash: false,
+      },
+    ],
+    action: 'Run ONLY after completing Steps A1–A5: sweeps non-meta 0-1atk commons rejected in A3, junk 3★ commons rejected in A4, and small XXL/XXS spares rejected in A5 (still shielding Nundos, @3mov, Rares, 100km+, and XL PvP species) so !# genuinely reaches zero.',
     isTrash: true,
   };
 
-  // --- Pinned 30-Second Mid-Event Emergency Dump ---
+  // --- Pinned 15-Second Mid-Event Emergency Dump (Self-Contained, Zero Pre-Tagging Required!) ---
   const emergencyDump = {
     id: 'emergency',
-    title: '30-Second Mid-Event Emergency Dump',
-    subtitle: 'Free 100–300 storage slots mid-GO Fest or Community Day in 3 taps with full PvP-IV, Nundo & 2nd-move shields.',
-    steps: [stepA1, stepA1b, stepA6],
+    title: '15-Second Mid-Event Emergency Dump',
+    subtitle: 'Paste Step E1 directly mid-GO Fest or Comm Day — 100% self-shielded (protects 3★–4★, Shinies, BGs, Unown/Rotom/Regionals/Pseudos, Babies, 100km+, Max, Shadows, XXL/XXS, PvP IVs, Nundos & @3mov) with zero pre-tagging required.',
+    steps: [
+      {
+        id: 'E1',
+        title: '1-Tap Self-Shielded 0★–2★ Dump (Paste → Select All → Transfer)',
+        query: stepA6.query,
+        action: 'Transfer in batches of 50–100 to prevent client lag. Mathematically excludes every grail, regional, rare spawn, PvP spread, nundo, and invested build automatically.',
+        isTrash: true,
+      },
+      {
+        id: 'E2',
+        title: "Optional: Favorite Today's Grails (4★, Shiny, BG)",
+        query: joinClauses(ageScope, '!favorite', '4*,shiny,background'),
+        action: 'Optional pocket-tap lock: star (★) newly caught 4★, Shinies, and Backgrounds while walking; full tagging can wait until post-event Mode A.',
+        isTrash: false,
+      },
+      {
+        id: 'E3',
+        title: "Optional: Favorite Today's 0% Nundos",
+        query: joinClauses(ageScope, '!favorite', '0attack', '0defense', '0hp'),
+        action: 'Optional pocket-tap lock: star (★) any 0/0/0 Nundo caught today (already excluded from E1 via 1-4atk,1-4def,1-4hp).',
+        isTrash: false,
+      },
+    ],
   };
 
   // --- Mode B: Deep Storage Cleanout ---
+  const shadowProtectedOpTags = [
+    notT('op_tmfrust'),
+    notT('op_evocd'),
+    notT('op_powerwip'),
+    notT('op_powerup'),
+    notT('op_buddy'),
+    notT('op_purify1k'),
+  ].filter(Boolean);
+
   const modeBSteps = [
     {
       id: 'B1',
       title: 'Untagged Backlog Inbox',
       query: '!#&!favorite',
-      action: 'Run Mode A Steps A1–A6 with "All Time" scope until !#&!favorite reaches zero.',
+      action: 'Bootstrap existing storage with the 6-Stage Hydration Walkthrough (Tag System tab) or run Mode A with "All Time" scope until !#&!favorite hits zero.',
       isTrash: false,
     },
     {
       id: 'B2',
-      title: 'Living Dex Singletons (Protect)',
+      title: 'True 1-of-1 Living Dex Singletons (Protect)',
       query: '!#&count1',
-      action: `Inspect unique 1-of species before deep pruning; tag Living Dex anchors ${tagMap.keep_trophy.name}.`,
+      action: `count1 matches National Dex #s where you own literally 1 copy in your entire box. Tag Living Dex anchors → ${tagMap.keep_trophy.name} + ★ before duplicate pruning.`,
       isTrash: false,
     },
     {
@@ -292,7 +558,27 @@ export function buildTriageFunnels(metaSnapshot = {}, customTagMap = null, optio
         includeIvShields: true,
         safetyShields,
       }),
-      action: 'Safe all-time purge of duplicate 0★–2★ clutter.',
+      subQueries: strictNonMetaDex
+        ? [
+            {
+              label: 'Strict Non-Meta Species Purge (0★–3★ — Zero PvP/PvE/Max/Rare Overlap)',
+              query: joinClauses(
+                buildSafeTrashQuery({
+                  ageScope: '',
+                  starScope: '0*,1*,2*,3*',
+                  countDuplicate: false,
+                  excludeTraded: true,
+                  includePvpIvShield: false,
+                  includeNundoShield: true,
+                  safetyShields,
+                }),
+                strictNonMetaDex
+              ),
+              isTrash: true,
+            },
+          ]
+        : [],
+      action: 'Important: count2- returns ALL copies of any species with ≥2 in storage (not N−1). If maintaining a Living Dex, Sort by # and leave 1 copy per species; otherwise use the Strict Non-Meta 0★–3★ companion query.',
       isTrash: true,
     },
     {
@@ -303,10 +589,12 @@ export function buildTriageFunnels(metaSnapshot = {}, customTagMap = null, optio
         starScope: '3*',
         countDuplicate: true,
         excludeTraded: false,
-        includeIvShields: false,
+        includePvpIvShield: false,
+        includeNundoShield: false,
+        extraExclusions: glUlHighNegation ? [glUlHighNegation] : [],
         safetyShields,
       }),
-      action: 'Sort by Number (#); keep single highest IV per species if maintaining a Living Dex, dump extras.',
+      action: 'Excludes XL GL/UL meta species (like 8/14/15 3★ Lickitung/Corsola) and scarce rares. Sort by Number (#): keep your single highest-IV specimen per family and transfer lower 82–89% duplicates.',
       isTrash: true,
     },
     {
@@ -320,48 +608,64 @@ export function buildTriageFunnels(metaSnapshot = {}, customTagMap = null, optio
             'xxl,xxs', 'evolve', '!favorite', '!shiny', '!4*', '!background',
             '!legendary', '!mythical', '!ultrabeast', '!shadow', '!maxmove1-', notT('op_xxl')
           ),
+          isTrash: false,
         },
       ],
-      action: 'Enforce 1–2 XXL per relevant species; evolve spares first for Platinum size medals, then transfer. (!maxmove1- shields non-evolving G-Max Pikachu/Meowth from the evolve bug.)',
+      action: `Sort by # → tag ONLY your 1–2 largest XXL per species into ${tagMap.op_xxl.name}; evolve spares first for Platinum XXL/XXS medals, then transfer. (!maxmove1- shields non-evolving G-Max Pikachu/Meowth/Eevee from PoGO's evolve bug.)`,
       isTrash: false,
     },
     {
       id: 'B6',
-      title: 'Duplicate Costumes & Event Spawns',
-      query: 'costume&count2-&!shiny&!4*&!background&!favorite&!#',
-      action: 'Sort by Number (#); keep 1–2 best (or M/F pair), cut excess.',
+      title: 'Untagged Costumes Audit (Sort by #)',
+      query: 'costume&!shiny&!4*&!background&!favorite&!#',
+      action: `Never combine costume with count2-/count3- (all Pikachu hats share Dex #25, flagging 1-of-1 costumes!). Instead, Sort by # so identical outfits group together, tag 1–2 keepers (${tagMap.keep_trophy.name}/${tagMap.tr_spec.name}), then transfer remaining !# extras.`,
       isTrash: false,
     },
     {
       id: 'B7',
-      title: 'Duplicate Legendaries / Ultra Beasts',
+      title: 'Duplicate Legendaries & Ultra Beasts',
       query: joinClauses(
         'legendary,ultrabeast', 'count2-', '!shiny', '!4*', '!background', '!favorite',
-        ...nsExc('pve'), ...nsExc('pvp'), ...nsExc('max'), notT('tr_spec')
+        '!fusion', '!adventureeffect', '!@special',
+        ...nsExc('pve'), ...nsExc('pvp'), ...nsExc('max'), notT('tr_spec'), notT('op_2xxfer')
       ),
-      action: `Keep top 1–6 PvE/ML specimens + capped ${tagMap.tr_spec.name} quota; move excess to ${tagMap.op_2xxfer.name}.`,
+      subQueries: [
+        {
+          label: 'Duplicate @special Legacy Legendaries (Review Separately)',
+          query: joinClauses(
+            'legendary,ultrabeast', 'count2-', '@special', '!shiny', '!4*', '!background', '!favorite',
+            '!fusion', '!adventureeffect',
+            ...nsExc('pve'), ...nsExc('pvp'), ...nsExc('max'), notT('tr_spec'), notT('op_2xxfer')
+          ),
+          isTrash: false,
+        },
+      ],
+      action: `Protects Fusions, Adventure Effects, and @special moves from plain raid clutter. Keep top 1–6 PvE/ML specimens + ${tagMap.tr_spec.name} trade stock; route excess to ${tagMap.op_2xxfer.name}.`,
       isTrash: false,
     },
     {
       id: 'B8',
-      title: 'Expendable Low-IV Shadows',
+      title: 'Expendable Low-IV Non-Meta Shadows',
       query: joinClauses(
         'shadow', '0*,1*,2*', '!shiny', '!legendary', '!mythical', '!background', '!costume', '!favorite',
         ...nsExc('pvp'), ...nsExc('pve'), ...nsExc('keep'), ...nsExc('ev'), ...nsExc('tr'),
-        notT('op_purify1k'), '@3mov', NUNDO_EXCLUDE_CLAUSE
+        ...shadowProtectedOpTags,
+        pveShadowNegation,
+        '@3mov', PVP_IV_EXCLUDE_CLAUSE, NUNDO_EXCLUDE_CLAUSE
       ),
-      action: 'Sort by #; purge non-meta low-IV shadows (protects nundos, double-moved, background/costume, and tagged shadows). Note: !@special is intentionally omitted because Frustration counts as @special.',
+      action: 'Purges junk 0★–2★ shadows while shielding Top PvE Shadow families (+20% shadow DPS), 0-1atk PvP IVs, Nundos, 2nd-moved builds, and all Rocket TM / Evo / Purify queues. (!@special is intentionally omitted because Frustration counts as @special.)',
       isTrash: true,
     },
     {
       id: 'B9',
-      title: 'Expendable Dynamax Clutter',
+      title: 'Expendable Un-Upgraded Dynamax Clutter',
       query: joinClauses(
         '!#', '!favorite', 'dynamax', '!shiny', '!background', '!costume',
         '!legendary', '!mythical', '!ultrabeast', '!lucky', '0*,1*,2*',
-        '@3mov', '!maxmove2-', '!maxguard1-', '!maxspirit1-'
+        RARE_SPECIES_EXCLUDE_CLAUSE,
+        '@3mov', '!maxmove2-', '!maxguard1-', '!maxspirit1-', NUNDO_EXCLUDE_CLAUSE
       ),
-      action: 'Protects G-Max (excluded by dynamax), Legendaries/UBs, Shinies, Hundos, Backgrounds, Costumes, Luckies, double-moved builds, AND any D-Max with upgraded Max Moves.',
+      action: `Sort by # first to keep 1–3 best per useful Max species (${tagMap.max_wip.name}/${tagMap.max_candy.name}), then clear leftover 2★ common D-Max clutter. Protects G-Max, Toxtricity/rares, Nundos, 2nd-moved builds, and any upgraded Max Move.`,
       isTrash: true,
     },
     {
@@ -369,88 +673,86 @@ export function buildTriageFunnels(metaSnapshot = {}, customTagMap = null, optio
       title: 'Event & Background Collection Review',
       query: 'locationbackground&!#',
       subQueries: [
-        { label: 'Global Special Backgrounds', query: 'specialbackground&!#' },
-        { label: 'Shiny + Any Background (Grails)', query: 'shiny&background&!#' },
-        { label: 'Profile Backgrounds', query: 'profilebackground&!#' },
+        { label: 'Global Special Backgrounds', query: 'specialbackground&!#', isTrash: false },
+        { label: 'Shiny + Any Background (Grails)', query: 'shiny&background&!#', isTrash: false },
+        { label: 'Profile Backgrounds', query: 'profilebackground&!#', isTrash: false },
       ],
-      action: `Route every background catch to ${tagMap.ev_shbg.name}, ${tagMap.ev_locbg.name}, ${tagMap.ev_global.name}, or ${tagMap.tr_spec.name} and dual-lock (★).`,
+      action: `Sort by # and route every background catch to ${tagMap.ev_shbg.name}, ${tagMap.ev_locbg.name}, ${tagMap.ev_global.name}, or ${tagMap.tr_spec.name} and dual-lock keepers (★).`,
       isTrash: false,
     },
   ];
 
   // --- Mode C: Competitive & Endgame Meta Triage ---
-  const glLowDex = dexClause(pvp.gl?.top100?.lowAtk);
-  const glHighDex = dexClause(pvp.gl?.top100?.highAtk);
-  const ulLowDex = dexClause(pvp.ul?.top100?.lowAtk);
-  const ulHighDex = dexClause(pvp.ul?.top100?.highAtk);
-  const mlAllDex = dexClause(pvp.ml?.top100?.all);
-  const pvpShadowDex = dexClause(pvp.allShadow);
-  const pvpTradeDex = dexClause(pvp.allTradeReroll);
-
   const modeCPvp = [
     {
       id: 'C1_gl_low',
-      title: 'GL Meta — Low-Atk Species (Top 100)',
-      query: joinClauses('!#', '0-1attack', '3-4defense', '3-4hp', glLowDex),
-      action: 'Covers ~86% of Great League Top 100 (defaultIVs Atk ≤ 5), family-expanded.',
+      title: 'GL Meta — Low-Atk Species (Top 100, ≤1500 CP)',
+      query: joinClauses('!#', '0-1attack', '3-4defense', '3-4hp', 'cp-1500', glLowDex),
+      action: 'Covers Great League Top 100 low-attack families (defaultIVs Atk ≤ 5), capped at cp-1500 so over-leveled catches never clutter results.',
       isTrash: false,
     },
     {
       id: 'C1_gl_high',
-      title: 'GL Meta — High-Atk / XL Species',
-      query: joinClauses('!#', '2-4attack', '3-4defense', '3-4hp', glHighDex),
-      action: 'Catches XL/raid-floor GL staples (Medicham, Bastiodon, Sableye, Deoxys-D, Florges, Pachirisu).',
+      title: 'GL Meta — High-Atk / XL Species (≤1500 CP)',
+      query: joinClauses('!#', '2-4attack', '3-4defense', '3-4hp', 'cp-1500', glHighDex),
+      action: 'Catches XL/raid-floor GL staples (Lickitung, Medicham, Bastiodon, Sableye, Carbink, Corsola, Pachirisu, Florges).',
       isTrash: false,
     },
     {
       id: 'C1_ul_low',
-      title: 'UL Meta — Low-Atk Species (Top 100)',
-      query: joinClauses('!#', '0-1attack', '3-4defense', '3-4hp', ulLowDex),
-      action: 'Covers ~67% of Ultra League Top 100 (defaultIVs Atk ≤ 5), family-expanded.',
+      title: 'UL Meta — Low-Atk Species (Top 100, ≤2500 CP)',
+      query: joinClauses('!#', '0-1attack', '3-4defense', '3-4hp', 'cp-2500', ulLowDex),
+      action: 'Covers Ultra League Top 100 low-attack families (defaultIVs Atk ≤ 5), capped at cp-2500.',
       isTrash: false,
     },
     {
       id: 'C1_ul_high',
-      title: 'UL Meta — High-Atk / XL / Hundo-Cap',
-      query: joinClauses('!#', '3*,4*', ulHighDex),
-      action: 'Catches XL-capped UL powerhouses (Tinkaton, Zygarde, Virizion, Mimikyu, Jellicent, Talonflame, Umbreon).',
+      title: 'UL Meta — High-Atk / XL / Hundo-Cap (≤2500 CP)',
+      query: joinClauses('!#', '3*,4*', 'cp-2500', ulHighDex),
+      action: 'Catches XL-capped UL powerhouses (Tinkaton, Zygarde, Virizion, Jellicent, Talonflame, Umbreon, Mandibuzz).',
       isTrash: false,
     },
     {
       id: 'C1_ml',
       title: 'ML Meta — Top IV Breakpoint Screen (Top 100)',
       query: joinClauses('!#', '3*,4*', '4attack', '3-4defense', '3-4hp', mlAllDex),
-      action: 'Prioritizes 15 Attack (4attack) + 93–100% IVs for CMP ties and fast-move breakpoints.',
+      action: 'Prioritizes 15 Attack (4attack) + 93–100% IVs for Master League CMP ties and fast-move breakpoints.',
       isTrash: false,
     },
     {
       id: 'C1_shadow',
       title: 'PvP Shadow Meta Candidates (All Leagues)',
       query: joinClauses('!#', 'shadow', pvpShadowDex),
-      action: 'Inspect all untagged shadows of Top-100 Shadow families (~30% of every league).',
+      subQueries: [
+        {
+          label: 'GL/UL Low-Atk Shadow Spreads (≤2500 CP)',
+          query: joinClauses('!#', 'shadow', '0-1attack', '3-4defense', '3-4hp', 'cp-2500', pvpShadowDex),
+          isTrash: false,
+        },
+        {
+          label: 'ML & XL 3★–4★ Shadow Spreads',
+          query: joinClauses('!#', 'shadow', '3*,4*', pvpShadowDex),
+          isTrash: false,
+        },
+      ],
+      action: `Screen untagged shadows of Top-100 PvP Shadow families; tag keepers → ${tagMap.pvp_wip.name} + ${tagMap.op_tmfrust.name}.`,
       isTrash: false,
     },
     {
       id: 'C1_trade',
       title: 'PvP Trade Reroll Targets (Low-IV Hunts)',
       query: joinClauses('!#', '!traded', '!shiny', '!4*', pvpTradeDex),
-      action: 'Raid/research legendaries needing trade IV rerolls for GL/UL.',
+      action: 'Raid/research Legendaries & Ultra Beasts needing trade IV rerolls to dip under GL/UL CP caps.',
       isTrash: false,
     },
     {
       id: 'C1_xl_ready',
       title: 'Ready-to-Build XL PvP Candidates',
       query: joinClauses(t('pvp_wip') || '#pvp-wip', 'countcandyxl296-'),
-      action: 'Spots PvP WIP projects that already have full Level 50 XL candy banked.',
+      action: 'Spots PvP WIP projects that already have full Level 50 (296+) XL candy banked.',
       isTrash: false,
     },
   ];
-
-  const pveTopDex = dexClause(pve.top30Overall);
-  const pveTypeDex = dexClause(pve.byType?.[pveType]);
-  const pveShadowDex = dexClause(pve.topShadow);
-  const pveMegaEvolvedDex = dexClause(pve.topMegaEvolved);
-  const pveMegaFamDex = dexClause(pve.topMegaFamily);
 
   const modeCPve = [
     {
@@ -476,11 +778,11 @@ export function buildTriageFunnels(metaSnapshot = {}, customTagMap = null, optio
     },
     {
       id: 'C2_mega_leveling',
-      title: 'Daily Free Mega Leveling (to Lv3 / Lv4)',
+      title: 'Daily Free Mega Leveling (to Lv3 Max / Lv4 Super Max)',
       query: 'mega1-2&megaevolve',
       subQueries: [
-        { label: 'Lv4 Super Max Target', query: 'mega1-3&megaevolve' },
-        { label: 'Tagged Mega Queue', query: joinClauses(t('op_mega') || '#op-mega', 'megaevolve') },
+        { label: 'Lv4 Super Max Target (mega1-3)', query: 'mega1-3&megaevolve', isTrash: false },
+        { label: 'Tagged Mega Queue', query: joinClauses(t('op_mega') || '#op-mega', 'megaevolve'), isTrash: false },
       ],
       action: `Evolves active Mega leveling roster on free cooldown; remove ${tagMap.op_mega.name} once maxed (mega3 or mega4).`,
       isTrash: false,
@@ -491,11 +793,19 @@ export function buildTriageFunnels(metaSnapshot = {}, customTagMap = null, optio
       query: joinClauses('!#', '!shadow', 'mega0', '3*,4*', '4attack', pveMegaEvolvedDex),
       subQueries: [
         {
-          label: 'Pre-Evos & Evolved Mega Families (no mega0)',
-          query: joinClauses('!#', '!shadow', '3*,4*', '4attack', pveMegaFamDex),
+          label: 'Mega Pre-Evolutions Only (Strict Pre-Evo Dexes)',
+          query: pveMegaPreEvoDex
+            ? joinClauses('!#', '!shadow', '3*,4*', '4attack', pveMegaPreEvoDex)
+            : joinClauses('!#', '!shadow', 'evolve', '3*,4*', '4attack'),
+          isTrash: false,
+        },
+        {
+          label: 'Tagged WIP Megas',
+          query: t('pve_megawip') || '#pve-megawip',
+          isTrash: false,
         },
       ],
-      action: 'mega0 only matches fully evolved Mega-capable forms — use the Pre-Evos & Evolved sub-query to catch Charmander/Beldum/etc.',
+      action: `mega0 matches un-Mega'd fully evolved forms, while the Pre-Evolutions sub-query targets ONLY unevolved pre-evos (Charmander, Beldum, Riolu) so already-Mega'd mega1–4 forms never leak in. Tag → ${tagMap.pve_megawip.name}.`,
       isTrash: false,
     },
     {
@@ -507,19 +817,22 @@ export function buildTriageFunnels(metaSnapshot = {}, customTagMap = null, optio
     },
   ];
 
-  const maxAtkDex = dexClause(max.attackers);
-  const maxTankHealDex = dexClause(max.tanksAndHealers);
   const fastMoveInclude = fastMoves.map((m) => `@1${m}`).join(',');
   const fastMoveExcludeClauses = fastMoves.map((m) => `!@1${m}`);
   const tankHealTags = joinOr(t('max_tank'), t('max_heal'));
 
   const maxAuditSubQueries = [
-    { label: 'Need Max Guard', query: joinClauses(t('max_tank') || '#max-tank', '!maxguard1-') },
+    {
+      label: 'Tanks Needing Max Guard Lv3 (!maxguard3)',
+      query: joinClauses(t('max_tank') || '#max-tank', '!maxguard3'),
+      isTrash: false,
+    },
   ];
   if (t('max_heal')) {
     maxAuditSubQueries.push({
-      label: 'Need Max Spirit',
-      query: joinClauses(t('max_heal'), '!maxspirit1-'),
+      label: 'Healers Needing Max Spirit Lv3 (!maxspirit3)',
+      query: joinClauses(t('max_heal'), '!maxspirit3'),
+      isTrash: false,
     });
   }
 
@@ -549,7 +862,7 @@ export function buildTriageFunnels(metaSnapshot = {}, customTagMap = null, optio
       id: 'C3_fast_with',
       title: 'Max Pokémon WITH a 0.5s Fast Move',
       query: joinClauses('maxmove1-', fastMoveInclude),
-      action: 'Verifies fast-charging Tanks/Healers across all 25 verified 500ms fast moves (@1 targets Fast Move slot).',
+      action: 'Verifies fast-charging Tanks/Healers across all 25 collision-free 500ms fast moves (@1 targets Fast Move slot).',
       isTrash: false,
     },
     {
@@ -561,32 +874,62 @@ export function buildTriageFunnels(metaSnapshot = {}, customTagMap = null, optio
     },
     {
       id: 'C3_audits',
-      title: 'Max Move Investment Audits',
+      title: 'Max Move Investment Audits (Not Yet Lv3)',
       query: joinClauses(t('max_atk') || '#max-atk', 'maxmove1-2'),
       subQueries: maxAuditSubQueries,
-      action: 'Tracks which tagged Max mons still need Max Particle upgrades (scoped by #max-* to prevent non-Max leakage).',
+      action: 'Finds tagged Attackers, Tanks (!maxguard3), and Healers (!maxspirit3) that are locked or Lv1–2 (scoped by #max-* tags so regular non-Max storage never leaks in).',
       isTrash: false,
     },
   ];
 
   // --- Mode D: Event-Hour & Trading Ops ---
+  const badTradeTagExclusions = [
+    ...nsExc('pvp'),
+    ...nsExc('pve'),
+    ...nsExc('max'),
+    ...nsExc('keep'),
+    ...nsExc('ev'),
+    notT('op_xxl'),
+    notT('op_mega'),
+    notT('op_evocd'),
+    notT('op_evoxp'),
+    notT('op_powerwip'),
+    notT('op_powerup'),
+    notT('op_2xxfer'),
+  ].filter(Boolean);
+
   const modeDSteps = [
     {
       id: 'D1_2xxfer',
       title: '2x Transfer Candy Spotlight Hour',
       query: joinClauses(t('op_2xxfer') || '#op-2xxfer', '!favorite'),
-      action: 'Mass-transfer queued rares, legendaries, and bad rerolled trades in 50–100 batches.',
+      action: 'Mass-transfer queued rares, legendaries, and bad legendary rerolls in 50–100 batches.',
       isTrash: true,
     },
     {
       id: 'D2_bad_trades',
-      title: 'Bad Rerolled Trades Cleanup',
+      title: 'Failed Common Trade Rerolls Cleanup (0★–2★)',
       query: joinClauses(
-        'traded', '!lucky', '!4*', '!shiny', '!background', '!favorite', '!@special', '@3mov',
-        ...nsExc('pvp'), ...nsExc('pve'), ...nsExc('max'), ...nsExc('keep'), ...nsExc('ev'),
-        notT('op_xxl'), notT('op_mega'), notT('op_evocd'), notT('op_evoxp')
+        'traded', '0*,1*,2*', '!lucky', '!4*', '!shiny', '!background', '!costume',
+        '!legendary', '!mythical', '!ultrabeast', '!favorite', '!@special',
+        '!maxmove1-', '!fusion', '!adventureeffect', '@3mov',
+        PVP_IV_EXCLUDE_CLAUSE, NUNDO_EXCLUDE_CLAUSE,
+        tradeEvoNegation,
+        ...badTradeTagExclusions
       ),
-      action: `Flush post-trade failures straight to ${tagMap.op_2xxfer.name} or transfer immediately (shields event, XXL, Mega, legacy-move, double-moved, and evolution-queued trades).`,
+      subQueries: [
+        {
+          label: `Failed 0★–2★ Legendary / UB Rerolls → Tag ${tagMap.op_2xxfer.name}`,
+          query: joinClauses(
+            'traded', '0*,1*,2*', 'legendary,ultrabeast', '!lucky', '!shiny', '!background',
+            '!favorite', '!@special', '!fusion', '!adventureeffect', '@3mov',
+            PVP_IV_EXCLUDE_CLAUSE,
+            ...badTradeTagExclusions
+          ),
+          isTrash: false,
+        },
+      ],
+      action: `Safely clears failed 0★–2★ common trades while protecting non-lucky 3★ rerolls, 0-1atk PvP rerolls, Nundos, free 0-candy trade evolutions, and Legendaries/UBs (route failed Legendaries via the companion query to ${tagMap.op_2xxfer.name} for 2x Candy!).`,
       isTrash: true,
     },
     {
@@ -594,7 +937,11 @@ export function buildTriageFunnels(metaSnapshot = {}, customTagMap = null, optio
       title: 'Distance Trade Prep (100km+)',
       query: 'distance100-&!traded&!shiny&!legendary&!mythical&!ultrabeast&!4*&!favorite&!#',
       subQueries: [
-        { label: 'S2 Cell Edge-Safe (101km+)', query: 'distance101-&!traded&!shiny&!legendary&!mythical&!ultrabeast&!4*&!favorite&!#' },
+        {
+          label: 'S2 Cell Edge-Safe (101km+)',
+          query: 'distance101-&!traded&!shiny&!legendary&!mythical&!ultrabeast&!4*&!favorite&!#',
+          isTrash: false,
+        },
       ],
       action: `Tag into ${tagMap.tr_dist.name}; during trade sessions search ${t('tr_dist') || '#tr-dist'}&!traded.`,
       isTrash: false,
@@ -636,9 +983,21 @@ export function buildTriageFunnels(metaSnapshot = {}, customTagMap = null, optio
       title: '2x Evolution XP Spotlight Hour',
       query: joinClauses(t('op_evoxp') || '#op-evoxp', 'evolve'),
       subQueries: [
-        { label: '12-Candy Fodder', query: joinClauses('!#', '!favorite', 'evolve', candy12Dex) },
-        { label: 'Already-Traded Free Evos (0 Candy)', query: joinClauses('traded', 'evolve', tradeEvoDex) },
-        { label: 'Un-Traded Trade-Evos (Send to Friend)', query: 'tradeevolve&!traded' },
+        {
+          label: '12-Candy Fodder',
+          query: joinClauses('!#', '!favorite', 'evolve', candy12Dex),
+          isTrash: false,
+        },
+        {
+          label: 'Already-Traded Free Evos (0 Candy)',
+          query: joinClauses('traded', 'evolve', tradeEvoDex),
+          isTrash: false,
+        },
+        {
+          label: 'Un-Traded Trade-Evos (Send to Friend)',
+          query: 'tradeevolve&!traded',
+          isTrash: false,
+        },
       ],
       action: 'Pop Lucky Egg → evolve → transfer! Note: tradeevolve never matches already-traded Pokémon — use the explicit Dex list for free 0-candy evolves.',
       isTrash: false,
@@ -657,6 +1016,25 @@ export function buildTriageFunnels(metaSnapshot = {}, customTagMap = null, optio
       action: 'Uses verified `party` keyword (never `partyplay`).',
       isTrash: false,
     },
+    {
+      id: 'D11_powerwip',
+      title: 'Active Power-Up WIP Roster',
+      query: t('op_powerwip') || '#op-powerwip',
+      subQueries: [
+        {
+          label: 'XL-Ready Power-Up WIPs (296+ XL)',
+          query: joinClauses(t('op_powerwip') || '#op-powerwip', 'countcandyxl296-'),
+          isTrash: false,
+        },
+        {
+          label: 'Field Research Power-Up Queue',
+          query: t('op_powerup') || '#op-powerup',
+          isTrash: false,
+        },
+      ],
+      action: `Track active Stardust/Candy builds in ${tagMap.op_powerwip.name} (remove once they hit target CP/Lv40/Lv50); keep ${tagMap.op_powerup.name} for "Power up X times" Field Research.`,
+      isTrash: false,
+    },
   ];
 
   return {
@@ -664,14 +1042,14 @@ export function buildTriageFunnels(metaSnapshot = {}, customTagMap = null, optio
     modes: {
       modeA: {
         id: 'modeA',
-        title: 'Event-Day & Post-Catch Rapid Triage',
-        subtitle: 'Strict priority inbox-zero funnel: lock grails & screen combat roles first, purge untagged remainder last.',
-        steps: [stepA1, stepA1b, stepA2, stepA3, stepA4, stepA5, stepA6, stepA6b],
+        title: 'Post-Catch & Event-Day Inbox-Zero Funnel',
+        subtitle: 'Exact meta-scoped screening from Grails → Raid/Shadow/Max → PvP (Low-Atk + XL) → PvE 3★ → Trades/Showcases → True !# Inbox Zero.',
+        steps: [stepA1, stepA2, stepA3, stepA4, stepA5, stepA6, stepA7],
       },
       modeB: {
         id: 'modeB',
         title: 'Deep Storage Cleanout',
-        subtitle: 'Full-box audit using count2- duplicate detection to clear backlog and hidden bloat.',
+        subtitle: 'Full-box audit with strict non-meta species isolation, safe # sorting for variants, and shadow/Max protections.',
         steps: modeBSteps,
       },
       modeC: {
