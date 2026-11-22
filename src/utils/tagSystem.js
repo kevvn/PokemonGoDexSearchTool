@@ -77,8 +77,8 @@ export const CORE_TAGS = [
     defaultName: 'PVP-GL',
     color: 'blue',
     dragOrder: 16,
-    purpose: 'Built Great League (≤1500 CP, double-moved, battle-ready).',
-    nativeSearchSynergy: '#pvp-gl&cp-1500',
+    purpose: 'Great League Roster & Candidates (≤1500 CP Top-100 meta + built double-moved roster; audit unbuilt needs via #pvp-gl&@3mov or #pvp-gl&evolve).',
+    nativeSearchSynergy: '#pvp-gl&cp-1500, #pvp-gl&@3mov, #pvp-gl&!@3mov',
   },
   {
     id: 'pvp_ul',
@@ -86,8 +86,8 @@ export const CORE_TAGS = [
     defaultName: 'PVP-UL',
     color: 'yellow',
     dragOrder: 17,
-    purpose: 'Built Ultra League (≤2500 CP, double-moved, battle-ready).',
-    nativeSearchSynergy: '#pvp-ul&cp-2500',
+    purpose: 'Ultra League Roster & Candidates (≤2500 CP Top-100 meta + built double-moved roster; audit unbuilt needs via #pvp-ul&@3mov or #pvp-ul&evolve).',
+    nativeSearchSynergy: '#pvp-ul&cp-2500, #pvp-ul&@3mov, #pvp-ul&!@3mov',
   },
   {
     id: 'pvp_ml',
@@ -95,8 +95,8 @@ export const CORE_TAGS = [
     defaultName: 'PVP-ML',
     color: 'purple',
     dragOrder: 18,
-    purpose: 'Built Master League (L50 / hundo or functional 15-Atk hundo, double-moved).',
-    nativeSearchSynergy: '#pvp-ml&4attack',
+    purpose: 'Master League Roster & Candidates (Top-100 ML 15-Atk 3★/4★ at any CP from Lv20 raid bosses up to Lv50 double-moved builds).',
+    nativeSearchSynergy: '#pvp-ml&4attack, #pvp-ml&@3mov, #pvp-ml&countcandyxl296-',
   },
   {
     id: 'pvp_cup',
@@ -104,8 +104,8 @@ export const CORE_TAGS = [
     defaultName: 'PVP-Cup',
     color: 'blue',
     dragOrder: 19,
-    purpose: 'Built Little Cup (≤500 CP) & Themed/Limited Cup specialists kept outside Open GL/UL.',
-    nativeSearchSynergy: '#pvp-cup&cp-500',
+    purpose: 'Little Cup (≤500 CP) & Limited/Themed Cup specialists outside the Open GL/UL Top 100.',
+    nativeSearchSynergy: '#pvp-cup&cp-500, #pvp-cup&cp-1500',
   },
   {
     id: 'pvp_wip',
@@ -113,8 +113,8 @@ export const CORE_TAGS = [
     defaultName: 'PVP-WIP',
     color: 'orange',
     dragOrder: 9,
-    purpose: 'Unbuilt PvP IV Candidates (top GL/UL/ML spreads awaiting Stardust, XL Candy, Frustration TM, or CD evolution).',
-    nativeSearchSynergy: '#pvp-wip&countcandyxl296-',
+    purpose: 'PvP Build Queue — pair alongside PVP-GL / PVP-UL / PVP-ML on candidates that still need Stardust, a 2nd Charged Move (@3mov), Evolution, or XL Candy; remove once battle-ready.',
+    nativeSearchSynergy: '#pvp-wip&countcandyxl296-, #pvp-gl,#pvp-ul,#pvp-ml&@3mov',
   },
 
   // Namespace 4: PvE Raids (#pve)
@@ -609,6 +609,7 @@ export function getRecommendedDragOrder(tagMap) {
 // Local fallback dex lists (avoids circular import with triageFunnels.js)
 const DEFAULT_CANDY_12_FODDER_IDS = [10, 13, 16, 265, 293, 519];
 const DEFAULT_TRADE_EVOLVE_IDS = [64, 67, 75, 93, 525, 533, 588, 616, 708, 710];
+const CLASSIC_GL_XL_FLOOR_IDS = [108, 463, 222, 864, 302, 307, 308, 410, 411, 417, 659, 660, 703];
 const COMPRESSED_CD_PRE_EVO_DEX = compressIds(ALL_COMMUNITY_DAY_PRE_EVO_IDS);
 
 /**
@@ -751,46 +752,136 @@ export function buildTagHydrationQueries(tagId, tagMap = null, metaSnapshot = nu
         },
       ];
 
-    // --- Stage 3: Built Competitive Rosters ---
-    case 'pvp_gl':
-      return [
-        {
-          id: 'pvp_gl_primary',
-          label: 'Built GL (Double-Moved)',
-          query: 'cp1300-1500&!@3mov&!#',
-        },
-      ];
+    // --- Stage 3: Built Competitive Rosters & League-Assigned Candidates ---
+    case 'pvp_gl': {
+      const glLow = Array.isArray(pvp.gl?.top100?.lowAtk) ? pvp.gl.top100.lowAtk : [];
+      const rawGlHigh = Array.isArray(pvp.gl?.top100?.highAtk) ? pvp.gl.top100.highAtk : [];
+      const glHigh = rawGlHigh.length > 0 ? [...rawGlHigh, ...CLASSIC_GL_XL_FLOOR_IDS] : [];
+      const glLowDex = compressIds(glLow);
+      const glHighDex = compressIds(glHigh);
+      const glHash = getTagHash('pvp_gl', merged) || '#pvp-gl';
 
-    case 'pvp_ul':
-      return [
-        {
-          id: 'pvp_ul_primary',
-          label: 'Built UL (Double-Moved)',
-          query: 'cp2300-2500&!@3mov&!#',
-        },
-      ];
+      const queries = [];
+      if (glLowDex) {
+        queries.push({
+          id: 'pvp_gl_meta_low',
+          label: 'GL Top-100 Low-Atk Candidates (≤1500 CP)',
+          query: `!#&0-1attack&3-4defense&3-4hp&cp-1500&${glLowDex}`,
+          note: 'Uses cp-1500 (no minimum CP floor) so low-level wild catches and pre-evolutions that need powering up, evolving, or a 2nd move are included.',
+        });
+      }
+      if (glHighDex) {
+        queries.push({
+          id: 'pvp_gl_meta_high',
+          label: 'GL Top-100 XL / High-Atk Candidates (≤1500 CP)',
+          query: `!#&2-4attack&3-4defense&3-4hp&cp-1500&${glHighDex}`,
+          note: 'Catches XL and egg/raid-floor GL staples (Lickitung, Medicham, Corsola, Bastiodon, Sableye, Carbink, Pachirisu, Diggersby, Florges) at any CP ≤ 1500.',
+        });
+      }
+      queries.push({
+        id: 'pvp_gl_primary',
+        label: 'Built Double-Moved GL (≤1500 CP)',
+        query: 'cp-1500&!@3mov&!#',
+      });
+      queries.push({
+        id: 'pvp_gl_needs_work',
+        label: 'Tagged GL Needing 2nd Move / Evo',
+        query: `${glHash}&@3mov,evolve`,
+        isSecondary: true,
+        note: 'Audits your tagged Great League pool for Pokémon that still need their 2nd Charged Move (@3mov) or evolution.',
+      });
+      return queries;
+    }
 
-    case 'pvp_ml':
-      return [
-        {
-          id: 'pvp_ml_primary',
-          label: 'Built ML (15-Atk Double-Moved)',
-          query: 'cp3000-&!@3mov&3*,4*&4attack&!#',
-        },
-        {
-          id: 'pvp_ml_xl',
-          label: 'XL Double-Moved ML',
-          query: 'candyxl&!@3mov&3*,4*&!#',
-          isSecondary: true,
-        },
-      ];
+    case 'pvp_ul': {
+      const ulLow = Array.isArray(pvp.ul?.top100?.lowAtk) ? pvp.ul.top100.lowAtk : [];
+      const ulHigh = Array.isArray(pvp.ul?.top100?.highAtk) ? pvp.ul.top100.highAtk : [];
+      const ulLowDex = compressIds(ulLow);
+      const ulHighDex = compressIds(ulHigh);
+      const ulHash = getTagHash('pvp_ul', merged) || '#pvp-ul';
+
+      const queries = [];
+      if (ulLowDex) {
+        queries.push({
+          id: 'pvp_ul_meta_low',
+          label: 'UL Top-100 Low-Atk Candidates (≤2500 CP)',
+          query: `!#&0-1attack&3-4defense&3-4hp&cp-2500&${ulLowDex}`,
+          note: 'Uses cp-2500 (no minimum CP floor) so under-leveled catches, Lv20 Raid Bosses, and pre-evolutions needing power-up or 2nd move are surfaced.',
+        });
+      }
+      if (ulHighDex) {
+        queries.push({
+          id: 'pvp_ul_meta_high',
+          label: 'UL Top-100 XL / Hundo-Cap Candidates (≤2500 CP)',
+          query: `!#&3*,4*&cp-2500&${ulHighDex}`,
+          note: 'Catches XL-capped UL staples (Tinkaton, Talonflame, Umbreon, Mandibuzz, Jellicent, Zygarde, Virizion) at any CP ≤ 2500.',
+        });
+      }
+      queries.push({
+        id: 'pvp_ul_primary',
+        label: 'Built Double-Moved UL (1501–2500 CP)',
+        query: 'cp1501-2500&!@3mov&!#',
+      });
+      queries.push({
+        id: 'pvp_ul_needs_work',
+        label: 'Tagged UL Needing 2nd Move / Evo',
+        query: `${ulHash}&@3mov,evolve`,
+        isSecondary: true,
+        note: 'Audits your tagged Ultra League pool for Pokémon that still need their 2nd Charged Move (@3mov) or evolution.',
+      });
+      return queries;
+    }
+
+    case 'pvp_ml': {
+      const mlAll = Array.isArray(pvp.ml?.top100?.all) ? pvp.ml.top100.all : [];
+      const mlAllDex = compressIds(mlAll);
+      const mlHash = getTagHash('pvp_ml', merged) || '#pvp-ml';
+
+      const queries = [];
+      if (mlAllDex) {
+        queries.push({
+          id: 'pvp_ml_meta_candidates',
+          label: 'ML Top-100 15-Atk Candidates (Any CP)',
+          query: `!#&3*,4*&4attack&3-4defense&3-4hp&${mlAllDex}`,
+          note: 'No minimum CP filter — catches Level 20 Raid Bosses, hatches, and pre-evolutions that need powering up and a 2nd move.',
+        });
+        queries.push({
+          id: 'pvp_ml_meta_hundos',
+          label: 'ML Top-100 4★ Hundos (Any CP)',
+          query: `!#&4*&${mlAllDex}`,
+        });
+      }
+      queries.push({
+        id: 'pvp_ml_primary',
+        label: 'Built Double-Moved ML (3000+ CP)',
+        query: 'cp3000-&!@3mov&3*,4*&4attack&!#',
+      });
+      queries.push({
+        id: 'pvp_ml_needs_work',
+        label: 'Tagged ML Needing 2nd Move / Evo',
+        query: `${mlHash}&@3mov,evolve`,
+        isSecondary: true,
+      });
+      return queries;
+    }
 
     case 'pvp_cup':
       return [
         {
           id: 'pvp_cup_primary',
-          label: 'Built Little Cup (Double-Moved)',
-          query: 'cp400-500&!@3mov&!#',
+          label: 'Built Little Cup (≤500 CP Double-Moved)',
+          query: 'cp-500&!@3mov&!#',
+        },
+        {
+          id: 'pvp_cup_little_candidates',
+          label: 'Little Cup Low-Atk Candidates (≤500 CP)',
+          query: '0-1attack&3-4defense&3-4hp&cp-500&!#',
+        },
+        {
+          id: 'pvp_cup_limited_spice',
+          label: 'Limited Cup Low-Atk Spice (≤1500 CP)',
+          query: '0-1attack&3-4defense&3-4hp&cp-1500&!#',
+          isSecondary: true,
         },
       ];
 
@@ -872,13 +963,22 @@ export function buildTagHydrationQueries(tagId, tagMap = null, metaSnapshot = nu
     case 'pvp_wip': {
       const glLow = Array.isArray(pvp.gl?.top100?.lowAtk) ? pvp.gl.top100.lowAtk : [];
       const ulLow = Array.isArray(pvp.ul?.top100?.lowAtk) ? pvp.ul.top100.lowAtk : [];
-      const glHigh = Array.isArray(pvp.gl?.top100?.highAtk) ? pvp.gl.top100.highAtk : [];
+      const rawGlHigh = Array.isArray(pvp.gl?.top100?.highAtk) ? pvp.gl.top100.highAtk : [];
+      const glHigh = rawGlHigh.length > 0 ? [...rawGlHigh, ...CLASSIC_GL_XL_FLOOR_IDS] : [];
       const ulHigh = Array.isArray(pvp.ul?.top100?.highAtk) ? pvp.ul.top100.highAtk : [];
       const mlAll = Array.isArray(pvp.ml?.top100?.all) ? pvp.ml.top100.all : [];
 
       const glUlLowAtkDex = compressIds([...glLow, ...ulLow]);
       const glUlHighAtkDex = compressIds([...glHigh, ...ulHigh]);
       const mlAllDex = compressIds(mlAll);
+      const leagueHashes = [
+        getTagHash('pvp_gl', merged),
+        getTagHash('pvp_ul', merged),
+        getTagHash('pvp_ml', merged),
+        getTagHash('pvp_cup', merged),
+      ]
+        .filter(Boolean)
+        .join(',') || '#pvp-gl,#pvp-ul,#pvp-ml,#pvp-cup';
       const queries = [];
 
       if (glUlLowAtkDex) {
@@ -896,6 +996,18 @@ export function buildTagHydrationQueries(tagId, tagMap = null, metaSnapshot = nu
           note: 'Catches XL/hundo-cap GL & UL staples (Lickitung, Medicham, Corsola, Tinkaton, Talonflame, Umbreon).',
         });
       }
+      queries.push({
+        id: 'pvp_wip_league_needs_move',
+        label: 'League-Tagged Needing 2nd Move (@3mov)',
+        query: `${leagueHashes}&@3mov`,
+        note: 'Finds Pokémon already tagged PVP-GL / PVP-UL / PVP-ML whose 2nd Charged Move is still locked (@3mov). Dual-tag with PVP-WIP until built.',
+      });
+      queries.push({
+        id: 'pvp_wip_league_needs_evo',
+        label: 'League-Tagged Needing Evolution',
+        query: `${leagueHashes}&evolve`,
+        isSecondary: true,
+      });
       if (mlAllDex) {
         queries.push({
           id: 'pvp_wip_ml',

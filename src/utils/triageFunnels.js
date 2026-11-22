@@ -392,13 +392,31 @@ export function buildTriageFunnels(metaSnapshot = {}, customTagMap = null, optio
             },
           ]
         : []),
+      ...(glLowDex
+        ? [
+            {
+              label: `Great League Only — Top-100 Low-Atk (≤1500 CP → Tag ${tagMap.pvp_gl.name})`,
+              query: joinClauses(ageScope, '!#', '0-1attack', '3-4defense', '3-4hp', 'cp-1500', glLowDex),
+              isTrash: false,
+            },
+          ]
+        : []),
+      ...(ulLowDex
+        ? [
+            {
+              label: `Ultra League Only — Top-100 Low-Atk (≤2500 CP → Tag ${tagMap.pvp_ul.name})`,
+              query: joinClauses(ageScope, '!#', '0-1attack', '3-4defense', '3-4hp', 'cp-2500', ulLowDex),
+              isTrash: false,
+            },
+          ]
+        : []),
       {
         label: 'All-Species Broad Low-Atk Spread (Limited Cup Spice)',
         query: joinClauses(ageScope, '!#', '0-1attack', '3-4defense', '3-4hp', 'cp-2500'),
         isTrash: false,
       },
     ],
-    action: `Primary query surfaces ONLY verified Top-100 GL/UL evolutionary families (zero common rodent/bug noise), while the XL companion query catches 2–4 Atk 3★ spreads like 8/14/15 Lickitung or 7/15/15 Corsola before 3★ cleanup. Tag keepers → ${tagMap.pvp_wip.name} (or ${tagMap.op_evocd.name}).`,
+    action: `Tag directly by target league (${tagMap.pvp_gl.name} for ≤1500 CP, ${tagMap.pvp_ul.name} for ≤2500 CP) AND add ${tagMap.pvp_wip.name} (or ${tagMap.op_evocd.name}) if it still needs powering up, evolving, or a 2nd Charged Move.`,
     isTrash: false,
   };
 
@@ -747,9 +765,30 @@ export function buildTriageFunnels(metaSnapshot = {}, customTagMap = null, optio
     },
     {
       id: 'C1_xl_ready',
-      title: 'Ready-to-Build XL PvP Candidates',
-      query: joinClauses(t('pvp_wip') || '#pvp-wip', 'countcandyxl296-'),
-      action: 'Spots PvP WIP projects that already have full Level 50 (296+) XL candy banked.',
+      title: 'PvP Build Queue Audits (XL-Ready, Needs 2nd Move, Needs Evo)',
+      query: joinClauses(
+        joinOr(t('pvp_wip'), t('pvp_gl'), t('pvp_ul'), t('pvp_ml')) || '#pvp-wip,#pvp-gl,#pvp-ul,#pvp-ml',
+        'countcandyxl296-'
+      ),
+      subQueries: [
+        {
+          label: 'League-Tagged Needing 2nd Charged Move (@3mov)',
+          query: joinClauses(
+            joinOr(t('pvp_gl'), t('pvp_ul'), t('pvp_ml'), t('pvp_cup'), t('pvp_wip')) || '#pvp-gl,#pvp-ul,#pvp-ml,#pvp-cup,#pvp-wip',
+            '@3mov'
+          ),
+          isTrash: false,
+        },
+        {
+          label: 'League-Tagged Needing Evolution',
+          query: joinClauses(
+            joinOr(t('pvp_gl'), t('pvp_ul'), t('pvp_ml'), t('pvp_cup'), t('pvp_wip')) || '#pvp-gl,#pvp-ul,#pvp-ml,#pvp-cup,#pvp-wip',
+            'evolve'
+          ),
+          isTrash: false,
+        },
+      ],
+      action: `Audits your league-tagged pool (${tagMap.pvp_gl.name} / ${tagMap.pvp_ul.name} / ${tagMap.pvp_ml.name} / ${tagMap.pvp_wip.name}) for specimens with 296+ XL candy banked, still missing a 2nd Charged Move (@3mov), or still needing evolution.`,
       isTrash: false,
     },
   ];
