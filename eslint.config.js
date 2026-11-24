@@ -23,7 +23,20 @@ export default defineConfig([
       },
     },
     rules: {
-      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
+      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]', argsIgnorePattern: '^_' }],
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: 'react',
+              importNames: ['useEffect', 'useLayoutEffect'],
+              message:
+                'This codebase enforces zero useEffect/useLayoutEffect. Use useSyncExternalStore for external state, React 19 ref cleanup callbacks for DOM observers/dialogs, or synchronous event handlers.',
+            },
+          ],
+        },
+      ],
     },
   },
 ])

@@ -553,17 +553,30 @@ export function parsePokechespinMaxLists(tsSource) {
 
 export function extractFastMoves500ms(pbMoves) {
   const names = new Set();
+  const non500msFastNames = [];
   for (const m of pbMoves || []) {
-    if (
-      m?.moveId?.endsWith('_FAST') &&
-      m.durationMs === 500 &&
-      m.moveId !== 'HIDDEN_POWER_FAST' &&
-      m.moveId !== 'TRANSFORM_FAST'
-    ) {
-      names.add(formatMoveDisplayName(m.moveId));
+    if (!m?.moveId?.endsWith('_FAST')) continue;
+    if (m.moveId === 'HIDDEN_POWER_FAST' || m.moveId === 'TRANSFORM_FAST') continue;
+    const display = formatMoveDisplayName(m.moveId);
+    if (m.durationMs === 500) {
+      names.add(display);
+    } else if (display) {
+      non500msFastNames.push(display.toLowerCase());
     }
   }
-  return [...names].sort((a, b) => a.localeCompare(b));
+  // Guard against Pokémon GO `@1Move` prefix collisions with slower fast moves
+  const safeNames = [...names].filter((name) => {
+    const lower = name.toLowerCase();
+    const collision = non500msFastNames.find((other) => other !== lower && other.startsWith(lower));
+    if (collision) {
+      console.warn(
+        `Skipping 500ms fast move "${name}" due to @1 prefix collision with slower move "${collision}".`
+      );
+      return false;
+    }
+    return true;
+  });
+  return safeNames.sort((a, b) => a.localeCompare(b));
 }
 
 export function buildMaxBattlesMeta(dynamaxIds, pbPokemon, pbMoves, pokedexById) {
