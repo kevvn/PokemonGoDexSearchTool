@@ -83,8 +83,8 @@ export function extractRegionalForms(rawEntry) {
   for (const key of Object.keys(regionFormsObj)) {
     const upper = key.toUpperCase();
     if (upper.includes('_ALOLA')) forms.add('alola');
-    if (upper.includes('_GALAR')) forms.add('galarian');
-    if (upper.includes('_HISUI')) forms.add('hisuian');
+    if (upper.includes('_GALAR')) forms.add('galar');
+    if (upper.includes('_HISUI')) forms.add('hisui');
     if (upper.includes('_PALDEA')) forms.add('paldea');
   }
   return [...forms].sort();
@@ -113,14 +113,17 @@ export async function fetchWithRetry(url, options = {}) {
   const {
     retries = 4,
     baseDelayMs = 1000,
+    timeoutMs = 15000,
     headers = { 'User-Agent': 'PokemonGoDexSearchTool/1.0 (build-time snapshot)' },
     fetchImpl = fetch,
   } = options;
 
   let lastError;
   for (let attempt = 0; attempt <= retries; attempt++) {
+    const controller = typeof AbortController !== 'undefined' && timeoutMs > 0 ? new AbortController() : null;
+    const timeoutId = controller ? setTimeout(() => controller.abort(), timeoutMs) : null;
     try {
-      const response = await fetchImpl(url, { headers });
+      const response = await fetchImpl(url, { headers, signal: controller?.signal });
       if (response.ok) {
         return response;
       }
@@ -134,6 +137,8 @@ export async function fetchWithRetry(url, options = {}) {
       if (attempt === retries) {
         throw lastError;
       }
+    } finally {
+      if (timeoutId !== null) clearTimeout(timeoutId);
     }
     const delayMs = baseDelayMs * Math.pow(2, attempt);
     await new Promise((resolve) => setTimeout(resolve, delayMs));

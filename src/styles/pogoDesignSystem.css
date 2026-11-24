@@ -112,17 +112,19 @@ body {
 }
 
 /* Natural Interaction Feedback & Accessible Focus Rings (mwg: natural-interactions & color) */
-:where(button, [role="button"], [role="tab"], summary) {
-  transition:
-    box-shadow 150ms ease-out,
-    scale 140ms ease-out,
-    background-color 150ms ease-out,
-    border-color 150ms ease-out,
-    color 150ms ease-out;
-}
+@media (prefers-reduced-motion: no-preference) {
+  :where(button, [role="button"], [role="tab"], summary) {
+    transition:
+      box-shadow 150ms ease-out,
+      scale 140ms ease-out,
+      background-color 150ms ease-out,
+      border-color 150ms ease-out,
+      color 150ms ease-out;
+  }
 
-:where(button:not(:disabled)):active {
-  scale: 0.97;
+  :where(button:not(:disabled)):active {
+    scale: 0.97;
+  }
 }
 
 :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
@@ -139,6 +141,12 @@ body {
   background-attachment: fixed;
   min-height: 100dvh;
   color: var(--pogo-ink-strong);
+}
+
+@media (pointer: coarse) {
+  .pogo-pokedex-canvas {
+    background-attachment: scroll;
+  }
 }
 
 .pogo-pokedex-header {

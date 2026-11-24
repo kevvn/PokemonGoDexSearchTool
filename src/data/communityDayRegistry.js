@@ -1,11 +1,8 @@
-import { getFamilyIds } from '../utils/familyUtils';
-
 /**
- * Complete Chronological Registry of Pokémon GO Community Day & Community Day Classic Events (2018–2026)
- * Organized by Year and Month so users can expand/collapse by year/month, inspect featured species,
- * and generate search strings for Community Day Shiny trade stockpiles (1-3) vs surplus transfers (count4-).
+ * Pure chronological dataset of Pokémon GO Community Day & Community Day Classic Events (2018–2026).
+ * Kept dependency-free under `src/data/`; family and pre-evolution expansion lives in `src/models/communityDayModel.js`.
  */
-const RAW_COMMUNITY_DAYS = [
+export const RAW_COMMUNITY_DAYS = [
   // ================= 2026 =================
   { id: '2026-11-pawniard', year: 2026, month: 'November', monthNum: 11, date: '2026-11-21', species: 'Pawniard', dexId: 624, finalEvolution: 'Kingambit', exclusiveMove: 'Kowtow Cleave', isClassic: false, utility: 'PvE Dark/Steel & ML' },
   { id: '2026-10-zorua', year: 2026, month: 'October', monthNum: 10, date: '2026-10-10', species: 'Zorua', dexId: 570, finalEvolution: 'Zoroark', exclusiveMove: 'Sucker Punch', isClassic: false, utility: 'Collectible Shiny' },
@@ -139,52 +136,3 @@ const RAW_COMMUNITY_DAYS = [
   { id: '2018-02-dratini', year: 2018, month: 'February', monthNum: 2, date: '2018-02-24', species: 'Dratini', dexId: 147, finalEvolution: 'Dragonite', exclusiveMove: 'Draco Meteor', isClassic: false, utility: 'Top ML & Shadow Dragon' },
   { id: '2018-01-pikachu', year: 2018, month: 'January', monthNum: 1, date: '2018-01-20', species: 'Pikachu', dexId: 25, finalEvolution: 'Pikachu (Surf)', exclusiveMove: 'Surf', isClassic: false, utility: 'Inaugural CD Trophy' },
 ];
-
-export const COMMUNITY_DAY_EVENTS = RAW_COMMUNITY_DAYS.map((entry) => {
-  const baseFamily = getFamilyIds(entry.dexId);
-  const extra = entry.extraDexIds || [];
-  const familyIds = Array.from(new Set([...baseFamily, ...extra])).sort((a, b) => a - b);
-  // Pre-evolution IDs (every stage before the final stage, unless single-stage like Pikachu)
-  const preEvoIds = familyIds.length > 1 ? familyIds.slice(0, -1) : familyIds;
-
-  return {
-    ...entry,
-    familyIds,
-    preEvoIds,
-    sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${entry.dexId}.png`,
-  };
-});
-
-/**
- * Returns Community Day events grouped by Year (descending: 2026 -> 2018).
- */
-export function getCommunityDaysByYear() {
-  const byYear = new Map();
-  COMMUNITY_DAY_EVENTS.forEach((ev) => {
-    if (!byYear.has(ev.year)) {
-      byYear.set(ev.year, []);
-    }
-    byYear.get(ev.year).push(ev);
-  });
-  return Array.from(byYear.entries())
-    .sort((a, b) => b[0] - a[0])
-    .map(([year, events]) => ({
-      year,
-      events,
-      allFamilyIds: Array.from(new Set(events.flatMap((e) => e.familyIds))).sort((a, b) => a - b),
-    }));
-}
-
-/**
- * All unique National Pokédex IDs across every Community Day evolutionary family (2018–2026).
- */
-export const ALL_COMMUNITY_DAY_FAMILY_IDS = Array.from(
-  new Set(COMMUNITY_DAY_EVENTS.flatMap((e) => e.familyIds))
-).sort((a, b) => a - b);
-
-/**
- * Pre-evolution IDs for high-value Community Day species worth holding until a December recap / Classic event.
- */
-export const ALL_COMMUNITY_DAY_PRE_EVO_IDS = Array.from(
-  new Set(COMMUNITY_DAY_EVENTS.flatMap((e) => e.preEvoIds))
-).sort((a, b) => a - b);

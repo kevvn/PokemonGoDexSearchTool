@@ -35,6 +35,12 @@
     color: var(--pogo-ink-strong);
   }
 
+  @media (pointer: coarse) {
+    body {
+      background-attachment: scroll;
+    }
+  }
+
   h1, h2, h3, h4 {
     font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif;
     text-wrap: balance;
@@ -165,10 +171,15 @@
     linear-gradient(black, black) no-clip subtract,
     linear-gradient(to var(--fade-dir), black, transparent) var(--fade-start-pos) 0 / var(--fade-start) 100% no-repeat no-clip,
     linear-gradient(to var(--fade-dir), transparent, black) var(--fade-end-pos) 0 / var(--fade-end) 100% no-repeat no-clip;
-  animation: reveal-fade-start linear both, hide-fade-end linear both;
-  animation-timeline: scroll(self inline);
-  animation-range: 0 var(--fade-size), calc(100% - var(--fade-size)) 100%;
   transition: --fade-start 0.2s, --fade-end 0.2s;
+}
+
+@supports (animation-timeline: scroll()) {
+  .mwg-tablist {
+    animation: reveal-fade-start linear both, hide-fade-end linear both;
+    animation-timeline: scroll(self inline);
+    animation-range: 0 var(--fade-size), calc(100% - var(--fade-size)) 100%;
+  }
 }
 
 .mwg-tablist::-webkit-scrollbar {
@@ -255,6 +266,12 @@
   cursor: pointer;
 }
 
+.mwg-copy-btn .icon-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
 .mwg-copy-btn .icon-check {
   display: none;
 }
@@ -270,7 +287,9 @@
 }
 
 .mwg-copy-btn[data-copied] .icon-check {
-  display: inline;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
 }
 
 .mwg-copy-btn[data-failed] {
@@ -402,8 +421,10 @@
   50% { transform: translateY(-3px); }
 }
 
-.animate-float {
-  animation: float 3s ease-in-out infinite;
+@media (prefers-reduced-motion: no-preference) {
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
 }
 
 /* Modern Web Guidance Native <details> Accordion Styling */
@@ -463,11 +484,6 @@
     transition-timing-function: ease-in-out;
     transition-behavior: allow-discrete;
   }
-}
-
-[command="--toggle-all"][aria-expanded="true"] .expand-text,
-[command="--toggle-all"][aria-expanded="false"] .collapse-text {
-  display: none;
 }
 
 /* Native <dialog> Scroll Containment & Sky-Slate Backdrop */
