@@ -82,8 +82,8 @@ export const CORE_TAGS = [
     defaultName: 'PVP-GL',
     color: 'blue',
     dragOrder: 16,
-    purpose: 'Built Great League (≤1500 CP, double-moved, battle-ready).',
-    nativeSearchSynergy: '#pvp-gl&cp-1500',
+    purpose: 'Great League Roster & Candidates (≤1500 CP Top-100 meta + built double-moved roster; audit unbuilt needs via #pvp-gl&@3mov or #pvp-gl&evolve).',
+    nativeSearchSynergy: '#pvp-gl&cp-1500, #pvp-gl&@3mov, #pvp-gl&!@3mov',
   },
   {
     id: 'pvp_ul',
@@ -91,8 +91,8 @@ export const CORE_TAGS = [
     defaultName: 'PVP-UL',
     color: 'yellow',
     dragOrder: 17,
-    purpose: 'Built Ultra League (≤2500 CP, double-moved, battle-ready).',
-    nativeSearchSynergy: '#pvp-ul&cp-2500',
+    purpose: 'Ultra League Roster & Candidates (≤2500 CP Top-100 meta + built double-moved roster; audit unbuilt needs via #pvp-ul&@3mov or #pvp-ul&evolve).',
+    nativeSearchSynergy: '#pvp-ul&cp-2500, #pvp-ul&@3mov, #pvp-ul&!@3mov',
   },
   {
     id: 'pvp_ml',
@@ -100,8 +100,8 @@ export const CORE_TAGS = [
     defaultName: 'PVP-ML',
     color: 'purple',
     dragOrder: 18,
-    purpose: 'Built Master League (L50 / hundo or functional 15-Atk hundo, double-moved).',
-    nativeSearchSynergy: '#pvp-ml&4attack',
+    purpose: 'Master League Roster & Candidates (Top-100 ML 15-Atk 3★/4★ at any CP from Lv20 raid bosses up to Lv50 double-moved builds).',
+    nativeSearchSynergy: '#pvp-ml&4attack, #pvp-ml&@3mov, #pvp-ml&countcandyxl296-',
   },
   {
     id: 'pvp_cup',
@@ -109,8 +109,8 @@ export const CORE_TAGS = [
     defaultName: 'PVP-Cup',
     color: 'blue',
     dragOrder: 19,
-    purpose: 'Built Little Cup (≤500 CP) & Themed/Limited Cup specialists kept outside Open GL/UL.',
-    nativeSearchSynergy: '#pvp-cup&cp-500',
+    purpose: 'Little Cup (≤500 CP) & Limited/Themed Cup specialists outside the Open GL/UL Top 100.',
+    nativeSearchSynergy: '#pvp-cup&cp-500, #pvp-cup&cp-1500',
   },
   {
     id: 'pvp_wip',
@@ -118,8 +118,8 @@ export const CORE_TAGS = [
     defaultName: 'PVP-WIP',
     color: 'orange',
     dragOrder: 9,
-    purpose: 'Unbuilt PvP IV Candidates (top GL/UL/ML spreads awaiting Stardust, XL Candy, Frustration TM, or CD evolution).',
-    nativeSearchSynergy: '#pvp-wip&countcandyxl296-',
+    purpose: 'PvP Build Queue — pair alongside PVP-GL / PVP-UL / PVP-ML on candidates that still need Stardust, a 2nd Charged Move (@3mov), Evolution, or XL Candy; remove once battle-ready.',
+    nativeSearchSynergy: '#pvp-wip&countcandyxl296-, #pvp-gl,#pvp-ul,#pvp-ml&@3mov',
   },
 
   // Namespace 4: PvE Raids (#pve-)
