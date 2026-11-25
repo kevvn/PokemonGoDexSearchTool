@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useState, useSyncExternalStore } from 'react';
 import { createResetConfirmStore } from '../models/machines/resetConfirmMachine';
 import {
+  EVENT_HYDRATION_YEARS,
   HYDRATION_STAGES,
   formatTagSetupListText,
   getAllTagHydrationSteps,
@@ -16,6 +17,10 @@ import {
   toggleTagEnabled,
   updateTagName,
 } from '../models/tagModel';
+import {
+  buildEventDatabaseSnapshot,
+  eventArchiveStore,
+} from '../models/eventArchiveModel';
 
 const resetConfirmStore = createResetConfirmStore(3500);
 
@@ -62,8 +67,36 @@ export function useTagSystemController(metaSnapshot = null) {
     resetConfirmStore.getSnapshot,
     resetConfirmStore.getServerSnapshot
   );
+  const rawEventState = useSyncExternalStore(
+    eventArchiveStore.subscribe,
+    eventArchiveStore.getSnapshot,
+    eventArchiveStore.getServerSnapshot
+  );
 
   const [walkthroughOpen, setWalkthroughOpen] = useState(false);
+  const [eventYearScope, setEventYearScope] = useState('ALL');
+
+  const eventDb = useMemo(() => buildEventDatabaseSnapshot(rawEventState), [rawEventState]);
+  const eventList = eventDb.events;
+
+  const availableEventYears = useMemo(() => {
+    const years = new Set(EVENT_HYDRATION_YEARS);
+    if (Array.isArray(eventList)) {
+      for (const ev of eventList) {
+        const y = Number(ev?.year);
+        if (Number.isInteger(y) && y >= 2016) years.add(y);
+      }
+    }
+    return Array.from(years).sort((a, b) => b - a);
+  }, [eventList]);
+
+  const hydrationOptions = useMemo(
+    () => ({
+      eventYear: eventYearScope,
+      events: eventList,
+    }),
+    [eventYearScope, eventList]
+  );
 
   const resolvedTags = useMemo(() => resolveTagsList(tagMap), [tagMap]);
   const lintResults = useMemo(() => lintTagMap(tagMap), [tagMap]);
@@ -79,8 +112,8 @@ export function useTagSystemController(metaSnapshot = null) {
   );
 
   const allHydrationSteps = useMemo(
-    () => getAllTagHydrationSteps(tagMap, metaSnapshot),
-    [tagMap, metaSnapshot]
+    () => getAllTagHydrationSteps(tagMap, metaSnapshot, hydrationOptions),
+    [tagMap, metaSnapshot, hydrationOptions]
   );
 
   // Precomputed lookup map so TagSystemView cards never re-run buildTagHydrationQueries during render
@@ -145,6 +178,8 @@ export function useTagSystemController(metaSnapshot = null) {
       setupListText,
       checkedTags,
       walkthroughOpen,
+      eventYearScope,
+      availableEventYears,
       confirmReset: resetConfirmState === 'armed',
       updateTagName,
       toggleTag: toggleTagEnabled,
@@ -152,6 +187,7 @@ export function useTagSystemController(metaSnapshot = null) {
       getTagHash,
       handleResetClick,
       toggleWalkthrough,
+      setEventYearScope,
       toggleCheckedTag: toggleHydrationChecked,
       resetHydrationProgress,
     }),
@@ -169,6 +205,8 @@ export function useTagSystemController(metaSnapshot = null) {
       setupListText,
       checkedTags,
       walkthroughOpen,
+      eventYearScope,
+      availableEventYears,
       resetConfirmState,
       getTagHash,
       handleResetClick,

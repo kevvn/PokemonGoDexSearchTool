@@ -47,6 +47,9 @@ function TagHydrationWalkthrough({
   completedHydrationCount,
   hydrationPct,
   checkedTags,
+  eventYearScope = 'ALL',
+  availableEventYears = [],
+  onSelectEventYear,
   onToggleCheckedTag,
   onResetProgress,
   onLoadQuery,
@@ -128,9 +131,37 @@ function TagHydrationWalkthrough({
                       </h3>
                       <p className="text-[11px] text-[#285d72] font-medium">{stage.subtitle}</p>
                     </div>
-                    <span className="px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold bg-white/95 text-[#1b4d60] border border-white shadow-2xs shrink-0">
-                      {stageDone}/{stageEnabled.length}
-                    </span>
+                    <div className="flex flex-wrap items-center gap-1.5 shrink-0">
+                      {stage.id === 'stage_1_events' && typeof onSelectEventYear === 'function' && (
+                        <div
+                          className="flex items-center gap-1"
+                          role="group"
+                          aria-label="Filter Stage 1 event queries by year"
+                        >
+                          {['ALL', ...availableEventYears].map((yr) => {
+                            const yrVal = String(yr);
+                            const active = eventYearScope === yrVal;
+                            return (
+                              <button
+                                key={yrVal}
+                                type="button"
+                                onClick={() => onSelectEventYear(yrVal)}
+                                className={`compact-inline-chip px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase cursor-pointer border transition-colors ${
+                                  active
+                                    ? 'bg-[#7c52b5] text-white border-white shadow-2xs'
+                                    : 'bg-white/90 hover:bg-white text-[#5d3696] border-purple-300/80'
+                                }`}
+                              >
+                                {yrVal === 'ALL' ? 'All Years' : yrVal}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+                      <span className="px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold bg-white/95 text-[#1b4d60] border border-white shadow-2xs shrink-0">
+                        {stageDone}/{stageEnabled.length}
+                      </span>
+                    </div>
                   </div>
 
                   <ol className="divide-y divide-[#0d7da8]/10">

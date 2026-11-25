@@ -106,12 +106,15 @@ function TagSystemView({ metaSnapshot, onLoadQuery }) {
     setupListText,
     checkedTags,
     walkthroughOpen,
+    eventYearScope,
+    availableEventYears,
     confirmReset,
     updateTagName,
     toggleTag,
     getTagHash,
     handleResetClick,
     toggleWalkthrough,
+    setEventYearScope,
     toggleCheckedTag,
     resetHydrationProgress,
   } = useTagSystemController(metaSnapshot);
@@ -199,6 +202,9 @@ function TagSystemView({ metaSnapshot, onLoadQuery }) {
         completedHydrationCount={completedHydrationCount}
         hydrationPct={hydrationPct}
         checkedTags={checkedTags}
+        eventYearScope={eventYearScope}
+        availableEventYears={availableEventYears}
+        onSelectEventYear={setEventYearScope}
         onToggleCheckedTag={toggleCheckedTag}
         onResetProgress={resetHydrationProgress}
         onLoadQuery={onLoadQuery}
@@ -320,27 +326,59 @@ function TagSystemView({ metaSnapshot, onLoadQuery }) {
                   </div>
                 </div>
 
-                {nsHashes.length > 0 && (
-                  <CopyActionButton
-                    text={nsHashes.join(',')}
-                    title="Copy namespace umbrella search"
-                    className="compact-inline-chip inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-mono font-bold border shadow-2xs transition-colors bg-white/95 hover:bg-white text-[#0b698e] border-[#0d7da8]/30"
-                    idleContent={
-                      <>
-                        <CopyIcon className="w-3 h-3" />
-                        <span className="truncate max-w-[180px] sm:max-w-[260px]">
-                          {nsHashes.join(',')}
-                        </span>
-                      </>
-                    }
-                    copiedContent={
-                      <>
-                        <CheckIcon className="w-3 h-3" />
-                        <span>✓ Copied</span>
-                      </>
-                    }
-                  />
-                )}
+                <div className="flex flex-wrap items-center gap-2">
+                  {ns.id === 'ev' && (
+                    <div
+                      className="flex flex-wrap items-center gap-1"
+                      role="group"
+                      aria-label="Filter Events & Backgrounds queries by year"
+                    >
+                      <span className="text-[10px] font-extrabold uppercase tracking-wide text-[#5d3696] mr-0.5">
+                        Year:
+                      </span>
+                      {['ALL', ...availableEventYears].map((yr) => {
+                        const yrVal = String(yr);
+                        const active = eventYearScope === yrVal;
+                        return (
+                          <button
+                            key={yrVal}
+                            type="button"
+                            onClick={() => setEventYearScope(yrVal)}
+                            className={`compact-inline-chip px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase cursor-pointer border transition-colors ${
+                              active
+                                ? 'bg-[#7c52b5] text-white border-white shadow-2xs'
+                                : 'bg-white/95 hover:bg-white text-[#5d3696] border-purple-300/80'
+                            }`}
+                          >
+                            {yrVal === 'ALL' ? 'All' : yrVal}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {nsHashes.length > 0 && (
+                    <CopyActionButton
+                      text={nsHashes.join(',')}
+                      title="Copy namespace umbrella search"
+                      className="compact-inline-chip inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-mono font-bold border shadow-2xs transition-colors bg-white/95 hover:bg-white text-[#0b698e] border-[#0d7da8]/30"
+                      idleContent={
+                        <>
+                          <CopyIcon className="w-3 h-3" />
+                          <span className="truncate max-w-[180px] sm:max-w-[260px]">
+                            {nsHashes.join(',')}
+                          </span>
+                        </>
+                      }
+                      copiedContent={
+                        <>
+                          <CheckIcon className="w-3 h-3" />
+                          <span>✓ Copied</span>
+                        </>
+                      }
+                    />
+                  )}
+                </div>
               </div>
 
               <div className="divide-y divide-[#0d7da8]/12">
@@ -356,6 +394,9 @@ function TagSystemView({ metaSnapshot, onLoadQuery }) {
                   const hashPreview = getTagHash ? getTagHash(tag.id) : '';
                   const isRenamed = tag.name !== tag.defaultName;
                   const hydrationQueries = hydrationQueriesByTagId[tag.id] || [];
+                  const allSelectAll =
+                    hydrationQueries.length > 0 &&
+                    hydrationQueries.every((q) => q.actionMode === 'select-all');
                   const synergyQueries = resolveSynergyQueries(tag, hashPreview);
 
                   return (
@@ -502,70 +543,98 @@ function TagSystemView({ metaSnapshot, onLoadQuery }) {
                               Hydrate in Pokémon GO
                             </span>
                             <span className="text-[10px] font-semibold text-[#285d72]">
-                              Paste into PoGO → Select All → Apply{' '}
-                              <strong className="text-[#123c4d]">{tag.name || tag.defaultName}</strong>
+                              {allSelectAll ? (
+                                <>
+                                  Paste into PoGO → Select All → Apply{' '}
+                                  <strong className="text-[#123c4d]">{tag.name || tag.defaultName}</strong>
+                                </>
+                              ) : (
+                                <>
+                                  Paste into PoGO → Review / Pick → Apply{' '}
+                                  <strong className="text-[#123c4d]">{tag.name || tag.defaultName}</strong>
+                                </>
+                              )}
                             </span>
                           </div>
 
                           <div className="space-y-2">
-                            {hydrationQueries.map((item) => (
-                              <div key={item.id} className="space-y-1">
-                                <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-                                  <div className="flex-1 min-w-0 flex flex-col sm:flex-row sm:items-center gap-1.5">
-                                    <span
-                                      className={`self-start sm:self-auto shrink-0 px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wide border ${
-                                        item.isSecondary
-                                          ? 'bg-white/90 text-[#285d72] border-[#0d7da8]/25'
-                                          : 'bg-[#0d7da8]/12 text-[#0b698e] border-[#0d7da8]/30'
-                                      }`}
-                                    >
-                                      {item.label}
-                                    </span>
-                                    <code className="block flex-1 min-w-0 px-2.5 py-1.5 rounded-xl bg-[#073b50] text-[#dff6fc] font-mono text-[11px] sm:text-xs font-bold break-all select-all max-h-20 overflow-y-auto shadow-inner">
-                                      {item.query}
-                                    </code>
+                            {hydrationQueries.map((item) => {
+                              const isSelectAll = item.actionMode === 'select-all';
+                              return (
+                                <div key={item.id} className="space-y-1">
+                                  <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                                    <div className="flex-1 min-w-0 flex flex-col sm:flex-row sm:items-center gap-1.5">
+                                      <div className="flex flex-wrap items-center gap-1 shrink-0">
+                                        <span
+                                          className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wide border ${
+                                            item.isSecondary
+                                              ? 'bg-white/90 text-[#285d72] border-[#0d7da8]/25'
+                                              : 'bg-[#0d7da8]/12 text-[#0b698e] border-[#0d7da8]/30'
+                                          }`}
+                                        >
+                                          {item.label}
+                                        </span>
+                                        <span
+                                          className={`px-1.5 py-0.5 rounded-full text-[9px] font-extrabold uppercase tracking-wide border ${
+                                            isSelectAll
+                                              ? 'bg-emerald-100/90 text-[#1d7a4d] border-emerald-300'
+                                              : 'bg-amber-100/90 text-amber-900 border-amber-300'
+                                          }`}
+                                          title={
+                                            isSelectAll
+                                              ? 'Exact match — safe to Select All and apply tag'
+                                              : 'Sort by # and cherry-pick keepers/spares before applying tag'
+                                          }
+                                        >
+                                          {isSelectAll ? 'Select All' : 'Sort by # & Pick'}
+                                        </span>
+                                      </div>
+                                      <code className="block flex-1 min-w-0 px-2.5 py-1.5 rounded-xl bg-[#073b50] text-[#dff6fc] font-mono text-[11px] sm:text-xs font-bold break-all select-all max-h-20 overflow-y-auto shadow-inner">
+                                        {item.query}
+                                      </code>
+                                    </div>
+
+                                    <div className="flex items-center gap-1.5 shrink-0">
+                                      <CopyActionButton
+                                        text={item.query}
+                                        ariaLabel={`Copy hydration query ${item.label} for ${tag.defaultName}`}
+                                        className="compact-inline-chip inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-extrabold border shadow-2xs transition-all bg-[#0d7da8] hover:bg-[#0b698e] text-white border-white/85"
+                                        idleContent={
+                                          <>
+                                            <CopyIcon />
+                                            <span>Copy</span>
+                                          </>
+                                        }
+                                        copiedContent={
+                                          <>
+                                            <CheckIcon />
+                                            <span>✓ Copied</span>
+                                          </>
+                                        }
+                                      />
+
+                                      {typeof onLoadQuery === 'function' && (
+                                        <button
+                                          type="button"
+                                          onClick={() => onLoadQuery(item.query)}
+                                          className="compact-inline-chip inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-extrabold bg-white/95 hover:bg-white text-[#0b698e] border border-[#0d7da8]/30 shadow-2xs transition-colors cursor-pointer"
+                                          aria-label={`Load hydration query ${item.label} for ${tag.defaultName} in Builder`}
+                                        >
+                                          <BuilderIcon />
+                                          <span>Builder</span>
+                                        </button>
+                                      )}
+                                    </div>
                                   </div>
 
-                                  <div className="flex items-center gap-1.5 shrink-0">
-                                    <CopyActionButton
-                                      text={item.query}
-                                      ariaLabel={`Copy hydration query ${item.label} for ${tag.defaultName}`}
-                                      className="compact-inline-chip inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-extrabold border shadow-2xs transition-all bg-[#0d7da8] hover:bg-[#0b698e] text-white border-white/85"
-                                      idleContent={
-                                        <>
-                                          <CopyIcon />
-                                          <span>Copy</span>
-                                        </>
-                                      }
-                                      copiedContent={
-                                        <>
-                                          <CheckIcon />
-                                          <span>✓ Copied</span>
-                                        </>
-                                      }
-                                    />
-
-                                    {typeof onLoadQuery === 'function' && (
-                                      <button
-                                        type="button"
-                                        onClick={() => onLoadQuery(item.query)}
-                                        className="compact-inline-chip inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-extrabold bg-white/95 hover:bg-white text-[#0b698e] border border-[#0d7da8]/30 shadow-2xs transition-colors cursor-pointer"
-                                        aria-label={`Load hydration query ${item.label} for ${tag.defaultName} in Builder`}
-                                      >
-                                        <BuilderIcon />
-                                        <span>Builder</span>
-                                      </button>
-                                    )}
-                                  </div>
+                                  {item.note && (
+                                    <p className="text-[11px] text-[#285d72] font-medium pl-1">
+                                      Tip: {item.note}
+                                    </p>
+                                  )}
                                 </div>
-
-                                {item.note && (
-                                  <p className="text-[11px] text-[#285d72] font-medium pl-1">
-                                    Tip: {item.note}
-                                  </p>
-                                )}
-                              </div>
-                            ))}
+                              );
+                            })}
                           </div>
                         </div>
                       )}
