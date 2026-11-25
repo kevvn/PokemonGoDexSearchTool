@@ -4,6 +4,9 @@
  * and returns frozen arrays so callers cannot mutate shared lookup state.
  */
 import pokedexData from '../data/pokedex.json';
+import { REGIONS_CONFIG } from '../data/speciesConstants';
+
+const FALLBACK_MAX_DEX_ID = Math.max(...REGIONS_CONFIG.map((r) => r.end));
 
 const FAMILY_MAP = new Map();
 const CAN_EVOLVE_SET = new Set();
@@ -30,7 +33,7 @@ for (const entry of pokedexData) {
   FAMILY_MAP.set(entry.id, frozenFamily);
 }
 
-export const MAX_POKEDEX_ID = maxDexId || 1025;
+export const MAX_POKEDEX_ID = maxDexId || FALLBACK_MAX_DEX_ID;
 export const TOTAL_POKEDEX_COUNT = pokedexData.length;
 
 export function getPokedexEntryById(dexId) {
