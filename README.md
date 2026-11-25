@@ -55,7 +55,11 @@ The codebase adheres to a strict separation of concerns across `src/`:
 - **CORS-Safe Sprite Caching**: `PokemonSprite` sets `crossOrigin="anonymous"` and Workbox caches only `statuses: [200]` (`maxEntries: 3000`, `CacheFirst`), preventing opaque-response quota bloat on iOS Safari. Live PvPoke sync uses `NetworkOnly` so **Sync Live** always fetches fresh rankings.
 - **`localStorage` Keys**: `pokedex_viewMode`, `pokedex_selectedIds`, `pokedex_filters`, `pokedex_saved_searches`, `pokedex_custom_tags`, `pogo_tag_hydration_checked_v1`, `pogo_stored_event_db_v2`, `pogo_personal_travel_trips_v1`, `pogo_live_meta_cache_v1`.
 
-## Tooling & Deployment Files
+## Tooling, Agent Foundations & Deployment Files
 
+- `AGENTS.md` — Always-on architectural rules, MVC import contract, zero-`useEffect` guidelines, PoGO search safety invariants, and verification gates for coding agents.
+- `docs/ARCHITECTURE.md` — Full MVC dependency diagram, FSM/store catalog, caching strategy, and Architectural Decision Records (ADRs).
+- `.agents/skills/` — On-demand workspace runbooks (`pogo-search-safety`, `mvc-react-zero-effect`, `offline-pwa-mobile-qa`).
+- `src/architecture.test.js` — Executable Vitest fitness suite enforcing MVC layer boundaries, zero `useEffect`, zero CDN runtime imports, dynamic scaling, and PWA config invariants.
 - `wrangler.toml` — Cloudflare Pages/Workers static asset deployment configuration serving `dist/`.
 - `test_mobile.py` — Standalone Playwright mobile E2E smoke test script covering all 4 workspace tabs, tag collision linting, hydration walkthrough, QR dialog, and mobile Filter By drawer.
