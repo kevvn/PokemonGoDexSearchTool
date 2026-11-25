@@ -247,6 +247,7 @@ describe('Initial Tag Hydration queries (all 31 tags, 6-stage walkthrough)', () 
           expect(typeof item.query).toBe('string');
           expect(item.query.trim().length).toBeGreaterThan(0);
           expect(item.query.length).toBeLessThan(4000);
+          expect(['select-all', 'review']).toContain(item.actionMode);
           expect(item.query).not.toContain('ultrabeasts');
           expect(item.query).not.toContain('partyplay');
           expect(item.query).not.toMatch(/![0-4](?:-[0-4])?(?:attack|defense|hp)/i);
@@ -262,28 +263,76 @@ describe('Initial Tag Hydration queries (all 31 tags, 6-stage walkthrough)', () 
     }
   });
 
-  test('verifies exact semantics for key hydration queries', () => {
-    expect(buildTagHydrationQueries('ev_shbg', defaultMap, realMetaSnapshot)[0].query).toBe(
-      'shiny&background&!#'
+  test('verifies exact semantics for refined hydration queries', () => {
+    const fixedRef = '2026-11-24';
+
+    const shbg = buildTagHydrationQueries('ev_shbg', defaultMap, realMetaSnapshot, { refDateStr: fixedRef });
+    expect(shbg[0].query).toBe('shiny&background&!#');
+    expect(shbg[0].actionMode).toBe('select-all');
+
+    const locbg = buildTagHydrationQueries('ev_locbg', defaultMap, realMetaSnapshot, { refDateStr: fixedRef });
+    expect(locbg[0].query).toBe('locationbackground&!shiny&!#');
+    expect(locbg[0].actionMode).toBe('select-all');
+
+    const globalQueries = buildTagHydrationQueries('ev_global', defaultMap, realMetaSnapshot, {
+      eventYear: 2026,
+      refDateStr: fixedRef,
+    });
+    expect(globalQueries[0].query).toBe(
+      'year2026&specialbackground&!locationbackground&!shiny&3*,4*,legendary,mythical,ultrabeast,gigantamax,costume&!#'
     );
-    expect(buildTagHydrationQueries('ev_locbg', defaultMap, realMetaSnapshot)[0].query).toBe(
-      'locationbackground&!#'
+    expect(globalQueries[0].actionMode).toBe('review');
+    expect(globalQueries[1].id).toBe('ev_global_attended');
+    expect(globalQueries[1].query).toMatch(/^year2026&specialbackground&!locationbackground&!shiny&age\d+/);
+    expect(globalQueries[2].query).toBe(
+      'year2026&specialbackground&!locationbackground&!shiny&0*,1*,2*&!favorite&!#'
     );
-    expect(buildTagHydrationQueries('ev_global', defaultMap, realMetaSnapshot).map((q) => q.query)).toEqual([
-      'specialbackground&!#',
-      'profilebackground&!#',
-    ]);
-    expect(buildTagHydrationQueries('ev_inperson', defaultMap, realMetaSnapshot).map((q) => q.query)).toEqual([
-      'distance100-&shiny,costume,201,479&!traded&!#',
-      '201,479&!traded&!#',
-    ]);
+    expect(globalQueries[3].query).toBe('year2026&profilebackground&!#');
+    expect(globalQueries[3].actionMode).toBe('select-all');
+
+    const inPerson2026 = buildTagHydrationQueries('ev_inperson', defaultMap, realMetaSnapshot, {
+      eventYear: 2026,
+      refDateStr: fixedRef,
+    });
+    expect(inPerson2026[0].id).toBe('ev_inperson_attended');
+    expect(inPerson2026[0].query).toMatch(
+      /^year2026&age\d+-\d+(?:,age\d+-\d+)*&shiny,costume,201,479&!remoteraid&!hatched&!traded&!#$/
+    );
+    expect(inPerson2026[1].id).toBe('ev_inperson_regionals');
+    expect(inPerson2026[1].query).toContain('!remoteraid&!traded&!#');
+    expect(inPerson2026[2].query).toBe(
+      'year2026&distance100-&shiny,costume,201,479&!remoteraid&!hatched&!traded&!#'
+    );
 
     expect(buildTagHydrationQueries('keep_trophy', defaultMap, realMetaSnapshot).map((q) => q.query)).toEqual([
       '0attack&0defense&0hp&!#',
-      'count1&@3mov&!candyxl&!maxmove1-&!#',
+      'costume&!shiny&!background&!#',
+      'count1&@3mov&!candyxl&!legendary&!mythical&!ultrabeast&!shadow&!maxmove1-&!#',
       '@special&!@frustration&!@return&!shadow&!purified&count1&!#',
       'year2016-2019&!#',
     ]);
+
+    const pvpWipQueries = buildTagHydrationQueries('pvp_wip', defaultMap, realMetaSnapshot);
+    expect(pvpWipQueries[0].query).toBe('#pvp-gl,#pvp-ul,#pvp-ml,#pvp-cup&@3mov');
+    expect(pvpWipQueries[1].query).toBe('#pvp-gl,#pvp-ul,#pvp-ml,#pvp-cup&evolve');
+
+    const trSpecQueries = buildTagHydrationQueries('tr_spec', defaultMap, realMetaSnapshot);
+    expect(trSpecQueries.map((q) => q.id)).toEqual([
+      'tr_spec_shinies_bgs',
+      'tr_spec_legends',
+      'tr_spec_rares',
+      'tr_spec_costumes',
+    ]);
+    expect(trSpecQueries[0].query).toContain('!shadow&!fusion&!mythical');
+    expect(trSpecQueries[1].query).toBe(
+      'legendary,ultrabeast&count2-&!traded&!shadow&!fusion&!favorite&!4*&!#'
+    );
+    expect(trSpecQueries[2].query).toContain('!traded&!shadow&!fusion&!favorite&!4*&!#&');
+    expect(trSpecQueries[3].query).toBe('costume&!traded&!shadow&!fusion&!favorite&!4*&!#');
+
+    expect(buildTagHydrationQueries('tr_dist', defaultMap, realMetaSnapshot)[0].query).toBe(
+      'distance100-&!traded&!shadow&!fusion&!shiny&!legendary&!mythical&!ultrabeast&!background&!costume&!4*&!favorite&!#'
+    );
 
     // PvP league tags embed Top-100 species with non-naive cp-1500 / cp-2500 / any-CP bounds + built !@3mov + @3mov,evolve audits
     const glQueries = buildTagHydrationQueries('pvp_gl', defaultMap, realMetaSnapshot).map((q) => q.query);

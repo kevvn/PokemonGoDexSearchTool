@@ -28,6 +28,7 @@ import {
   formatTagSetupListText,
 } from './tags/tagLinter';
 import {
+  EVENT_HYDRATION_YEARS,
   buildTagHydrationQueries,
   getAllTagHydrationSteps,
 } from './tags/tagHydration';
@@ -54,6 +55,7 @@ export {
   getNamespaceExclusions,
   getRecommendedDragOrder,
   formatTagSetupListText,
+  EVENT_HYDRATION_YEARS,
   buildTagHydrationQueries,
   getAllTagHydrationSteps,
 };

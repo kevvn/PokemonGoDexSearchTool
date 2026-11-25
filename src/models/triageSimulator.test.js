@@ -426,7 +426,8 @@ describe('Leidwesen v0.435.1 Pokémon GO Box Simulator — End-to-End Triage Ver
       createMon({ id: 'dup_frigibax_2', dex: 996, atk: 11, def: 10, hp: 10 }),
     ];
 
-    const trophyIds = evaluatePogoBox(box, byId.keep_trophy.queries[2].query).map((m) => m.id);
+    const legacyTrophyQuery = byId.keep_trophy.queries.find((q) => q.id === 'keep_trophy_legacy').query;
+    const trophyIds = evaluatePogoBox(box, legacyTrophyQuery).map((m) => m.id);
     expect(trophyIds).not.toContain('shadow_mamoswine_frust');
     expect(trophyIds).not.toContain('purified_sableye_return');
 
