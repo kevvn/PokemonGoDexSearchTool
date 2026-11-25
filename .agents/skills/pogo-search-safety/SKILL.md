@@ -27,6 +27,7 @@ Use this procedure whenever modifying `src/models/search/`, `src/models/tags/`, 
    - Never emit `!mega...` (hides all non-Mega species in PoGO).
    - Never emit `!maxmove2-` without `maxmove1-` scoping (matches non-Max storage).
    - Never emit `!@special` on Community Day evolution queries (PoGO treats Shadow `Frustration` and Purified `Return` as `@special`).
+   - Never combine `count2-` / `count-N` with variant filters (`costume`, `shiny`, `background`) — PoGO's `count` counts National Dex `#`, not variants.
    - Never use non-existent keywords like `ultrabeasts` (plural) or `partyplay` — use `ultrabeast` and `party`.
 
 ## 2. Where to Make Domain Changes
@@ -38,6 +39,10 @@ Use this procedure whenever modifying `src/models/search/`, `src/models/tags/`, 
   2. Never silently fall back to a broad Dex range (e.g., `'1-9'`) when a selection is empty — disable the action instead.
   3. Keep trailing hyphens on umbrella namespace hashes (`#ev-`, `#tr-`, `#op-`, `#max-`) so external user tags (`Trade`, `Trash`, `Evolve`) never collide.
 - **Add/edit a tag hydration query**: Update the builder entry in `src/models/tags/tagHydration.js` and matching metadata in `src/models/tags/tagDefinitions.js`.
+  - Always declare `actionMode: 'select-all' | 'review'` (`'select-all'` only for zero-false-positive deterministic queries; `'review'` for variant/IV/duplicate picks).
+  - For Stage 1 (`EV-*`), use `src/models/events/eventAgeUtils.js` to build merged `ageX-Y` unions of attended events (skipping `end === 'PRESENT'` venues), guard `EV-InPerson` with `!remoteraid&!hatched&!traded`, and guard `EV-Global` with `!locationbackground&!shiny`.
+  - For Stage 2 (`KEEP-Trophy`), exclude combat classes from `count1` (`@3mov&!candyxl&!legendary&!mythical&!ultrabeast&!shadow&!maxmove1-`) and keep the untagged costume sweep before `TR-Spec`.
+  - For Stage 5 (`TR-*`), always exclude untradeables (`!shadow&!fusion`), split `TR-Spec` into focused sub-buckets, and exclude `!background&!costume` from `TR-Dist`.
 
 ## 3. Mandatory Verification
 
