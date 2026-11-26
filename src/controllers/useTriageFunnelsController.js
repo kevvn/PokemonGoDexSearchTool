@@ -15,6 +15,10 @@ export function useTriageFunnelsController({ metaSnapshot, customTagMap, customT
   const [safetyShields, setSafetyShields] = useState(createDefaultSafetyShields);
   const [shieldsOpen, setShieldsOpen] = useState(false);
   const [emergencyOpen, setEmergencyOpen] = useState(true);
+  const [pikachuKeepCap, setPikachuKeepCap] = useState(6);
+  const [pikachuYearSlice, setPikachuYearSlice] = useState('');
+  const [pikachuGender, setPikachuGender] = useState('');
+  const [pikachuIncludeFamily, setPikachuIncludeFamily] = useState(false);
 
   const toggleShield = useCallback((shieldId) => {
     setSafetyShields((prev) => ({
@@ -35,20 +39,26 @@ export function useTriageFunnelsController({ metaSnapshot, customTagMap, customT
     setEmergencyOpen((v) => !v);
   }, []);
 
+  const togglePikachuIncludeFamily = useCallback(() => {
+    setPikachuIncludeFamily((v) => !v);
+  }, []);
+
   const enabledShieldCount = useMemo(
     () => SAFETY_SHIELD_DEFINITIONS.filter((d) => safetyShields[d.id]).length,
     [safetyShields]
   );
 
+  const customResolvedTags = customTags?.resolvedTags;
   const resolvedTags = useMemo(
-    () => (effectiveTagMap ? resolveTagsList(effectiveTagMap) : customTags?.resolvedTags || []),
-    [effectiveTagMap, customTags?.resolvedTags]
+    () => (effectiveTagMap ? resolveTagsList(effectiveTagMap) : customResolvedTags || []),
+    [effectiveTagMap, customResolvedTags]
   );
 
+  const customLintResults = customTags?.lintResults;
   const tagErrorCount = useMemo(() => {
-    if (customTags?.lintResults) return customTags.lintResults.errorCount || 0;
+    if (customLintResults) return customLintResults.errorCount || 0;
     return effectiveTagMap ? lintTagMap(effectiveTagMap).errorCount : 0;
-  }, [effectiveTagMap, customTags?.lintResults]);
+  }, [effectiveTagMap, customLintResults]);
 
   const missingCoreLock = !safetyShields.untagged || !safetyShields.favorite;
 
@@ -58,8 +68,22 @@ export function useTriageFunnelsController({ metaSnapshot, customTagMap, customT
         ageScope,
         safetyShields,
         pveType,
+        pikachuKeepCap,
+        pikachuYearSlice,
+        pikachuGender,
+        pikachuIncludeFamily,
       }),
-    [metaSnapshot, effectiveTagMap, ageScope, safetyShields, pveType]
+    [
+      metaSnapshot,
+      effectiveTagMap,
+      ageScope,
+      safetyShields,
+      pveType,
+      pikachuKeepCap,
+      pikachuYearSlice,
+      pikachuGender,
+      pikachuIncludeFamily,
+    ]
   );
 
   return useMemo(
@@ -73,6 +97,14 @@ export function useTriageFunnelsController({ metaSnapshot, customTagMap, customT
       safetyShields,
       shieldsOpen,
       emergencyOpen,
+      pikachuKeepCap,
+      setPikachuKeepCap,
+      pikachuYearSlice,
+      setPikachuYearSlice,
+      pikachuGender,
+      setPikachuGender,
+      pikachuIncludeFamily,
+      togglePikachuIncludeFamily,
       enabledShieldCount,
       missingCoreLock,
       resolvedTags,
@@ -90,6 +122,11 @@ export function useTriageFunnelsController({ metaSnapshot, customTagMap, customT
       safetyShields,
       shieldsOpen,
       emergencyOpen,
+      pikachuKeepCap,
+      pikachuYearSlice,
+      pikachuGender,
+      pikachuIncludeFamily,
+      togglePikachuIncludeFamily,
       enabledShieldCount,
       missingCoreLock,
       resolvedTags,
