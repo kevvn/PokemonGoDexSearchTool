@@ -3,6 +3,7 @@ import { useTriageFunnelsController } from '../../controllers/useTriageFunnelsCo
 import { TYPES } from '../../models/searchEngine';
 import { AGE_SCOPES, SAFETY_SHIELD_DEFINITIONS } from '../../models/triageFunnelModel';
 import { PogoTypeIcon } from '../shared/PogoDesignSystem';
+import CostumePikachuPanel from './CostumePikachuPanel';
 import TriageStepCard, { QueryActionRow } from './TriageStepCard';
 
 const MODE_TABS = [
@@ -10,6 +11,7 @@ const MODE_TABS = [
   { id: 'modeB', shortLabel: 'Mode B', label: 'Deep Cleanout', badge: '10 steps' },
   { id: 'modeC', shortLabel: 'Mode C', label: 'Competitive Meta', badge: 'PvP · PvE · Max' },
   { id: 'modeD', shortLabel: 'Mode D', label: 'Event & Trade Ops', badge: '11 routines' },
+  { id: 'modeE', shortLabel: 'Mode E', label: 'Costume Pikachu', badge: '7 steps · ≤6' },
 ];
 
 const SHIELD_CATEGORIES = [
@@ -94,6 +96,14 @@ function TriageFunnelsView({ metaSnapshot, customTagMap, customTags, onLoadQuery
     safetyShields,
     shieldsOpen,
     emergencyOpen,
+    pikachuKeepCap,
+    setPikachuKeepCap,
+    pikachuYearSlice,
+    setPikachuYearSlice,
+    pikachuGender,
+    setPikachuGender,
+    pikachuIncludeFamily,
+    togglePikachuIncludeFamily,
     enabledShieldCount,
     missingCoreLock,
     resolvedTags,
@@ -287,7 +297,7 @@ function TriageFunnelsView({ metaSnapshot, customTagMap, customTags, onLoadQuery
           >
             <strong>Warning:</strong> Disabling <code className="font-mono font-black">!#</code>{' '}
             (Untagged) or <code className="font-mono font-black">!favorite</code> removes Dual-Lock
-            protection from E1/A6/A7/B3/B4 trash queries!
+            protection from E1/A6/A7/B3/B4/P6/P7 trash queries!
           </div>
         )}
 
@@ -295,8 +305,8 @@ function TriageFunnelsView({ metaSnapshot, customTagMap, customTags, onLoadQuery
           <div className="pt-3 border-t border-[#0d7da8]/15 space-y-3">
             <p className="text-xs text-[#285d72] font-medium">
               Toggle shields to live-update{' '}
-              <strong className="text-[#123c4d]">E1, A6, A7, B3, and B4</strong> mass-transfer strings.
-              Double-moved protection uses{' '}
+              <strong className="text-[#123c4d]">E1, A6, A7, B3, B4, P6, and P7</strong> mass-transfer
+              strings. Double-moved protection uses{' '}
               <code className="font-mono font-bold text-[#0b698e]">@3mov</code> (never inverted{' '}
               <code className="font-mono font-bold text-rose-700">!@3mov</code>).
             </p>
@@ -339,11 +349,11 @@ function TriageFunnelsView({ metaSnapshot, customTagMap, customTags, onLoadQuery
         )}
       </section>
 
-      {/* 4 Mode Sub-Tabs */}
+      {/* 5 Mode Sub-Tabs */}
       <div
         role="tablist"
         aria-label="Triage funnel modes"
-        className="grid grid-cols-2 lg:grid-cols-4 gap-2.5"
+        className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5"
       >
         {MODE_TABS.map((tab, idx) => {
           const isActive = activeMode === tab.id;
@@ -415,7 +425,7 @@ function TriageFunnelsView({ metaSnapshot, customTagMap, customTags, onLoadQuery
           )}
         </div>
 
-        {activeMode !== 'modeC' && Array.isArray(currentMode.steps) && (
+        {activeMode !== 'modeC' && activeMode !== 'modeE' && Array.isArray(currentMode.steps) && (
           <div className="space-y-3">
             {currentMode.steps.map((step) => (
               <TriageStepCard
@@ -426,6 +436,22 @@ function TriageFunnelsView({ metaSnapshot, customTagMap, customTags, onLoadQuery
               />
             ))}
           </div>
+        )}
+
+        {activeMode === 'modeE' && (
+          <CostumePikachuPanel
+            modeE={currentMode}
+            resolvedTags={resolvedTags}
+            onLoadQuery={onLoadQuery}
+            keepCap={pikachuKeepCap}
+            onKeepCapChange={setPikachuKeepCap}
+            yearSlice={pikachuYearSlice}
+            onYearSliceChange={setPikachuYearSlice}
+            gender={pikachuGender}
+            onGenderChange={setPikachuGender}
+            includeFamily={pikachuIncludeFamily}
+            onToggleIncludeFamily={togglePikachuIncludeFamily}
+          />
         )}
 
         {activeMode === 'modeC' && currentMode.sections && (

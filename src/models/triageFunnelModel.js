@@ -26,6 +26,7 @@ import {
   getNamespaceHashes,
   getNamespaceExclusions,
 } from './tagModel';
+import { buildCostumePikachuMode } from './costumePikachuModel';
 
 export { DEFAULT_FAST_MOVES_500MS };
 export const DEFAULT_CANDY_12_FODDER = CANDY_12_FODDER_IDS;
@@ -1156,6 +1157,16 @@ export function buildTriageFunnels(metaSnapshot = {}, customTagMap = null, optio
     steps: modeAResult.steps,
   };
 
+  const modeE = buildCostumePikachuMode({
+    buildSafeTrashQuery,
+    safetyShields,
+    customTagMap: tagMap,
+    keepCap: options.pikachuKeepCap ?? 6,
+    yearSlice: options.pikachuYearSlice ?? '',
+    gender: options.pikachuGender ?? '',
+    includeFamily: Boolean(options.pikachuIncludeFamily),
+  });
+
   return {
     emergencyDump,
     modes: {
@@ -1163,6 +1174,7 @@ export function buildTriageFunnels(metaSnapshot = {}, customTagMap = null, optio
       modeB: buildModeB(ctx),
       modeC: buildModeC(ctx),
       modeD: buildModeD(ctx),
+      modeE,
     },
   };
 }

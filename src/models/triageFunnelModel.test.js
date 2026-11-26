@@ -52,6 +52,7 @@ function collectAllSteps(funnels) {
     ...funnels.modes.modeC.sections.pve.steps,
     ...funnels.modes.modeC.sections.maxBattles.steps,
     ...funnels.modes.modeD.steps,
+    ...funnels.modes.modeE.steps,
   ];
 }
 
