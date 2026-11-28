@@ -309,7 +309,7 @@ describe('Initial Tag Hydration queries (all 31 tags, 6-stage walkthrough)', () 
       'costume&!shiny&!background&!#',
       'count1&@3mov&!candyxl&!legendary&!mythical&!ultrabeast&!shadow&!maxmove1-&!#',
       '@special&!@frustration&!@return&!shadow&!purified&count1&!#',
-      'year2016-2019&!#',
+      'year2016-2020&!#',
     ]);
 
     const pvpWipQueries = buildTagHydrationQueries('pvp_wip', defaultMap, realMetaSnapshot);
@@ -322,13 +322,25 @@ describe('Initial Tag Hydration queries (all 31 tags, 6-stage walkthrough)', () 
       'tr_spec_legends',
       'tr_spec_rares',
       'tr_spec_costumes',
+      'tr_spec_guaranteed_lucky',
+      'tr_spec_remote_ready',
+      'tr_spec_dead_audit',
     ]);
-    expect(trSpecQueries[0].query).toContain('!shadow&!fusion&!mythical');
-    expect(trSpecQueries[1].query).toBe(
+    expect(trSpecQueries.find((q) => q.id === 'tr_spec_shinies_bgs').query).toContain('!shadow&!fusion&!mythical,808-809');
+    expect(trSpecQueries.find((q) => q.id === 'tr_spec_legends').query).toBe(
       'legendary,ultrabeast&count2-&!traded&!shadow&!fusion&!favorite&!4*&!#'
     );
-    expect(trSpecQueries[2].query).toContain('!traded&!shadow&!fusion&!favorite&!4*&!#&');
-    expect(trSpecQueries[3].query).toBe('costume&!traded&!shadow&!fusion&!favorite&!4*&!#');
+    expect(trSpecQueries.find((q) => q.id === 'tr_spec_rares').query).toContain('!traded&!shadow&!fusion&!favorite&!4*&!#&');
+    expect(trSpecQueries.find((q) => q.id === 'tr_spec_costumes').query).toBe('costume&!traded&!shadow&!fusion&!favorite&!4*&!#');
+    expect(trSpecQueries.find((q) => q.id === 'tr_spec_guaranteed_lucky').query).toBe(
+      'year2016-2020&!traded&!shadow&!fusion&!mythical,808-809&!favorite&!4*&!#'
+    );
+    expect(trSpecQueries.find((q) => q.id === 'tr_spec_remote_ready').query).toBe(
+      '#tr-spec&age30-&!traded&!shadow&!mythical&!fusion&!defender'
+    );
+    expect(trSpecQueries.find((q) => q.id === 'tr_spec_dead_audit').query).toBe(
+      '#tr-spec,#tr-mirror,#tr-dist&traded'
+    );
 
     expect(buildTagHydrationQueries('tr_dist', defaultMap, realMetaSnapshot)[0].query).toBe(
       'distance100-&!traded&!shadow&!fusion&!shiny&!legendary&!mythical&!ultrabeast&!background&!costume&!4*&!favorite&!#'

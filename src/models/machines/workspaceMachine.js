@@ -3,7 +3,7 @@
  * and mobile filter drawer visibility.
  */
 
-export const VALID_TABS = new Set(['triage', 'events', 'tags', 'builder']);
+export const VALID_TABS = new Set(['triage', 'events', 'tags', 'trades', 'builder']);
 
 export function normalizeTab(value) {
   if (value === 'grid') return 'builder';

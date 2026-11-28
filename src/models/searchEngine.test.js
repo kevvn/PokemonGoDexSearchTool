@@ -358,4 +358,37 @@ describe('compileDnfToPogoCnf & inspectAndFixPogoQuery', () => {
     expect(validateSearchString('!-1attack').errors.map((e) => e.code)).toContain('NEGATED_IV_STAT');
     expect(validateSearchString('!distance100').warnings[0].message).toContain('exclude');
   });
+
+  test('round-trips count range filters while preserving count1 and count2- tri-state chips', () => {
+    const parsedRange = parseSearchString('count4-&legendary');
+    expect(parsedRange.filters.countMin).toBe('4');
+    expect(parsedRange.filters.countMax).toBe('');
+    expect(generateSearchString(parsedRange.selectedIds, parsedRange.filters)).toBe(
+      'count4-&legendary'
+    );
+
+    const parsedBounded = parseSearchString('count2-50');
+    expect(parsedBounded.filters.countMin).toBe('2');
+    expect(parsedBounded.filters.countMax).toBe('50');
+    expect(generateSearchString(parsedBounded.selectedIds, parsedBounded.filters)).toBe('count2-50');
+
+    const parsedLegacy = parseSearchString('count2-&!count1');
+    expect(parsedLegacy.filters['count2-']).toBe(true);
+    expect(parsedLegacy.filters.count1).toBe(false);
+
+    expect(validateSearchString('count10-5').warnings.map((w) => w.code)).toContain('INVERTED_RANGE');
+    expect(
+      inspectAndFixPogoQuery('!traded&4,384,757&!4,shiny&!757,female').hasPrecedenceTrap
+    ).toBe(false);
+    expect(
+      inspectAndFixPogoQuery(
+        'shiny,background&!traded&!shadow&!fusion&!mythical,808-809&!favorite&!4*&!#'
+      ).hasPrecedenceTrap
+    ).toBe(false);
+    expect(
+      inspectAndFixPogoQuery(
+        '!traded&!shadow&!fusion&!mythical,808-809&!favorite&!4*&shiny,locationbackground,gigantamax,144-146,384&background,gigantamax,144-146,384&!144-146,galar,shiny,background,dynamax'
+      ).hasPrecedenceTrap
+    ).toBe(false);
+  });
 });

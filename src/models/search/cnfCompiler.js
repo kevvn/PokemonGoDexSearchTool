@@ -9,6 +9,8 @@
  *   `shiny,lucky&!shadow`, `distance100-&shiny,costume&!traded`)
  */
 
+import { compressIds } from './idRanges';
+
 const DEFAULT_MAX_CNF_CLAUSES = 256;
 const DEFAULT_MAX_CNF_CHARS = 5000;
 
@@ -214,10 +216,15 @@ export function inspectAndFixPogoQuery(rawQuery) {
   }
 
   const coreClauses = ampParts.slice(startIdx, endIdx + 1);
-  const coreString = coreClauses.join('&');
+  const isNegatedGuardOrClause = (cl) => cl.startsWith('!') && cl.includes(',');
+  const nonGuardCore = coreClauses.filter(
+    (cl) => !isScopeOrNegationClause(cl) && !isNegatedGuardOrClause(cl)
+  );
+  const effectiveCore = nonGuardCore;
+  const coreString = effectiveCore.join('&');
 
-  // If the core has no `,` or no `&`, it's standard CNF (e.g. `legendary,ultrabeast` or `3*,4*`)
-  if (coreClauses.length < 2 || !coreString.includes(',')) {
+  // If the effective core has <2 clauses or no `,`, it's standard CNF
+  if (effectiveCore.length < 2 || !coreString.includes(',')) {
     return {
       hasPrecedenceTrap: false,
       rawQuery: trimmed,
@@ -228,17 +235,15 @@ export function inspectAndFixPogoQuery(rawQuery) {
     };
   }
 
-  const clausesWithComma = coreClauses.filter((c) => c.includes(','));
+  const clausesWithComma = effectiveCore.filter((c) => c.includes(','));
 
-  // A single OR-clause at the start or end of core (e.g., `shiny,lucky&legendary` or `legendary&shiny,lucky`)
+  // A single OR-clause at the start or end of effectiveCore (e.g., `shiny,lucky&legendary`)
   // is standard PoGO CNF (`(A OR B) AND C`), NOT an accidental DNF trap.
-  // A genuine DNF trap either has >= 2 comma clauses (e.g., `4*,shiny&shadow,shiny&legendary`)
-  // OR an interior comma joining two AND-sides (e.g., `shiny&shadow,4*&legendary`, where `coreClauses`
-  // has non-comma clauses BOTH before AND after a comma clause).
-  const firstCommaIdx = coreClauses.findIndex((c) => c.includes(','));
-  const lastCommaIdx = coreClauses.length - 1 - [...coreClauses].reverse().findIndex((c) => c.includes(','));
+  const firstCommaIdx = effectiveCore.findIndex((c) => c.includes(','));
+  const lastCommaIdx =
+    effectiveCore.length - 1 - [...effectiveCore].reverse().findIndex((c) => c.includes(','));
   const hasInteriorCommaSplit =
-    clausesWithComma.length === 1 && firstCommaIdx > 0 && lastCommaIdx < coreClauses.length - 1;
+    clausesWithComma.length === 1 && firstCommaIdx > 0 && lastCommaIdx < effectiveCore.length - 1;
 
   if (clausesWithComma.length < 2 && !hasInteriorCommaSplit) {
     return {
@@ -251,7 +256,7 @@ export function inspectAndFixPogoQuery(rawQuery) {
     };
   }
 
-  // Already-distributed valid CNF: every core clause has `,` and shares a distributed literal
+  // Already-distributed valid CNF: every effective core clause has `,` and shares a distributed literal
   // OR every clause is a standard independent CNF filter (e.g. `0*,1*,2*&fire,water&1-151,201`)
   const isIndependentCnfClause = (cl) =>
     cl.startsWith('!') ||
@@ -262,14 +267,14 @@ export function inspectAndFixPogoQuery(rawQuery) {
     /^#[a-z0-9-]+(?:,#[a-z0-9-]+)*$/i.test(cl) ||
     /^@[^,&]+(?:,@[^,&]+)*$/i.test(cl);
 
-  const firstLiterals = coreClauses[0].split(',').map((s) => s.trim());
+  const firstLiterals = effectiveCore[0].split(',').map((s) => s.trim());
   const sharedAcrossAll =
-    coreClauses.every((c) => c.includes(',')) &&
+    effectiveCore.every((c) => c.includes(',')) &&
     firstLiterals.some((lit) =>
-      coreClauses.slice(1).every((cl) => cl.split(',').map((s) => s.trim()).includes(lit))
+      effectiveCore.slice(1).every((cl) => cl.split(',').map((s) => s.trim()).includes(lit))
     );
 
-  if (sharedAcrossAll || coreClauses.every(isIndependentCnfClause)) {
+  if (sharedAcrossAll || effectiveCore.every(isIndependentCnfClause)) {
     return {
       hasPrecedenceTrap: false,
       rawQuery: trimmed,
@@ -318,3 +323,88 @@ export function inspectAndFixPogoQuery(rawQuery) {
     extractedOrBranches: commaBranches,
   };
 }
+
+/**
+ * Compiles a per-species trait wishlist using Fly33-style exclusion-filter algebra:
+ *   entries = [{ dexId: 384, traits: [] }, { dexId: 4, traits: ['shiny'] }, { dexId: 757, traits: ['female'] }]
+ *   -> "384,4,757&!4,shiny&!757,female"
+ *
+ * Mathematically exact in Pokémon GO CNF because for mutually exclusive species IDs:
+ *   (S1 | S2 | S3) & (!S2 | T2) & (!S3 | T3)  ===  S1 | (S2 & T2) | (S3 & T3)
+ * Keeps multi-species wishlists O(N) instead of O(2^N) exponential CNF blowup.
+ */
+export function compileSpeciesTraitWishlist(
+  entries,
+  globalAndTokens = [],
+  { maxChars = DEFAULT_MAX_CNF_CHARS } = {}
+) {
+  const prefixClean = (globalAndTokens || [])
+    .map((t) => normalizeOperators(t).trim().replace(/&+$/, ''))
+    .filter(Boolean);
+
+  // Deduplicate species entries; if the same dexId appears twice, keep the common
+  // required traits (or empty traits if any entry wants ANY variant of that species).
+  const speciesMap = new Map();
+  for (const entry of entries || []) {
+    const dexId = Number(entry?.dexId);
+    if (!Number.isInteger(dexId) || dexId <= 0) continue;
+    const traits = Array.isArray(entry.traits)
+      ? Array.from(
+          new Set(
+            entry.traits
+              .flatMap((t) => normalizeOperators(t).split('&'))
+              .map((t) => t.trim())
+              .filter(Boolean)
+          )
+        )
+      : [];
+
+    if (!speciesMap.has(dexId)) {
+      speciesMap.set(dexId, traits);
+    } else {
+      const existing = speciesMap.get(dexId);
+      // If either entry wants ANY variant (no trait restrictions), ANY subsumes trait-specific
+      if (existing.length === 0 || traits.length === 0) {
+        speciesMap.set(dexId, []);
+      } else {
+        // Intersect required traits so the OR of two specific entries doesn't over-restrict
+        const nextSet = new Set(traits);
+        const intersection = existing.filter((t) => nextSet.has(t));
+        speciesMap.set(dexId, intersection);
+      }
+    }
+  }
+
+  const orderedIds = Array.from(speciesMap.keys()).sort((a, b) => a - b);
+  if (orderedIds.length === 0) {
+    return {
+      query: '',
+      speciesIds: [],
+      clauseCount: 0,
+      charCount: 0,
+      charLimitExceeded: false,
+    };
+  }
+
+  const speciesUnion = compressIds(orderedIds);
+  const exclusionClauses = [];
+
+  for (const dexId of orderedIds) {
+    const traits = speciesMap.get(dexId);
+    for (const trait of traits) {
+      exclusionClauses.push(`!${dexId},${trait}`);
+    }
+  }
+
+  const allClauses = [...prefixClean, speciesUnion, ...exclusionClauses];
+  const query = allClauses.join('&');
+
+  return {
+    query,
+    speciesIds: orderedIds,
+    clauseCount: allClauses.length,
+    charCount: query.length,
+    charLimitExceeded: query.length > maxChars,
+  };
+}
+

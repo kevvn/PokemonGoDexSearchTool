@@ -12,7 +12,7 @@ PokéSearch uses a strictly acyclic **Model–View–Controller + Services + Dat
 
 ```mermaid
 flowchart TD
-  Views["src/views/<br/>Presentational React 19 UI<br/>(builder, dock, events, layout, shared, tags, triage)"]
+  Views["src/views/<br/>Presentational React 19 UI<br/>(builder, dock, events, layout, shared, tags, trades, triage)"]
   Controllers["src/controllers/<br/>React 19 Hooks (Zero useEffect)<br/>Bind views to stores, FSMs & services"]
   Services["src/services/<br/>Browser / Network / SW / QR / Clipboard<br/>Side-effect boundaries"]
   Models["src/models/<br/>Pure Domain Logic, FSMs (machines/),<br/>Search Engine, Tag System, Persistent Stores"]
@@ -45,6 +45,9 @@ flowchart TD
     - `tagDefinitions.js`: 30-tag taxonomy across 7 namespaces (`ev`, `keep`, `pvp`, `pve`, `max`, `tr`, `op`) + 6-stage hydration order.
     - `tagLinter.js`: Native keyword collision detection, prefix-collision checking, and custom tag map merging.
     - `tagHydration.js`: Data-driven `HYDRATION_BUILDERS` registry producing validated queries for all tags (including Top-100 league rosters & `@3mov,evolve` build audits).
+  - **Trade & Anti-Hoarding Models (`src/models/trades/`)**:
+    - `tradeValueModel.js`: Curated Trade Demand Tiers (S/A/B), Dead Trade Tag Audits, Duplicate Cap Pruner, Stale Hoard Cleanup (`buildSafeTrashQuery`), and 2026 Forever Friends Remote Trade (`age30-`) showcase queries.
+    - `tradeWishlistModel.js`: Offline personal Wishlist compiler (Fly33-style exclusion-filter algebra) + persistent store (`pogo_trade_wishlists_v1`) + multi-friend Group Wants Merger & Unwanted Surplus cleanup.
   - **Domain Models**: `triageFunnelModel.js`, `eventArchiveModel.js`, `metaCacheModel.js`, `communityDayModel.js`, `familyModel.js`, `pokedexModel.js`, `savedSearchModel.js`, `filterPresets.js`, `spriteUrls.js`, `pwaModel.js`.
   - **Persistent Store Primitive (`src/models/storage/createPersistentStore.js`)**: `useSyncExternalStore`-compatible store factory with `localStorage` persistence, cross-tab `storage` sync, `localStorage.clear()` (`event.key === null`) recovery, `QuotaExceededError` notification (never silent green saves), and schema validation hooks.
 - **`src/services/` (Imperative browser/network boundaries — zero React)**
@@ -54,10 +57,11 @@ flowchart TD
   - `qrCodeService.js`: Local bundled `qrcode` data-URL generation (100% offline).
   - `fileTransferService.js`: JSON export/import helpers with delayed `URL.revokeObjectURL` for iOS Safari.
 - **`src/controllers/` (React 19 hooks — zero `useEffect`/`useLayoutEffect`)**
-  - Root/tab controllers: `useWorkspaceController`, `useSearchDockController`, `useSavedSearchesController`, `usePokedexBuilderController`, `useTagSystemController`, `useTriageFunnelsController`, `useEventsHubController`, `usePwaController`.
+  - Root/tab controllers: `useWorkspaceController`, `useSearchDockController`, `useSavedSearchesController`, `usePokedexBuilderController`, `useTagSystemController`, `useTriageFunnelsController`, `useEventsHubController`, `useTradesHubController`, `usePwaController`.
   - Isolated per-panel Events Hub controllers (`src/controllers/events/`): `useEventsArchiveController`, `useYearSlicerController`, `useCommunityDaysController`, `useMetaExplorerController`, `useCnfCombinerController`.
+  - Isolated per-panel Trades Hub controllers (`src/controllers/trades/`): `useTradeAuditController`, `useRemoteTradeController`, `useTradeWishlistController`.
 - **`src/views/` (Presentational React 19 components)**
-  - Feature-grouped (`builder/`, `dock/`, `events/`, `layout/`, `shared/`, `tags/`, `triage/`), wrapped in `<ErrorBoundary>`, with `React.lazy` splitting on non-default workspace tabs.
+  - Feature-grouped (`builder/`, `dock/`, `events/`, `layout/`, `shared/`, `tags/`, `trades/`, `triage/`), wrapped in `<ErrorBoundary>`, with `React.lazy` splitting on non-default workspace tabs.
 
 ---
 
@@ -65,12 +69,13 @@ flowchart TD
 
 | Machine | States / Responsibilities |
 | --- | --- |
-| `workspaceMachine.js` | Active workspace tab (`triage`, `builder`, `tags`, `events`) & URL/storage persistence |
+| `workspaceMachine.js` | Active workspace tab (`triage`, `events`, `tags`, `trades`, `builder`) & URL/storage persistence |
 | `searchDockMachine.js` | Dock draft editing, validation feedback, saved-search drawer, QR modal lifecycle |
 | `triStateMachine.js` | Deterministic `neutral -> include -> exclude -> neutral` filter chip transitions |
 | `resetConfirmMachine.js` | Two-step destructive confirmation (`idle -> armed -> idle`) |
 | `metaSyncMachine.js` | Live PvPoke sync (`idle -> syncing -> success | error`) with status messaging |
 | `eventModalMachine.js` | Event create/edit/delete dialog state with explicit payload transitions |
+| `qrModalMachine.js` | Async offline QR `<dialog>` lifecycle (`idle -> loading -> ready | error`) with monotonic `requestId` guard |
 | `pwaMachine.js` | Service worker lifecycle (`idle -> offlineReady | updateAvailable -> updating -> error`) |
 
 ---
@@ -87,6 +92,7 @@ All keys are owned by dedicated stores created with `createPersistentStore`:
 - `pogo_stored_event_db_v2`
 - `pogo_personal_travel_trips_v1`
 - `pogo_live_meta_cache_v1`
+- `pogo_trade_wishlists_v1`
 
 ---
 
@@ -106,5 +112,5 @@ Configured in [vite.config.js](../vite.config.js) (`vite-plugin-pwa` in `devDepe
 - **ADR-002 — Declarative Operator Registry (`operatorRegistry.js`)**: Adding a new Pokémon GO search keyword requires one entry instead of touching 7+ files across query generation, parsing, filter counting, tag linting, and UI chips.
 - **ADR-003 — Unified `buildSafeTrashQuery` & Read-Only Dock Diagnostics**: Destructive transfer strings share a single shield builder with explicit opt-outs only for the targeted trait, verified by `validateSearchString` and `triageSimulator.test.js`. The search dock never silently auto-rewrites valid CNF strings.
 - **ADR-004 — Dynamic Data Derivation (Zero 1025 / 2026 Cliffs)**: Evolution families (`familyModel.js`), Community Day pre-evolutions (`evolveCandy` in `pokedex.json`), max Dex IDs, and event year selectors derive dynamically from data snapshots rather than hardcoded constants.
-- **ADR-005 — Isolated Per-Panel Controllers for `hidden="until-found"`**: `EventsHubView` keeps all 5 panels discoverable by browser Find-in-Page while avoiding cross-panel re-renders by giving each panel its own controller under `src/controllers/events/`.
+- **ADR-005 — Isolated Per-Panel Controllers for `hidden="until-found"`**: `EventsHubView` and `TradesHubView` keep all sub-panels discoverable by browser Find-in-Page while avoiding cross-panel re-renders by giving each panel its own controller under `src/controllers/events/` and `src/controllers/trades/`.
 - **ADR-006 — CORS-Safe Workbox Sprite Caching & `NetworkOnly` Live Sync**: Prevents iOS/Android quota eviction from opaque sprite responses and guarantees truthful live-sync status during crowded live events.

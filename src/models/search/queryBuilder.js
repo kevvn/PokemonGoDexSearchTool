@@ -359,9 +359,12 @@ export function parseSearchString(searchString) {
       continue;
     }
 
-    // 2d. Declarative numeric ranges (age, distance, cp, year, buddy)
+    // 2d. Declarative numeric ranges (age, distance, cp, year, buddy, count)
     let matchedRange = false;
     for (const rangeOp of RANGE_OPERATORS) {
+      if (rangeOp.id === 'count' && ATTRIBUTE_SET.has(canonicalValue)) {
+        continue;
+      }
       const pLen = rangeOp.prefix.length;
       if (
         canonicalValue.startsWith(rangeOp.prefix) &&

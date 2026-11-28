@@ -28,12 +28,14 @@ import {
   transitionEventModal,
 } from './eventModalMachine';
 import { INITIAL_PWA_STATE, transitionPwa } from './pwaMachine';
+import { INITIAL_QR_MODAL_STATE, transitionQrModal } from './qrModalMachine';
 
 describe('workspaceMachine', () => {
   test('normalizes legacy grid tab and invalid tabs safely', () => {
     expect(normalizeTab('grid')).toBe('builder');
     expect(normalizeTab('events')).toBe('events');
     expect(normalizeTab('tags')).toBe('tags');
+    expect(normalizeTab('trades')).toBe('trades');
     expect(normalizeTab('unknown')).toBe('triage');
   });
 
@@ -269,3 +271,38 @@ describe('pwaMachine', () => {
     expect(failed.errorMessage).toBe('SW blocked');
   });
 });
+
+describe('qrModalMachine', () => {
+  test('guards against stale async QR completions and close-before-resolve races', () => {
+    let state = transitionQrModal(INITIAL_QR_MODAL_STATE, {
+      type: 'OPEN_QR',
+      requestId: 1,
+      forString: '201,384',
+    });
+    expect(state).toEqual({
+      status: 'loading',
+      requestId: 1,
+      forString: '201,384',
+      dataUrl: '',
+      error: '',
+    });
+
+    // Rapid reopen bumps requestId to 2; late response for requestId 1 must be ignored
+    state = transitionQrModal(state, { type: 'OPEN_QR', requestId: 2, forString: '479' });
+    expect(transitionQrModal(state, { type: 'QR_SUCCESS', requestId: 1, dataUrl: 'data:stale' })).toBe(state);
+
+    // Matching requestId transitions cleanly to ready
+    state = transitionQrModal(state, { type: 'QR_SUCCESS', requestId: 2, dataUrl: 'data:fresh' });
+    expect(state.status).toBe('ready');
+    expect(state.forString).toBe('479');
+    expect(state.dataUrl).toBe('data:fresh');
+
+    // Close while loading ignores late resolution
+    state = transitionQrModal(state, { type: 'OPEN_QR', requestId: 3, forString: '757' });
+    state = transitionQrModal(state, { type: 'CLOSE_QR' });
+    expect(state.status).toBe('idle');
+    expect(transitionQrModal(state, { type: 'QR_SUCCESS', requestId: 3, dataUrl: 'data:late' })).toBe(state);
+    expect(transitionQrModal(state, { type: 'QR_ERROR', requestId: 3, error: 'late err' })).toBe(state);
+  });
+});
+
