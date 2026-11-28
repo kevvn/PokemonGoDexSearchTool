@@ -49,10 +49,10 @@ function AppHeader({
           </div>
         </div>
 
-        {/* 4-Tab Primary Workspace Navigation */}
+        {/* 5-Tab Primary Workspace Navigation */}
         <nav
           aria-label="Primary workspace navigation"
-          className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 shrink-0"
+          className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 min-w-0"
         >
           <button
             type="button"
@@ -103,6 +103,18 @@ function AppHeader({
                 {tagWarnings}
               </span>
             ) : null}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => onSelectTab('trades')}
+            aria-current={activeTab === 'trades' ? 'page' : undefined}
+            className={`h-8 sm:h-9 px-3 sm:px-3.5 text-[11px] sm:text-xs uppercase inline-flex items-center justify-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer ${
+              activeTab === 'trades' ? 'pogo-pill-active' : 'pogo-pill'
+            }`}
+          >
+            <span aria-hidden="true">🤝</span>
+            <span>Trades</span>
           </button>
 
           <button

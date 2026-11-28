@@ -9,7 +9,7 @@ const SPECIMEN_VARIANTS = new Set([
   'xxl', 'xxs', '@special', 'fusion', 'adventureeffect', 'maxmove1-',
 ]);
 
-const INVERTED_RANGE_REGEX = /^(age|year|distance|cp|buddy)(\d+)-(\d+)$/;
+const INVERTED_RANGE_REGEX = /^(age|year|distance|cp|buddy|count)(\d+)-(\d+)$/;
 const INVERTED_IV_REGEX = /^([0-4])-([0-4])(attack|defense|hp)$/;
 
 export function validateSearchString(searchString, options = {}) {

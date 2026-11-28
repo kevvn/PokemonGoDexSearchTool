@@ -135,7 +135,7 @@ describe('Architecture fitness & MVC boundary guardrails', () => {
         if (/\b1025\b/.test(code)) {
           dexCeilingViolations.push(relFile);
         }
-        if (/\[\s*2026\s*,\s*2025\s*,\s*2024/.test(code)) {
+        if (/\[\s*202\d\s*,\s*202\d\s*,\s*202\d/.test(code)) {
           yearArrayViolations.push(relFile);
         }
       }

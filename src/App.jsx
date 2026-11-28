@@ -11,6 +11,7 @@ import TriageFunnelsView from './views/triage/TriageFunnelsView';
 
 const EventsHubView = React.lazy(() => import('./views/events/EventsHubView'));
 const TagSystemView = React.lazy(() => import('./views/tags/TagSystemView'));
+const TradesHubView = React.lazy(() => import('./views/trades/TradesHubView'));
 const PokedexBuilderView = React.lazy(() => import('./views/builder/PokedexBuilderView'));
 
 const EMPTY_RAW_CLAUSES = [];
@@ -90,6 +91,20 @@ function App() {
               <TagSystemView
                 metaSnapshot={activeMetaSnapshot}
                 onLoadQuery={workspace.loadQueryFromTriage}
+              />
+            </Suspense>
+          </main>
+        )}
+
+        {workspace.activeTab === 'trades' && (
+          <main className="flex-1 w-full">
+            <Suspense fallback={<TabLoadingFallback label="Trades Hub" />}>
+              <TradesHubView
+                pokemonList={pokemonData}
+                metaSnapshot={activeMetaSnapshot}
+                customTagMap={tagSummary.tagMap}
+                onLoadSearchString={workspace.loadEventStringToDock}
+                onSelectSpeciesInGrid={workspace.selectSpeciesInBuilder}
               />
             </Suspense>
           </main>

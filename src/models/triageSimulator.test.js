@@ -10,6 +10,12 @@ import {
   computeYearSlicerPlan,
 } from './eventArchiveModel';
 import { COMMUNITY_DAY_EVENTS } from './communityDayModel';
+import { buildTradeHoardAudit } from './trades/tradeValueModel';
+import {
+  buildGroupWishlistQueries,
+  parseImportedFriendWishlist,
+} from './trades/tradeWishlistModel';
+import { compileSpeciesTraitWishlist } from './searchEngine';
 
 function parseRangeExpr(expr, bareIsMax = false) {
   if (expr === '') return { min: -Infinity, max: Infinity };
@@ -115,6 +121,9 @@ function evaluateAtom(mon, atom, dexCounts) {
     if (rawVal === 'raid') return Boolean(mon.raid);
     if (rawVal === 'remoteraid') return Boolean(mon.remoteraid);
     if (rawVal === 'party') return Boolean(mon.party);
+    if (rawVal === 'defender') return Boolean(mon.defender);
+    if (rawVal === 'female') return mon.gender === 'female';
+    if (rawVal === 'male') return mon.gender === 'male';
     if (rawVal === 'candyxl') return Boolean(mon.candyxl);
     if (rawVal.startsWith('candykm')) {
       return inRange(mon.candyKm ?? 3, parseRangeExpr(rawVal.slice('candykm'.length), false));
@@ -532,4 +541,54 @@ describe('Leidwesen v0.435.1 Pokémon GO Box Simulator — End-to-End Triage Ver
       }
     }
   });
+
+  test('simulates Trades Hub staleHoardTrashQuery, cleanUnwantedQuery, and Fly33 wishlist with zero grail leaks', () => {
+    const audit = buildTradeHoardAudit({
+      metaSnapshot: realMetaSnapshot,
+      duplicateCap: 4,
+      staleMaxYear: 2024,
+    });
+    const friend = parseImportedFriendWishlist('Alex', '!traded&4,384,757&!4,shiny&!757,female').entry;
+    const group = buildGroupWishlistQueries([friend], { metaSnapshot: realMetaSnapshot });
+
+    const box = [
+      createMon({ id: 'lucky_2019_pidgey', dex: 16, year: 2019, atk: 5, def: 6, hp: 7 }),
+      createMon({ id: 'lucky_2020_rattata', dex: 19, year: 2020, atk: 5, def: 6, hp: 7 }),
+      createMon({ id: 'friend_want_charmander', dex: 4, year: 2023, atk: 6, def: 7, hp: 8 }),
+      createMon({ id: 'friend_want_shiny_char', dex: 4, year: 2023, shiny: true, atk: 6, def: 7, hp: 8 }),
+      createMon({ id: 'friend_want_female_salandit', dex: 757, year: 2023, gender: 'female', atk: 6, def: 7, hp: 8 }),
+      createMon({ id: 'male_salandit', dex: 757, year: 2023, gender: 'male', atk: 6, def: 7, hp: 8 }),
+      createMon({ id: 'rayquaza_plain', dex: 384, year: 2023, legendary: true, atk: 12, def: 12, hp: 12 }),
+      createMon({ id: 'tier_a_larvesta', dex: 636, year: 2023, atk: 6, def: 7, hp: 8 }),
+      createMon({ id: 'pvp_iv_pidgey', dex: 16, year: 2023, atk: 0, def: 15, hp: 14 }),
+      createMon({ id: 'nundo_pidgey', dex: 16, year: 2023, atk: 0, def: 0, hp: 0 }),
+      createMon({ id: 'stale_2023_pidgey_junk', dex: 16, year: 2023, atk: 7, def: 6, hp: 8 }),
+      createMon({ id: 'recent_2026_pidgey_junk', dex: 16, year: 2026, atk: 7, def: 6, hp: 8 }),
+    ];
+
+    // Stale Hoard Cleanup catches ONLY stale 2021-2024 non-rare junk (protects 2019/2020 Luckies, PvP IVs, Nundos, Tier S/A)
+    const staleMatches = evaluatePogoBox(box, audit.staleCleanup.query).map((m) => m.id);
+    expect(staleMatches).toEqual(['stale_2023_pidgey_junk']);
+
+    // Unwanted Surplus protects 2019/2020 Guaranteed Luckies, Friend-Wanted Charmander/Salandit/Rayquaza, Tier A Larvesta, PvP IVs & Nundos
+    const unwantedMatches = evaluatePogoBox(box, group.cleanUnwantedQuery).map((m) => m.id);
+    expect(unwantedMatches).toEqual(['stale_2023_pidgey_junk', 'recent_2026_pidgey_junk']);
+
+    // Fly33 exclusion-filter wishlist matches Rayquaza + Shiny Charmander + Female Salandit ONLY
+    const fly33 = compileSpeciesTraitWishlist(
+      [
+        { dexId: 384, traits: [] },
+        { dexId: 4, traits: ['shiny'] },
+        { dexId: 757, traits: ['female'] },
+      ],
+      ['!traded']
+    );
+    const wishlistMatches = evaluatePogoBox(box, fly33.query).map((m) => m.id);
+    expect(wishlistMatches).toEqual([
+      'friend_want_shiny_char',
+      'friend_want_female_salandit',
+      'rayquaza_plain',
+    ]);
+  });
 });
+

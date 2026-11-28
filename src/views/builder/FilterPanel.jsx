@@ -698,6 +698,58 @@ function FilterPanel({
             </select>
           </div>
 
+          <div className="grid grid-cols-[54px_1fr_auto_1fr] items-center gap-1.5 pt-1">
+            <span className="text-[11px] font-extrabold text-[#1b4d60]">Count</span>
+            <input
+              type="number"
+              min="1"
+              placeholder="Min"
+              value={filters.countMin || ''}
+              onChange={(e) => setFilters((prev) => ({ ...prev, countMin: e.target.value }))}
+              aria-label="Minimum species count"
+              className="w-full px-3 py-1 rounded-full bg-white border border-[#0d7da8]/25 text-base sm:text-xs text-[#123c4d] placeholder-[#396d82]/60 focus:border-[#0d7da8] font-bold"
+            />
+            <span className="text-[#285d72] text-xs font-bold">–</span>
+            <input
+              type="number"
+              min="1"
+              placeholder="Max"
+              value={filters.countMax || ''}
+              onChange={(e) => setFilters((prev) => ({ ...prev, countMax: e.target.value }))}
+              aria-label="Maximum species count"
+              className="w-full px-3 py-1 rounded-full bg-white border border-[#0d7da8]/25 text-base sm:text-xs text-[#123c4d] placeholder-[#396d82]/60 focus:border-[#0d7da8] font-bold"
+            />
+          </div>
+
+          <div className="flex flex-wrap gap-1.5" role="group" aria-label="Duplicate count presets">
+            {[
+              { label: '3+ Dupes', min: '3' },
+              { label: '4+ Dupes', min: '4' },
+              { label: '6+ Dupes', min: '6' },
+            ].map((preset) => {
+              const isActive = filters.countMin === preset.min && !filters.countMax;
+              return (
+                <button
+                  key={preset.min}
+                  type="button"
+                  aria-pressed={isActive}
+                  onClick={() =>
+                    setFilters((prev) => ({
+                      ...prev,
+                      countMin: isActive ? '' : preset.min,
+                      countMax: '',
+                    }))
+                  }
+                  className={`min-h-[34px] px-2.5 py-1 text-[11px] font-extrabold cursor-pointer ${
+                    isActive ? 'pogo-pill-active' : 'pogo-pill'
+                  }`}
+                >
+                  {preset.label}
+                </button>
+              );
+            })}
+          </div>
+
           <input
             type="text"
             placeholder="Move filter (e.g. @1Shadow Claw, @ice)"

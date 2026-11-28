@@ -95,6 +95,54 @@ export const SCARCE_RARE_SPECIES_IDS = Array.from(
   new Set([...GLOBAL_REGIONAL_ROTOM_UNOWN_IDS, ...SCARCE_NON_REGIONAL_RARE_IDS])
 ).sort((a, b) => a - b);
 
+// Guaranteed Lucky Trade cutoff (expanded to 2020 & limit 45 as of New Year's 2026)
+export const GUARANTEED_LUCKY_CUTOFF_YEAR = 2020;
+export const GUARANTEED_LUCKY_LIMIT = 45;
+export const GUARANTEED_LUCKY_YEAR_RANGE = `year2016-${GUARANTEED_LUCKY_CUTOFF_YEAR}`;
+
+// Shared trade eligibility guard tokens (single source of truth across tagHydration & trade models)
+export const TRADE_ELIGIBILITY_GUARDS = ['!traded', '!shadow', '!fusion'];
+export const REMOTE_TRADE_ELIGIBILITY_GUARDS = [
+  'age30-',
+  '!traded',
+  '!shadow',
+  '!mythical',
+  '!fusion',
+  '!defender',
+];
+
+// Mythicals that ARE tradeable in Pokémon GO (Special Trade)
+export const TRADEABLE_MYTHICAL_IDS = [808, 809]; // Meltan, Melmetal
+
+// Non-Mythical 1-per-account species that cannot be traded in Pokémon GO
+export const UNTRADEABLE_NON_MYTHICAL_IDS = [718, 890]; // Zygarde, Eternatus
+
+// Tier S: Universal high-demand trade grails (Galarian Birds, Unown, Rotom, top Fusion/Origin/Crowned Legendaries)
+export const TRADE_TIER_S_SPECIES_IDS = [
+  144, 145, 146, // Articuno, Zapdos, Moltres (Galarian Birds guarded in query)
+  150, // Mewtwo
+  201, // Unown
+  382, 383, 384, // Kyogre, Groudon, Rayquaza
+  479, // Rotom
+  483, 484, // Dialga, Palkia (Origin Formes)
+  646, // Kyurem
+  800, // Necrozma
+  888, 889, // Zacian, Zamazenta
+];
+
+// Tier A Lucky Trade targets (top Raid/ML/Max hundo-hunt Legendaries, Fusion Fuel & Ultra Beasts outside Tier S)
+export const TRADE_TIER_A_LUCKY_TARGET_IDS = [
+  249, 250, // Lugia, Ho-Oh
+  487, // Giratina
+  643, 644, 645, // Reshiram, Zekrom, Landorus
+  716, 717, // Xerneas, Yveltal
+  789, 790, 791, 792, // Cosmog, Cosmoem, Solgaleo, Lunala
+  793, 795, 796, 798, 805, 806, // Nihilego, Pheromosa, Xurkitree, Kartana, Stakataka, Blacephalon
+  891, 892, // Kubfu, Urshifu
+  894, 895, // Regieleki, Regidrago
+  905, // Enamorus
+];
+
 // XL / Egg-Floor / Research-Floor GL staples whose optimal builds use 2-4 Atk bars
 export const CLASSIC_GL_XL_FLOOR_IDS = [
   108, 463, // Lickitung, Lickilicky

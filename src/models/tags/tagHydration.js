@@ -16,6 +16,12 @@ import { ALL_COMMUNITY_DAY_PRE_EVO_IDS } from '../communityDayModel';
 import {
   CANDY_12_FODDER_IDS,
   CLASSIC_GL_XL_FLOOR_IDS,
+  GUARANTEED_LUCKY_CUTOFF_YEAR,
+  GUARANTEED_LUCKY_LIMIT,
+  GUARANTEED_LUCKY_YEAR_RANGE,
+  REMOTE_TRADE_ELIGIBILITY_GUARDS,
+  TRADEABLE_MYTHICAL_IDS,
+  TRADE_ELIGIBILITY_GUARDS,
   TRADE_EVOLVE_IDS,
 } from '../../data/speciesConstants';
 import eventsArchiveJson from '../../data/events_archive.json';
@@ -287,8 +293,8 @@ const HYDRATION_BUILDERS = {
     },
     {
       id: 'keep_trophy_vintage',
-      label: 'Vintage 2016–2019 Catches',
-      query: 'year2016-2019&!#',
+      label: `Vintage 2016–${GUARANTEED_LUCKY_CUTOFF_YEAR} Catches (Guaranteed Lucky)`,
+      query: `${GUARANTEED_LUCKY_YEAR_RANGE}&!#`,
       actionMode: 'review',
       isSecondary: true,
     },
@@ -664,38 +670,74 @@ const HYDRATION_BUILDERS = {
     },
   ],
 
-  tr_spec: () => [
-    {
-      id: 'tr_spec_shinies_bgs',
-      label: 'Spare Shinies & Backgrounds',
-      query: 'shiny,background&!traded&!shadow&!fusion&!mythical&!favorite&!4*&!#',
-      actionMode: 'review',
-      note: 'Excludes untradeable Shadows, Fusions, and Mythicals. Sort by # to route spare shinies and backgrounds into TR-Spec.',
-    },
-    {
-      id: 'tr_spec_legends',
-      label: 'Duplicate Legendaries & UBs',
-      query: 'legendary,ultrabeast&count2-&!traded&!shadow&!fusion&!favorite&!4*&!#',
-      actionMode: 'review',
-      note: 'Uses count2- so 1-of-1 Legendaries stay untouched; route excess bad-IV copies to OP-2xXfer.',
-    },
-    {
-      id: 'tr_spec_rares',
-      label: 'Scarce Regionals, Unown & Rotom',
-      query: `!traded&!shadow&!fusion&!favorite&!4*&!#&${SCARCE_RARE_SPECIES_RANGES}`,
-      actionMode: 'review',
-      isSecondary: true,
-      note: 'Catches untraded Regionals, Unown (#201), Rotom (#479), and scarce 10km/12km egg tradeables.',
-    },
-    {
-      id: 'tr_spec_costumes',
-      label: 'Spare Costumes',
-      query: 'costume&!traded&!shadow&!fusion&!favorite&!4*&!#',
-      actionMode: 'review',
-      isSecondary: true,
-      note: 'Run after KEEP-Trophy costume review so remaining untagged spares route cleanly to TR-Spec.',
-    },
-  ],
+  tr_spec: ({ merged }) => {
+    const trSpecHash = getTagHash('tr_spec', merged) || '#tr-spec';
+    const trMirrorHash = getTagHash('tr_mirror', merged) || '#tr-mirror';
+    const trDistHash = getTagHash('tr_dist', merged) || '#tr-dist';
+    const trSpecName = merged.tr_spec?.name || 'TR-Spec';
+    const op2xXferName = merged.op_2xxfer?.name || 'OP-2xXfer';
+    const allTradeHashes = [trSpecHash, trMirrorHash, trDistHash].filter(Boolean).join(',');
+    const tradeBase = TRADE_ELIGIBILITY_GUARDS.join('&');
+    const localMythicalGuard = `!mythical,${compressIds(TRADEABLE_MYTHICAL_IDS)}`;
+    const remoteBase = REMOTE_TRADE_ELIGIBILITY_GUARDS.join('&');
+
+    return [
+      {
+        id: 'tr_spec_shinies_bgs',
+        label: 'Spare Shinies & Backgrounds',
+        query: `shiny,background&${tradeBase}&${localMythicalGuard}&!favorite&!4*&!#`,
+        actionMode: 'review',
+        note: `Excludes untradeable Shadows, Fusions, and Mythicals (while keeping tradeable Meltan/Melmetal #808–809). Sort by # to route spares into ${trSpecName}.`,
+      },
+      {
+        id: 'tr_spec_legends',
+        label: 'Duplicate Legendaries & UBs',
+        query: `legendary,ultrabeast&count2-&${tradeBase}&!favorite&!4*&!#`,
+        actionMode: 'review',
+        note: `Uses count2- so 1-of-1 Legendaries stay untouched; route excess bad-IV copies to ${op2xXferName}.`,
+      },
+      {
+        id: 'tr_spec_rares',
+        label: 'Scarce Regionals, Unown & Rotom',
+        query: `${tradeBase}&!favorite&!4*&!#&${SCARCE_RARE_SPECIES_RANGES}`,
+        actionMode: 'review',
+        isSecondary: true,
+        note: 'Catches untraded Regionals, Unown (#201), Rotom (#479), and scarce 10km/12km egg tradeables.',
+      },
+      {
+        id: 'tr_spec_costumes',
+        label: 'Spare Costumes',
+        query: `costume&${tradeBase}&!favorite&!4*&!#`,
+        actionMode: 'review',
+        isSecondary: true,
+        note: `Run after KEEP-Trophy costume review so remaining untagged spares route cleanly to ${trSpecName}.`,
+      },
+      {
+        id: 'tr_spec_guaranteed_lucky',
+        label: `Guaranteed Lucky Bait (2016–${GUARANTEED_LUCKY_CUTOFF_YEAR})`,
+        query: `${GUARANTEED_LUCKY_YEAR_RANGE}&${tradeBase}&${localMythicalGuard}&!favorite&!4*&!#`,
+        actionMode: 'review',
+        isSecondary: true,
+        note: `Catches from 2016–${GUARANTEED_LUCKY_CUTOFF_YEAR} trigger Guaranteed Lucky trades (up to ${GUARANTEED_LUCKY_LIMIT} cap). Tag keepers into ${trSpecName}.`,
+      },
+      {
+        id: 'tr_spec_remote_ready',
+        label: 'Remote Trade Ready (age30-)',
+        query: `${trSpecHash}&${remoteBase}`,
+        actionMode: 'review',
+        isSecondary: true,
+        note: `Surfaces your existing ${trSpecName} Pokémon that meet the 30-day & eligibility rules for the native Remote Trade tag.`,
+      },
+      {
+        id: 'tr_spec_dead_audit',
+        label: 'Dead Trade Tag Audit (Already Traded)',
+        query: `${allTradeHashes}&traded`,
+        actionMode: 'select-all',
+        isSecondary: true,
+        note: `Pokémon can only be traded once — remove trade tags from any hits and route bad rerolls to ${op2xXferName}.`,
+      },
+    ];
+  },
 
   tr_dist: () => [
     {

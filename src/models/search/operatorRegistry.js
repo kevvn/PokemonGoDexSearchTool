@@ -146,6 +146,7 @@ export const RANGE_OPERATORS = [
   { id: 'cp', prefix: 'cp', minKey: 'cpMin', maxKey: 'cpMax', bareIsMax: false, forceOpenTrailingHyphen: false },
   { id: 'year', prefix: 'year', minKey: 'yearMin', maxKey: 'yearMax', bareIsMax: false, forceOpenTrailingHyphen: false },
   { id: 'buddy', prefix: 'buddy', minKey: 'buddyMin', maxKey: 'buddyMax', bareIsMax: false, forceOpenTrailingHyphen: false },
+  { id: 'count', prefix: 'count', minKey: 'countMin', maxKey: 'countMax', bareIsMax: false, forceOpenTrailingHyphen: false },
 ];
 
 // Additional native PoGO keywords (range prefixes, stats, legacy/extra search phrases) for tag linting

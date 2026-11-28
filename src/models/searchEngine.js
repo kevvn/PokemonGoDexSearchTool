@@ -50,5 +50,6 @@ export { validateSearchString } from './search/validator';
 export {
   compileDnfToPogoCnf,
   compileDnfToPogoCnfSafe,
+  compileSpeciesTraitWishlist,
   inspectAndFixPogoQuery,
 } from './search/cnfCompiler';
